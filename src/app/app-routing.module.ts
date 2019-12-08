@@ -4,10 +4,16 @@ import { ContentComponent } from "./content/content.component";
 import { ErrorComponent } from "./error/error.component";
 
 const routes: Routes = [
+  { path: "", redirectTo: "", pathMatch: "full" },
+  {
+    path: "test",
+    component: ContentComponent
+  },
   {
     path: ":type/:id",
     component: ContentComponent
   },
+
   {
     path: "**",
     component: ErrorComponent
