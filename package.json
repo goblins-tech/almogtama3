@@ -2,17 +2,11 @@
   "name": "almogtama3",
   "version": "0.0.0",
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "test": "ng test",
-    "lint": "ng lint",
-    "e2e": "ng e2e",
-    "compile:server": "webpack --config webpack.server.config.js --progress --colors",
-    "serve:ssr": "node dist/server",
-    "build:ssr": "npm run build:client-and-server-bundles && npm run compile:server",
-    "build:client-and-server-bundles": "ng build --prod && ng run almogtama3:server:production --bundleDependencies all",
-    "run:ssr": "npm run build:ssr && npm run serve:ssr"
+    "serve": "ng serve -o",
+    "serve:ssr": "node --inspect dist/server",
+    "build:ssr": "ng build --prod && ng run almogtama3:server:production --bundleDependencies all && webpack --config webpack.server.config.js --progress --colors",
+    "start:ssr": "npm run build:ssr && npm run serve:ssr",
+    "start:nodemon": "nodemon --watch  src/ -e ts,html,scss --exec \"npm run start:ssr\" "
   },
   "private": true,
   "dependencies": {
