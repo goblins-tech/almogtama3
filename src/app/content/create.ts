@@ -10,10 +10,10 @@ export interface Params {
 }
 @Component({
   selector: "app-content",
-  templateUrl: "./content.component.html",
-  styleUrls: ["./content.component.scss"]
+  templateUrl: "./create.html",
+  styleUrls: ["./create.scss"]
 })
-export class ContentComponent implements OnInit {
+export class ContentCreateComponent implements OnInit {
   params: Params;
   data: Observable<Object>;
   form;
@@ -26,7 +26,7 @@ export class ContentComponent implements OnInit {
     this.form = this.formBuilder.group({
       title: ["", [Validators.required, Validators.maxLength(100)]],
       subtitle: "",
-      content: "",
+      content: ["", [Validators.required]],
       keywords: ""
     });
 

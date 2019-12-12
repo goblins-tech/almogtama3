@@ -19,6 +19,7 @@ const {
 } = require("./dist/server/main");
 
 function getData(type: string, id?: string) {
+  console.log("server/getData:", { type, id });
   let data;
   try {
     data = fs.readFileSync(`./data/${type}.json`).toString();
@@ -56,7 +57,7 @@ app.post("/api/:type", (req, res) => {
   res.send(data); //todo: update the existing data in html
 });
 
-app.get("/api/:type/:id", (req, res) => {
+app.get("/api/:type/:id?", (req, res) => {
   res.json(getData(req.params.type, req.params.id));
 });
 

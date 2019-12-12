@@ -3,7 +3,9 @@ import { NgModule } from "@angular/core";
 import { Routes, RouterModule } from "@angular/router";
 import { AppComponent } from "./app.component";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
-import { ContentComponent } from "./content/content.component";
+import { ContentComponent } from "./content/index";
+import { ContentCreateComponent } from "./content/create";
+import { ContentManageComponent } from "./content/manage";
 import { ErrorComponent } from "./error/error.component";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { HttpClientModule } from "@angular/common/http";
@@ -21,13 +23,22 @@ import {
 
 const routes: Routes = [
   { path: "", redirectTo: "", pathMatch: "full" },
-  { path: "test", component: ContentComponent },
-  { path: ":type/:id", component: ContentComponent },
+  { path: "test/:optional?", component: ContentComponent },
+  { path: ":type/create", component: ContentCreateComponent },
+  { path: ":type/manage", component: ContentManageComponent },
+  { path: ":type/:item", component: ContentComponent },
+  { path: ":type", redirectTo: ":type/" }, //make :item optional
   { path: "**", component: ErrorComponent }
 ];
 
 @NgModule({
-  declarations: [AppComponent, ContentComponent, ErrorComponent],
+  declarations: [
+    AppComponent,
+    ContentComponent,
+    ContentCreateComponent,
+    ContentManageComponent,
+    ErrorComponent
+  ],
   imports: [
     RouterModule.forRoot(routes, { enableTracing: true }), //todo: enableTracing:false
     BrowserModule.withServerTransition({ appId: "serverApp" }),
