@@ -12,6 +12,6 @@ export class AppComponent implements OnInit {
   ngOnInit() {}
   go(path: any[] | string) {
     if (typeof path == "string") path = [path];
-    this.router.navigate(path);
+    //  this.router.navigate(path);
   }
 }
