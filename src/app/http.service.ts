@@ -9,8 +9,8 @@ export interface Obj {
 })
 export class HttpService {
   constructor(private http: HttpClient) {}
-  get(type: string, id: string) {
-    return this.http.get(`/api/${type}/${id}`);
+  get<T>(type: string, id: string) {
+    return this.http.get<T>(`/api/${type}/${id}`);
   }
 
   post(type: string, data: Obj) {

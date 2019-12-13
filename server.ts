@@ -23,8 +23,8 @@ function getData(type: string, id?: string) {
   let data;
   try {
     data = fs.readFileSync(`./data/${type}.json`).toString();
-    if (data) data = JSON.parse(data);
-    //todo: if(id)data=[data:id]
+    if (data) data = JSON.parse(data) || {};
+    if (id) data = data[0]; //todo:
   } catch (e) {
     console.warn(`getData() reading ${type}.json faild!`, e);
   }
@@ -58,7 +58,11 @@ app.post("/api/:type", (req, res) => {
 });
 
 app.get("/api/:type/:id?", (req, res) => {
-  res.json(getData(req.params.type, req.params.id));
+  let id = req.params.id;
+  res.json({
+    type: id ? "item" : "index",
+    payload: getData(req.params.type, id)
+  });
 });
 
 // Example Express Rest API endpoints

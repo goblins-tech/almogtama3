@@ -31,6 +31,7 @@ const routes: Routes = [
   { path: "**", component: ErrorComponent }
 ];
 
+let enableTracing = false; //true to trace routing navigations in dev mode
 @NgModule({
   declarations: [
     AppComponent,
@@ -40,7 +41,7 @@ const routes: Routes = [
     ErrorComponent
   ],
   imports: [
-    RouterModule.forRoot(routes, { enableTracing: true }), //todo: enableTracing:false
+    RouterModule.forRoot(routes, { enableTracing }),
     BrowserModule.withServerTransition({ appId: "serverApp" }),
     BrowserAnimationsModule,
     FormsModule,

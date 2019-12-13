@@ -4,9 +4,19 @@ import { HttpService } from "../http.service";
 import { FormBuilder, Validators } from "@angular/forms";
 import { Observable } from "rxjs";
 
-export interface Params {
-  type: string;
-  id?: string;
+export interface obj {
+  [key: string]: any;
+}
+
+export interface Article extends obj {
+  title: string;
+  subtitle: string;
+  content: string;
+  keywords: string | string[];
+}
+export interface Data {
+  type: string; //item|index
+  payload: Article | Article[];
 }
 @Component({
   selector: "app-content",
@@ -14,13 +24,11 @@ export interface Params {
   styleUrls: ["./index.scss"]
 })
 export class ContentComponent implements OnInit {
-  params: Params;
-  data: Observable<Object>;
-  form;
+  data$: Observable<Data>;
+
   constructor(
     private route: ActivatedRoute,
-    private httpService: HttpService,
-    private formBuilder: FormBuilder
+    private httpService: HttpService
   ) {}
   ngOnInit() {
     this.getData();
@@ -28,14 +36,12 @@ export class ContentComponent implements OnInit {
 
   getData() {
     this.route.paramMap.subscribe(params => {
-      //this.params = { type: params.get("type"), id: params.get("item") };
-      this.data = this.httpService.get(params.get("type"), params.get("item"));
+      let item = params.get("item"),
+        id;
+      if (item) id = item.substring(item.indexOf("-") + 1);
+      this.data$ = this.httpService.get<Data>(params.get("type"), id || "");
 
-      console.log({
-        item: params.get("item"),
-        optional: params.get("optional"),
-        params
-      });
+      console.log({ params });
     });
   }
 }

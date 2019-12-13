@@ -5,9 +5,9 @@
     <mat-hint align="end"
       ><span class="hint">no more than 70 chatacters</span></mat-hint
     >
-    <mat-error *ngIf="!valid('title')">{{
-      getErrorMessage("title")
-    }}</mat-error>
+    <mat-error *ngIf="!valid('title')"
+      >{{ getErrorMessage("title") }}</mat-error
+    >
   </mat-form-field>
 
   <mat-form-field appearance="legacy">

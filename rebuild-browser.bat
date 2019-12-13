@@ -1,0 +1,1 @@
+npm run build:browser:dev && npm run serve

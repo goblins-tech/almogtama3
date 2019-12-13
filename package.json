@@ -2,18 +2,18 @@
   "name": "almogtama3",
   "version": "1.0.0",
   "scripts": {
-    "build": "ng build --prod",
-    "build:dev": "ng build",
+    "build:browser": "ng build --prod",
+    "build:browser:dev": "ng build",
     "build:server": "ng run almogtama3:server:production --bundleDependencies all",
     "build:server:dev": "ng run almogtama3:server --bundleDependencies all",
     "webpack:server": "webpack --config webpack.server.config.js --progress --colorsl",
-    "build:ssr": "npm run build && npm run build:server && npm run webpack:server",
-    "build:ssr:dev": "npm run build:dev && npm run build:server:dev && npm run webpack:server",
-    "serve": "ng serve -o",
-    "serve:ssr": "node --inspect dist/server",
-    "start:ssr": "npm run build:ssr && npm run serve:ssr",
-    "start:ssr:dev": "npm run build:ssr:dev && npm run serve:ssr",
-    "start:nodemon": "nodemon  src/ -e ts,html,scss --exec \"npm run start:ssr:dev\" "
+    "build": "npm run build:browser && npm run build:server && npm run webpack:server",
+    "build:dev": "npm run build:browser:dev && npm run build:server:dev && npm run webpack:server",
+    "serve:ng": "ng serve -o",
+    "serve": "node --inspect dist/server",
+    "start": "npm run build && npm run serve",
+    "start:dev": "npm run build:dev && npm run serve",
+    "start:nodemon": "nodemon  src/ -e ts,html,scss --exec \"npm run start:dev\" "
   },
   "private": true,
   "dependencies": {
