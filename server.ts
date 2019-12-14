@@ -1,5 +1,5 @@
 import "zone.js/dist/zone-node";
-import * as express from "express";
+import express from "express";
 import { join } from "path";
 import * as fs from "fs";
 import * as bodyParser from "body-parser";
