@@ -8,7 +8,7 @@ import * as bodyParser from "body-parser";
 const app = express();
 
 const PORT = process.env.PORT || 4200;
-const DIST_FOLDER = join(process.cwd(), "./browser");
+const DIST_FOLDER = join(process.cwd(), "./dist/browser"); //process.cwd() dosen't include /dist
 
 // * NOTE :: leave this as require() since this file is built Dynamically from webpack
 const {
