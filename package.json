@@ -15,6 +15,7 @@
     "start:dev": "npm run build:dev && npm run serve",
     "start:nodemon": "nodemon  src/ -e ts,html,scss --exec \"npm run start:dev\"",
     "firebase": "npm run firebase:build && npm run firebase:deploy",
+    "firebase:functions": "npm run firebase:build && npm run firebase deploy --only functions",
     "firebase:build": "tsc -p firebase/tsconfig.json",
     "firebase:deploy": "firebase deploy",
     "firebase:serve": "firebase serve"

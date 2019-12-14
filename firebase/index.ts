@@ -1,8 +1,14 @@
-import * as functions from 'firebase-functions';
+require("zone.js/dist/zone-node"); // todo: why?
 
-// // Start writing Firebase Functions
-// // https://firebase.google.com/docs/functions/typescript
-//
-// export const helloWorld = functions.https.onRequest((request, response) => {
-//  response.send("Hello from Firebase!");
-// });
+import * as functions from "firebase-functions";
+import { enableProdMode } from "@angular/core";
+import { app } from "../server";
+
+enableProdMode();
+
+// to test: https://us-central1-<projectId>.cloudfunctions.net/<functionName>
+export const test = functions.https.onRequest((request, response) => {
+  response.send("firebase function works");
+});
+
+export const ssr = functions.https.onRequest(app);
