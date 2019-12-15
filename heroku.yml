@@ -1,0 +1,10 @@
+# by default Heroku uses `scripts.start` in packages.json to start the app
+# but we can customize this script using procFile or heroku.yml
+# to override `scripts.run, preinstall, preinstall`, add `scripts.heroku-prebuild, heroku-postbuild`.
+# https://devcenter.heroku.com/changelog-items/1573
+# https://devcenter.heroku.com/articles/nodejs-support#heroku-specific-build-steps
+# https://devcenter.heroku.com/articles/procfile#procfile-and-heroku-yml
+# https://devcenter.heroku.com/articles/build-docker-images-heroku-yml#run-defining-the-processes-to-run
+
+run:
+  web: node index.js node dist/server.js

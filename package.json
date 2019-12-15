@@ -10,7 +10,7 @@
     "build": "npm run build:browser && npm run build:server && npm run webpack:server",
     "build:dev": "npm run build:browser:dev && npm run build:server:dev && npm run webpack:server",
     "serve:ng": "ng serve -o",
-    "serve": "node --inspect dist/server",
+    "serve": "node --inspect dist/server.js",
     "start": "npm run build && npm run serve",
     "start:dev": "npm run build:dev && npm run serve",
     "start:nodemon": "nodemon  src/ -e ts,html,scss --exec \"npm run start:dev\"",
@@ -22,7 +22,8 @@
     "firebase:token": "firebase login:ci"
   },
   "engines": {
-    "node": "8"
+    "node": "10",
+    "npm": "6.9.0"
   },
   "main": "./dist/firebase/index.js",
   "private": false,
