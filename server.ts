@@ -16,7 +16,7 @@ const {
   LAZY_MODULE_MAP,
   ngExpressEngine,
   provideModuleMap
-} = require("./server/main");
+} = require("./dist/server/main");
 
 function getData(type: string, id?: string) {
   console.log("server/getData:", { type, id });
