@@ -1,0 +1,1 @@
+web: node index.js node dist/server.js
