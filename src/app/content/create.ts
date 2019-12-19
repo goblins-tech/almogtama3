@@ -3,6 +3,7 @@ import { ActivatedRoute } from "@angular/router";
 import { HttpService } from "../http.service";
 import { FormBuilder, Validators } from "@angular/forms";
 import { Observable, forkJoin } from "rxjs";
+import { HttpEventType } from "@angular/common/http";
 
 export interface Params {
   type: string;
@@ -25,6 +26,7 @@ export class ContentCreateComponent implements OnInit {
   showUploadBtn = true;
   uploading = false;
   uploadSuccessful = false;
+  progress;
   constructor(
     private route: ActivatedRoute,
     private httpService: HttpService,
@@ -35,7 +37,8 @@ export class ContentCreateComponent implements OnInit {
       title: ["", [Validators.required, Validators.maxLength(100)]],
       subtitle: "",
       content: ["", [Validators.required]],
-      keywords: ""
+      keywords: "",
+      cover: null
     });
 
     this.getData();
@@ -52,10 +55,23 @@ export class ContentCreateComponent implements OnInit {
     //todo: data.files=this.upload()
 
     console.log("content.ts onSubmit()", data);
-    this.data = this.httpService.post(
-      this.params.type,
-      data
-    ); /*.subscribe(
+    this.httpService
+      .post(this.params.type, data, {
+        formData: true,
+        reportProgress: true,
+        observe: "events"
+      })
+      .subscribe(event => {
+        if (event.type === HttpEventType.UploadProgress) {
+          this.progress = Math.round((event.loaded * 100) / event.total);
+        } else if (event.type === HttpEventType.Response) {
+          console.log(event.body);
+          //this.uploadedFiles=event.body;
+          this.form.reset();
+          this.files.clear();
+        }
+      });
+    /*.subscribe(
       data => {
         this.data = data;
       },
@@ -63,9 +79,7 @@ export class ContentCreateComponent implements OnInit {
         console.error(`Error @content: ${this.params.type}/onSubmit():`, err)
     );*/
 
-    this.upload();
-    this.form.reset();
-    this.files.clear();
+    //  this.upload();
   }
 
   isValid(field: string) {

@@ -27,10 +27,9 @@ import {
 
 const routes: Routes = [
   { path: "", redirectTo: "", pathMatch: "full" },
-  { path: "test/:optional?", component: ContentComponent },
   { path: ":type/create", component: ContentCreateComponent },
   { path: ":type/manage", component: ContentManageComponent },
-  { path: ":type/:item", component: ContentComponent },
+  { path: ":type/:id/:slug", component: ContentComponent },
   { path: ":type", redirectTo: ":type/" }, //make :item optional
   { path: "**", component: ErrorComponent }
 ];

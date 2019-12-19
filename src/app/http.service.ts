@@ -27,12 +27,22 @@ export class HttpService {
 
   post(type: string, data: Obj, options?: Obj) {
     console.log("httpService post", { type, data });
+    if (options && options.formData) {
+      data = this.toFormData(data);
+      delete options.formData;
+    }
     return this.http.post<any>(`/api/${type}`, data, options);
   }
 
   //this method dosent return an Observable
   request(method: string, type: string, data: Obj, options?: Obj) {
     return new HttpRequest(method, `/api/${type}`, data, options);
+  }
+
+  toFormData(data) {
+    let formData = new FormData();
+    data.forEach((k, v) => formData.append(k, v));
+    return formData;
   }
 
   upload(type, files: Set<File>, fieldName = "file"): Upload {

@@ -41,6 +41,7 @@
   <input
     type="file"
     #file
+    formControlName="cover"
     style="display: none"
     (change)="onFilesAdded()"
     multiple
@@ -73,7 +74,7 @@
     mat-raised-button
     color="primary"
     type="submit"
-    [disabled]="!form.valid"
+    [disabled]="!form.valid || form.prestine"
   >
     Submit
   </button>
