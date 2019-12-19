@@ -12,7 +12,8 @@ export interface Obj {
 }
 
 export interface Upload {
-  [key: string]: { progress: Observable<number> };
+  files: any;
+  progress: Observable<number>;
 }
 
 @Injectable({
@@ -34,33 +35,33 @@ export class HttpService {
     return new HttpRequest(method, `/api/${type}`, data, options);
   }
 
-  upload(type, files: Set<File>): Upload {
-    let filesMap: Upload = {};
+  upload(type, files: Set<File>, fieldName = "file"): Upload {
+    //to show the progress for each file separately, each one must be uploaded separately; use upload() for each file alone
+    let filesMap: Upload;
+    let formData: FormData = new FormData();
 
     files.forEach(file => {
-      // create a new multipart-form for every file
-      let formData: FormData = new FormData();
-      formData.append("file", file, file.name);
+      formData.append(fieldName, file, file.name);
+    });
+    let req = this.request("POST", type, formData, { reportProgress: true });
 
-      let req = this.request("POST", type, formData, { reportProgress: true });
+    // create a new progress-subject for every file
+    let progress = new Subject<number>();
 
-      // create a new progress-subject for every file
-      let progress = new Subject<number>();
+    // send the http-request and subscribe for progress-updates
+    this.http.request(req).subscribe(event => {
+      if (event.type === HttpEventType.UploadProgress) {
+        // calculate the progress percentage, and pass it to the progress-stream
+        progress.next(Math.round((event.loaded * 100) / event.total));
+      } else if (event instanceof HttpResponse) {
+        // if we get an answer form the API,The upload is complete & Close the progress-stream
+        progress.complete();
+      }
+    });
 
-      // send the http-request and subscribe for progress-updates
-      this.http.request(req).subscribe(event => {
-        if (event.type === HttpEventType.UploadProgress) {
-          // calculate the progress percentage, and pass it to the progress-stream
-          progress.next(Math.round((event.loaded * 100) / event.total));
-        } else if (event instanceof HttpResponse) {
-          // if we get an answer form the API,The upload is complete & Close the progress-stream
-          progress.complete();
-        }
-      });
-
-      filesMap[file.name] = {
-        progress: progress.asObservable()
-      };
+    filesMap = { progress: progress.asObservable(), files: {} };
+    formData.forEach((value, key) => {
+      filesMap.files[key] = value;
     });
 
     // return the map of progress.observables

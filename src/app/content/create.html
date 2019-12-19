@@ -10,7 +10,7 @@
     <mat-hint align="end"
       ><span class="hint">no more than 70 chatacters</span></mat-hint
     >
-    <mat-error *ngIf="!valid('title')"
+    <mat-error *ngIf="!isValid('title')"
       >{{ getErrorMessage("title") }}</mat-error
     >
   </mat-form-field>
@@ -55,6 +55,17 @@
   >
     Add Files
   </button>
+  <mat-list>
+    <mat-list-item *ngFor="let file of files">
+      <h4 mat-line>{{file.name}}</h4>
+      <!-- todo: add cancel btn -->
+    </mat-list-item>
+    <mat-progress-bar
+      *ngIf="uploadedFiles"
+      mode="determinate"
+      [value]="uploadedFiles.progress | async"
+    ></mat-progress-bar>
+  </mat-list>
 
   <hr />
 

@@ -21,7 +21,7 @@ export class ContentCreateComponent implements OnInit {
   //uploading vars
   @ViewChild("file", { static: false }) file; //access #file DOM element
   public files: Set<File> = new Set();
-  progress;
+  uploadedFiles;
   showUploadBtn = true;
   uploading = false;
   uploadSuccessful = false;
@@ -65,9 +65,10 @@ export class ContentCreateComponent implements OnInit {
 
     this.upload();
     this.form.reset();
+    this.files.clear();
   }
 
-  valid(field: string) {
+  isValid(field: string) {
     return (
       !this.form.get(field).touched ||
       !this.form.get(field).hasError("required")
@@ -104,17 +105,17 @@ export class ContentCreateComponent implements OnInit {
 
     // start the upload and save the progress map
     this.uploading = true;
-    this.progress = this.httpService.upload(this.params.type, this.files);
+    this.uploadedFiles = this.httpService.upload(
+      this.params.type,
+      this.files,
+      "cover"
+    );
 
     // Adjust the state variables
     this.showUploadBtn = false;
 
     // When all progress-observables are completed...
-    let allProgressObservables = [];
-    for (let key in this.progress) {
-      allProgressObservables.push(this.progress[key].progress);
-    }
-    forkJoin(allProgressObservables).subscribe(end => {
+    forkJoin(this.uploadedFiles.progress).subscribe(end => {
       this.uploadSuccessful = true;
       this.uploading = false;
     });
