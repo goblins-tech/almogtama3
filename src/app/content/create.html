@@ -1,4 +1,9 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit(form.value)" method="post">
+<form
+  [formGroup]="form"
+  (ngSubmit)="onSubmit(form.value)"
+  method="post"
+  enctype="multipart/form-data"
+>
   <mat-form-field appearance="legacy">
     <mat-label for="title">Title</mat-label>
     <input matInput placeholder="title" formControlName="title" />
@@ -32,7 +37,35 @@
     <input matInput placeholder="keywords" formControlName="keywords" />
   </mat-form-field>
 
-  <button class="button" type="submit" [disabled]="!form.valid">Submit</button>
+  <h4>Cover image</h4>
+  <input
+    type="file"
+    #file
+    style="display: none"
+    (change)="onFilesAdded()"
+    multiple
+    name="cover"
+  />
+  <button
+    type="button"
+    [disabled]="uploading || uploadSuccessful"
+    mat-raised-button
+    color="primary"
+    (click)="addFiles()"
+  >
+    Add Files
+  </button>
+
+  <hr />
+
+  <button
+    mat-raised-button
+    color="primary"
+    type="submit"
+    [disabled]="!form.valid"
+  >
+    Submit
+  </button>
 </form>
 <hr />
 

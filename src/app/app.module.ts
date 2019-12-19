@@ -20,7 +20,9 @@ import {
   MatCardModule,
   MatGridListModule,
   MatButtonModule,
-  MatIconModule
+  MatIconModule,
+  MatListModule,
+  MatProgressBarModule
 } from "@angular/material";
 
 const routes: Routes = [
@@ -69,6 +71,8 @@ const firebaseConfig = {
     MatGridListModule,
     MatButtonModule,
     MatIconModule,
+    MatListModule,
+    MatProgressBarModule,
     HttpClientModule
   ],
   providers: [HttpService],

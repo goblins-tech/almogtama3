@@ -1,8 +1,8 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { HttpService } from "../http.service";
 import { FormBuilder, Validators } from "@angular/forms";
-import { Observable } from "rxjs";
+import { Observable, forkJoin } from "rxjs";
 
 export interface Params {
   type: string;
@@ -17,6 +17,14 @@ export class ContentCreateComponent implements OnInit {
   params: Params;
   data: Observable<Object>;
   form;
+
+  //uploading vars
+  @ViewChild("file", { static: false }) file; //access #file DOM element
+  public files: Set<File> = new Set();
+  progress;
+  showUploadBtn = true;
+  uploading = false;
+  uploadSuccessful = false;
   constructor(
     private route: ActivatedRoute,
     private httpService: HttpService,
@@ -41,6 +49,8 @@ export class ContentCreateComponent implements OnInit {
   }
 
   onSubmit(data) {
+    //todo: data.files=this.upload()
+
     console.log("content.ts onSubmit()", data);
     this.data = this.httpService.post(
       this.params.type,
@@ -52,6 +62,8 @@ export class ContentCreateComponent implements OnInit {
       err =>
         console.error(`Error @content: ${this.params.type}/onSubmit():`, err)
     );*/
+
+    this.upload();
     this.form.reset();
   }
 
@@ -70,5 +82,41 @@ export class ContentCreateComponent implements OnInit {
     }
 
     return field.hasError("email") ? "Invalid email" : "";
+  }
+
+  //clicks on <input #file>
+  addFiles() {
+    this.file.nativeElement.click();
+  }
+
+  onFilesAdded() {
+    let files: { [key: string]: File } = this.file.nativeElement.files;
+    for (let key in files) {
+      if (!isNaN(parseInt(key))) {
+        this.files.add(files[key]);
+      }
+    }
+    this.showUploadBtn = true;
+  }
+
+  upload() {
+    //todo: return files[] to merge it with other form fields
+
+    // start the upload and save the progress map
+    this.uploading = true;
+    this.progress = this.httpService.upload(this.params.type, this.files);
+
+    // Adjust the state variables
+    this.showUploadBtn = false;
+
+    // When all progress-observables are completed...
+    let allProgressObservables = [];
+    for (let key in this.progress) {
+      allProgressObservables.push(this.progress[key].progress);
+    }
+    forkJoin(allProgressObservables).subscribe(end => {
+      this.uploadSuccessful = true;
+      this.uploading = false;
+    });
   }
 }
