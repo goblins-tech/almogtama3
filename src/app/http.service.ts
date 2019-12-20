@@ -39,9 +39,12 @@ export class HttpService {
     return new HttpRequest(method, `/api/${type}`, data, options);
   }
 
-  toFormData(data) {
+  toFormData(data): FormData {
+    if (data instanceof FormData) return data;
     let formData = new FormData();
-    data.forEach((k, v) => formData.append(k, v));
+    for (let key in data) {
+      if (data.hasOwnProperty(key)) formData.append(key, data[key]);
+    }
     return formData;
   }
 
