@@ -94,12 +94,6 @@ app.use(
 );*/
 
 app.post("/api/:type", (req, res) => {
-  console.log("server post()", {
-    type: req.params.type,
-    body: req.body,
-    files: req.files
-  });
-
   /*
 todo: waiting for version 1.2.2   https://github.com/node-formidable/node-formidable/issues/533
   let form = new formidable.IncomingForm(); // new formidable()
