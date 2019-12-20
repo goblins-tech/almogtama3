@@ -30,16 +30,22 @@ const {
 } = require("./dist/server/main");
 
 function getData(type: string, id?: string) {
-  console.log("server/getData:", { type, id });
   let data;
   try {
     data = fs.readFileSync(`./data/${type}.json`).toString();
     if (data) data = JSON.parse(data) || {};
-    if (id) data = data[0]; //todo:
+    if (id && data instanceof Array) {
+      for (let i = 0; i < data.length; i++) {
+        if (data[i]["id"] == id) {
+          data = data[i];
+          break;
+        }
+      }
+    }
   } catch (e) {
     console.warn(`getData() reading ${type}.json faild!`, e);
   }
-  return data || [];
+  return data;
 }
 
 // Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
