@@ -1,5 +1,4 @@
-
-@import '~@angular/material/prebuilt-themes/deeppurple-amber.css';
+/*@import '~@angular/material/prebuilt-themes/deeppurple-amber.css';*/
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 *{max-width:100%; box-sizing: border-box;}
@@ -7,7 +6,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .masonry {
   column-count: 4;
-  column-gap: 1em;  
+  column-gap: 1em;
 }
 .masonry .masonry-item {
   display: inline-block;

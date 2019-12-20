@@ -18,7 +18,7 @@ import {
   MatListModule,
   MatProgressBarModule
 } from "@angular/material";
-import { SlugPipe, ReplacePipe, Nl2brPipe } from "./pipes";
+import { SlugPipe, ReplacePipe, Nl2brPipe, KeepHtmlPipe } from "./pipes";
 
 const routes: Routes = [
   { path: "", component: ContentComponent },
@@ -34,7 +34,8 @@ const routes: Routes = [
     ContentManageComponent,
     SlugPipe,
     ReplacePipe,
-    Nl2brPipe
+    Nl2brPipe,
+    KeepHtmlPipe
   ],
   exports: [RouterModule],
   imports: [

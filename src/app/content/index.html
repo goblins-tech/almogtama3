@@ -15,7 +15,9 @@
             <mat-card-subtitle>{{item.subtitle}}</mat-card-subtitle>
           </mat-card-header>
           <img mat-card-image src="assets/book.png" />
-          <mat-card-content>{{item.content | nl2br}}</mat-card-content>
+          <mat-card-content
+            >{{item.content | nl2br | keepHtml}}</mat-card-content
+          >
           <mat-card-actions>
             <button mat-flat-button color="primary">
               <mat-icon>like</mat-icon> Like
@@ -37,7 +39,7 @@
             >
           </h4>
           <h6 mat-line>{{item.subtitle}}</h6>
-          <div mat-line>{{item.content | nl2br}}</div>
+          <div mat-line [innerHtml]="item.content | nl2br | keepHtml"></div>
           <!-- todo: add cancel btn -->
         </mat-list-item>
       </mat-list>
@@ -56,7 +58,7 @@
         <mat-card-subtitle>{{item.subtitle}}</mat-card-subtitle>
       </mat-card-header>
       <img mat-card-image src="assets/book.png" />
-      <mat-card-content>{{item.content | nl2br}}</mat-card-content>
+      <mat-card-content>{{item.content | nl2br | keepHtml}}</mat-card-content>
       <mat-card-actions>
         <button mat-flat-button color="primary">
           <mat-icon>like</mat-icon> Like
