@@ -31,30 +31,36 @@ export interface Params extends Obj {
 })
 export class ContentComponent implements OnInit {
   data$: Observable<Data>;
-  params$: Params;
+  params: Params;
+  layout = "grid";
 
   constructor(
     private route: ActivatedRoute,
     private httpService: HttpService
   ) {}
   ngOnInit() {
-    this.getData();
+    this.route.paramMap.subscribe(params => {
+      //  /jobs/1-title
+      var type = params.get("type"),
+        item = params.get("item") || "";
+
+      //todo: a workaround for https://github.com/angular/angular/issues/34504
+      if (!type) {
+        type = item;
+        item = "";
+      }
+
+      this.params = {
+        type,
+        id: item.substring(0, item.indexOf("-")) || item //todo: parse as number
+      };
+      if (this.params.type == "jobs") this.layout = "list";
+      this.data$ = this.getData();
+      console.log({ params, calculatedParamas: this.params });
+    });
   }
 
   getData() {
-    this.route.paramMap.subscribe(params => {
-      //  /jobs/1-title
-      let item = params.get("item"),
-        id;
-      if (item) id = item.substring(item.indexOf("-") + 1) || "";
-      this.params$ = { type: params.get("type"), id };
-
-      this.data$ = this.httpService.get<Data>(
-        this.params$.type,
-        this.params$.id
-      );
-
-      console.log({ params });
-    });
+    return this.httpService.get<Data>(this.params.type, this.params.id);
   }
 }

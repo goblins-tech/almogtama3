@@ -3,34 +3,21 @@ import { NgModule } from "@angular/core";
 import { Routes, RouterModule } from "@angular/router";
 import { AppComponent } from "./app.component";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
-import { ContentComponent } from "./content/index";
-import { ContentCreateComponent } from "./content/create";
-import { ContentManageComponent } from "./content/manage";
 import { ErrorComponent } from "./error/error.component";
-import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { HttpClientModule } from "@angular/common/http";
 import { AngularFireModule } from "@angular/fire";
 import { AngularFireAuthModule } from "@angular/fire/auth";
+import { HttpClientModule } from "@angular/common/http";
 import { HttpService } from "./http.service";
-import {
-  MatFormFieldModule,
-  MatInputModule,
-  MatOptionModule,
-  MatSelectModule,
-  MatCardModule,
-  MatGridListModule,
-  MatButtonModule,
-  MatIconModule,
-  MatListModule,
-  MatProgressBarModule
-} from "@angular/material";
+import { ContentModule } from "./content/content.module";
 
 const routes: Routes = [
   { path: "", redirectTo: "", pathMatch: "full" },
-  { path: ":type/create", component: ContentCreateComponent },
-  { path: ":type/manage", component: ContentManageComponent },
-  { path: ":type/:id/:slug", component: ContentComponent },
-  { path: ":type", redirectTo: ":type/" }, //make :item optional
+  {
+    path: ":type",
+    loadChildren: () =>
+      import("./content/content.module").then(m => m.ContentModule)
+  },
+
   { path: "**", component: ErrorComponent }
 ];
 
@@ -47,31 +34,15 @@ const firebaseConfig = {
   measurementId: "G-59RT8HNS31"
 };
 @NgModule({
-  declarations: [
-    AppComponent,
-    ContentComponent,
-    ContentCreateComponent,
-    ContentManageComponent,
-    ErrorComponent
-  ],
+  declarations: [AppComponent, ErrorComponent],
   imports: [
+    ContentModule,
     RouterModule.forRoot(routes, { enableTracing }),
     BrowserModule.withServerTransition({ appId: "serverApp" }),
     BrowserAnimationsModule,
     AngularFireModule.initializeApp(firebaseConfig),
     AngularFireAuthModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatOptionModule,
-    MatSelectModule,
-    MatCardModule,
-    MatGridListModule,
-    MatButtonModule,
-    MatIconModule,
-    MatListModule,
-    MatProgressBarModule,
+
     HttpClientModule
   ],
   providers: [HttpService],

@@ -36,6 +36,7 @@ export class ContentCreateComponent implements OnInit {
     this.form = this.formBuilder.group({
       title: ["", [Validators.required, Validators.maxLength(100)]],
       subtitle: "",
+      slug: "", //todo: default = title
       content: ["", [Validators.required]],
       keywords: "",
       cover: null
