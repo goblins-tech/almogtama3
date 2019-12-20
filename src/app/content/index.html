@@ -1,72 +1,81 @@
-<ng-container *ngIf="data$ | async as data">
-  <!--todo: if(!data.payload)show error! No content found -->
-  <ng-container *ngIf="data.type=='index'; else itemBlock">
-    <ng-container *ngIf="layout=='grid'; else listLayout">
-      <div class="masonry">
-        <mat-card class="masonry-item" *ngFor="let item of data.payload">
-          <mat-card-header>
-            <div mat-card-avatar><img src="assets/avatar-male.png" /></div>
-            <mat-card-title
-              ><a
-                href="{{params.type}}/{{item.id}}-{{item.slug?item.slug:item.title | slug}}"
-                >{{item.title}}</a
-              ></mat-card-title
+<!--
+todo: *ngIf="data$ | async as data && data.payload && data.payload.length>0; else noContent"
+https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-data-payload-else-nocontent
+ -->
+<ng-container *ngIf="data$ | async as data; else noContent">
+  <ng-container *ngIf="data.payload && data.payload.length>0; else noContent">
+    <ng-container *ngIf="data.type=='index'; else itemBlock">
+      <ng-container *ngIf="layout=='grid'; else listLayout">
+        <div class="masonry">
+          <mat-card class="masonry-item" *ngFor="let item of data.payload">
+            <mat-card-header>
+              <div mat-card-avatar><img src="assets/avatar-male.png" /></div>
+              <mat-card-title
+                ><a
+                  href="{{params.type}}/{{item.id}}-{{item.slug?item.slug:item.title | slug}}"
+                  >{{item.title}}</a
+                ></mat-card-title
+              >
+              <mat-card-subtitle>{{item.subtitle}}</mat-card-subtitle>
+            </mat-card-header>
+            <img mat-card-image src="assets/book.png" />
+            <mat-card-content
+              >{{item.content | nl2br | keepHtml}}</mat-card-content
             >
-            <mat-card-subtitle>{{item.subtitle}}</mat-card-subtitle>
-          </mat-card-header>
-          <img mat-card-image src="assets/book.png" />
-          <mat-card-content
-            >{{item.content | nl2br | keepHtml}}</mat-card-content
-          >
-          <mat-card-actions>
-            <button mat-flat-button color="primary">
-              <mat-icon>like</mat-icon> Like
-            </button>
-            <button mat-flat-button color="accent">
-              <mat-icon>share</mat-icon> SHARE
-            </button>
-          </mat-card-actions>
-        </mat-card>
-      </div>
+            <mat-card-actions>
+              <button mat-flat-button color="primary">
+                <mat-icon>like</mat-icon> Like
+              </button>
+              <button mat-flat-button color="accent">
+                <mat-icon>share</mat-icon> SHARE
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </ng-container>
+      <ng-template #listLayout>
+        <mat-list>
+          <mat-list-item *ngFor="let item of data.payload">
+            <h4 mat-line>
+              <a
+                href="{{params.type}}/{{item.id}}-{{item.slug?item.slug:item.title | slug }}"
+                >{{item.title}}</a
+              >
+            </h4>
+            <h6 mat-line>{{item.subtitle}}</h6>
+            <div mat-line [innerHtml]="item.content | nl2br | keepHtml"></div>
+            <!-- todo: add cancel btn -->
+          </mat-list-item>
+        </mat-list>
+      </ng-template>
     </ng-container>
-    <ng-template #listLayout>
-      <mat-list>
-        <mat-list-item *ngFor="let item of data.payload">
-          <h4 mat-line>
+    <ng-template let-item="data.payload" #itemBlock>
+      <mat-card>
+        <mat-card-header>
+          <div mat-card-avatar><img src="assets/avatar-female.png" /></div>
+          <mat-card-title>
             <a
               href="{{params.type}}/{{item.id}}-{{item.slug?item.slug:item.title | slug }}"
               >{{item.title}}</a
-            >
-          </h4>
-          <h6 mat-line>{{item.subtitle}}</h6>
-          <div mat-line [innerHtml]="item.content | nl2br | keepHtml"></div>
-          <!-- todo: add cancel btn -->
-        </mat-list-item>
-      </mat-list>
+            ></mat-card-title
+          >
+          <mat-card-subtitle>{{item.subtitle}}</mat-card-subtitle>
+        </mat-card-header>
+        <img mat-card-image src="assets/book.png" />
+        <mat-card-content>{{item.content | nl2br | keepHtml}}</mat-card-content>
+        <mat-card-actions>
+          <button mat-flat-button color="primary">
+            <mat-icon>like</mat-icon> Like
+          </button>
+          <button mat-flat-button color="accent">
+            <mat-icon>share</mat-icon> SHARE
+          </button>
+        </mat-card-actions>
+      </mat-card>
     </ng-template>
   </ng-container>
-  <ng-template let-item="data.payload" #itemBlock>
-    <mat-card>
-      <mat-card-header>
-        <div mat-card-avatar><img src="assets/avatar-female.png" /></div>
-        <mat-card-title>
-          <a
-            href="{{params.type}}/{{item.id}}-{{item.slug?item.slug:item.title | slug }}"
-            >{{item.title}}</a
-          ></mat-card-title
-        >
-        <mat-card-subtitle>{{item.subtitle}}</mat-card-subtitle>
-      </mat-card-header>
-      <img mat-card-image src="assets/book.png" />
-      <mat-card-content>{{item.content | nl2br | keepHtml}}</mat-card-content>
-      <mat-card-actions>
-        <button mat-flat-button color="primary">
-          <mat-icon>like</mat-icon> Like
-        </button>
-        <button mat-flat-button color="accent">
-          <mat-icon>share</mat-icon> SHARE
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  </ng-template>
 </ng-container>
+<ng-template #noContent
+  >No content! <br />
+  <a href="/{{params.type}}">Back</a></ng-template
+>

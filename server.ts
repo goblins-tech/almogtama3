@@ -29,23 +29,30 @@ const {
   provideModuleMap
 } = require("./dist/server/main");
 
-function getData(type: string, id?: string) {
+function getData(type: string, id?: string | Number) {
   let data;
   try {
     data = fs.readFileSync(`./data/${type}.json`).toString();
-    if (data) data = JSON.parse(data) || {};
+    if (data) data = JSON.parse(data);
+    if (!data) return;
     if (id && data instanceof Array) {
       for (let i = 0; i < data.length; i++) {
-        if (data[i]["id"] == id) {
-          data = data[i];
-          break;
-        }
+        if (+data[i]["id"] == +id) return data[i];
       }
     }
   } catch (e) {
     console.warn(`getData() reading ${type}.json faild!`, e);
   }
   return data;
+}
+
+function saveData(type: string, data): void {
+  if (data) {
+    let allData = getData(type);
+    if (!fs.existsSync("./data")) fs.mkdirSync("./data", { recursive: true });
+    allData.push(data);
+    fs.writeFileSync(`./data/${type}.json`, JSON.stringify(allData));
+  }
 }
 
 // Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
@@ -68,6 +75,7 @@ app.use(
 );
 
 //multer hanles multipart/form-data ONLY, make sure to add enctype="multipart/form-data" to <form>
+//todo: add multer to specific urls: app.post(url,multer,(req,res)=>{})
 app.use(
   multer({
     fileSize: 5 * 1024 * 1024,
@@ -100,35 +108,8 @@ app.use(
 );*/
 
 app.post("/api/:type", (req, res) => {
-  /*
-todo: waiting for version 1.2.2   https://github.com/node-formidable/node-formidable/issues/533
-  let form = new formidable.IncomingForm(); // new formidable()
-  form.multiples = true;
-  form.keepExtensions = true;
-  form.maxFileSize = 5 * 1024 * 1024;
-  form.maxFieldsSize = 5 * 1024 * 1024; //the amount of memory all fields together (except files)
-  form.parse(req, (err, fields, files) => {
-    //  or using events: form.parse(req).on('file',callback)
-    if (err) {
-      console.error("formidable error:", err);
-      throw err;
-    }
-    console.log({ files, fields });
-    for (let file of Object.entries(files)) {
-      console.log({ file });
-    }
-  }); */
-
-  //without formidable, cannot handle 'file' inputs
-  var data = [];
-  if (req.body) {
-    if (!fs.existsSync("./data")) fs.mkdirSync("./data", { recursive: true });
-    data = getData(req.params.type);
-    data.push(req.body);
-    fs.writeFileSync(`./data/${req.params.type}.json`, JSON.stringify(data));
-  }
-
-  res.send(data); //todo: update the existing data in html
+  if (req.body) saveData(req.params.type, req.body);
+  res.send({ ok: true }); //todo: update the existing data in html
 });
 
 app.get("/api/:type/:id?", (req, res) => {
