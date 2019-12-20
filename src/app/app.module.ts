@@ -6,9 +6,10 @@ import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { ErrorComponent } from "./error/error.component";
 import { AngularFireModule } from "@angular/fire";
 import { AngularFireAuthModule } from "@angular/fire/auth";
-import { HttpClientModule } from "@angular/common/http";
+import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { HttpService } from "./http.service";
 import { ContentModule } from "./content/content.module";
+import { UniversalInterceptor } from "../../universal-interceptor";
 
 const routes: Routes = [
   { path: "", redirectTo: "", pathMatch: "full" },
@@ -45,7 +46,14 @@ const firebaseConfig = {
 
     HttpClientModule
   ],
-  providers: [HttpService],
+  providers: [
+    HttpService,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: UniversalInterceptor,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
