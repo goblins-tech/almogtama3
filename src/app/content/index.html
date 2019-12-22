@@ -3,36 +3,36 @@ todo: *ngIf="data$ | async as data && data.payload && data.payload.length>0; els
 https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-data-payload-else-nocontent
  -->
 <ng-container *ngIf="data$ | async as data; else noContent">
-  <ng-container *ngIf="data.payload && data.payload.length>0; else noContent">
+  <ng-container *ngIf="data.payload; else noContent"
+    ><!-- data.payload:[]|{}, so incase of type=='item' don't use data.payload?.length>0 -->
     <ng-container *ngIf="data.type=='index'; else itemBlock">
-      <ng-container *ngIf="layout=='grid'; else listLayout">
-        <div class="masonry">
-          <mat-card class="masonry-item" *ngFor="let item of data.payload">
-            <mat-card-header>
-              <div mat-card-avatar><img src="assets/avatar-male.png" /></div>
-              <mat-card-title
-                ><a
-                  href="{{params.type}}/{{item.id}}-{{item.slug?item.slug:item.title | slug}}"
-                  >{{item.title}}</a
-                ></mat-card-title
-              >
-              <mat-card-subtitle>{{item.subtitle}}</mat-card-subtitle>
-            </mat-card-header>
-            <img mat-card-image src="assets/book.png" />
-            <mat-card-content
-              >{{item.content | nl2br | keepHtml}}</mat-card-content
+      <div class="masonry" *ngIf="layout=='grid'; else listLayout">
+        <mat-card class="masonry-item" *ngFor="let item of data.payload">
+          <mat-card-header>
+            <div mat-card-avatar><img src="assets/avatar-male.png" /></div>
+            <mat-card-title
+              ><a
+                href="{{params.type}}/{{item.id}}-{{item.slug?item.slug:item.title | slug}}"
+                >{{item.title}}</a
+              ></mat-card-title
             >
-            <mat-card-actions>
-              <button mat-flat-button color="primary">
-                <mat-icon>like</mat-icon> Like
-              </button>
-              <button mat-flat-button color="accent">
-                <mat-icon>share</mat-icon> SHARE
-              </button>
-            </mat-card-actions>
-          </mat-card>
-        </div>
-      </ng-container>
+            <mat-card-subtitle>{{item.subtitle}}</mat-card-subtitle>
+          </mat-card-header>
+          <img mat-card-image src="assets/book.png" />
+          <mat-card-content
+            >{{item.content | nl2br | keepHtml}}</mat-card-content
+          >
+          <mat-card-actions>
+            <button mat-flat-button color="primary">
+              <mat-icon>like</mat-icon> Like
+            </button>
+            <button mat-flat-button color="accent">
+              <mat-icon>share</mat-icon> SHARE
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+
       <ng-template #listLayout>
         <mat-list>
           <mat-list-item *ngFor="let item of data.payload">

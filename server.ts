@@ -48,10 +48,16 @@ function getData(type: string, id?: string | Number) {
 
 function saveData(type: string, data): void {
   if (data) {
-    let allData = getData(type);
     if (!fs.existsSync("./data")) fs.mkdirSync("./data", { recursive: true });
+
+    let allData = getData(type) || [];
+    var ids = getData("ids") || { [type]: 0 };
+    ids[type] = (ids[type] || 0) + 1;
+    data["id"] = ids[type];
+
     allData.push(data);
     fs.writeFileSync(`./data/${type}.json`, JSON.stringify(allData));
+    fs.writeFileSync("./data/ids.json", JSON.stringify(ids));
   }
 }
 
