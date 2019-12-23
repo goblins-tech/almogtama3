@@ -121,7 +121,7 @@ app.post("/api/:type", (req, res) => {
 app.get("/api/:type/:id?", (req, res) => {
   let id = req.params.id;
   res.json({
-    type: id ? "item" : "index",
+    type: id ? "item" : "list",
     payload: getData(req.params.type, id)
   });
 });

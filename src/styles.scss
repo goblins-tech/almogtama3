@@ -41,3 +41,28 @@ mat-card div[mat-card-avatar]{
    overflow: hidden; border: solid medium gray;
 }
 mat-card img{margin: auto;}
+
+/* bootstrap-like alerts */
+.alert-error {
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+}
+.alert-ok {
+  color: #155724;
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+}
+
+.alert {
+    position: relative;
+    padding: .75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+    text-align: center;
+}
+.alert a { font-weight: 700; }
+
+/* todo: css dosen't have dir:auto */
+mat-card-title,mat-card-subtitle,mat-card-content,dir-auto{direction: auto}

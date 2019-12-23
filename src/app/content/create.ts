@@ -4,6 +4,7 @@ import { HttpService } from "../http.service";
 import { FormBuilder, Validators } from "@angular/forms";
 import { Observable, forkJoin } from "rxjs";
 import { HttpEventType } from "@angular/common/http";
+import { MatSnackBar } from "@angular/material";
 
 export interface Params {
   type: string;
@@ -21,16 +22,19 @@ export class ContentCreateComponent implements OnInit {
 
   //uploading vars
   @ViewChild("file", { static: false }) file; //access #file DOM element
+  @ViewChild("formElement", { static: false }) formElement;
   public files: Set<File> = new Set();
   uploadedFiles;
   showUploadBtn = true;
   uploading = false;
   uploadSuccessful = false;
   progress;
+  msg = "";
   constructor(
     private route: ActivatedRoute,
     private httpService: HttpService,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private snackBar: MatSnackBar
   ) {}
   ngOnInit() {
     this.form = this.formBuilder.group({
@@ -67,8 +71,16 @@ export class ContentCreateComponent implements OnInit {
           this.progress = Math.round((event.loaded * 100) / event.total);
         } else if (event.type === HttpEventType.Response) {
           console.log(event.body);
+          if (event.body!.ok) this.msg = "ok";
+          else this.msg = event.body!.msg;
+          this.showSnackBar(
+            this.msg == "ok" ? "form submitted" : this.msg,
+            "close",
+            3000
+          );
           //this.uploadedFiles=event.body;
           this.form.reset();
+          this.formElement.reset(); //https://stackoverflow.com/a/49789012/12577650; also see create.html
           this.files.clear();
         }
       });
@@ -98,6 +110,10 @@ export class ContentCreateComponent implements OnInit {
     }
 
     return field.hasError("email") ? "Invalid email" : "";
+  }
+
+  showSnackBar(message: string, action: string, duration = 0) {
+    this.snackBar.open(message, action, { duration });
   }
 
   //clicks on <input #file>

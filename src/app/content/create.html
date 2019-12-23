@@ -1,6 +1,14 @@
+<h3>Create new {{params.type}}</h3>
+<div
+  *ngIf="msg!=''"
+  class="alert"
+  [ngClass]="msg=='ok'?'alert-ok':'alert-error'"
+>
+  {{msg=='ok'?'form submitted successfully':'error:'+msg}}
+</div>
 <form
+  #formElement="ngForm"
   [formGroup]="form"
-  (ngSubmit)="onSubmit(form.value)"
   method="post"
   enctype="multipart/form-data"
 >
@@ -70,11 +78,16 @@
 
   <hr />
 
+  <!--
+  using (ngSubmit)="onSubmit(..)" causes the form to show errors after submitting
+  so we replaced it with (click)="onSubmit(..)", and  type="submit" with type="button"
+  https://stackoverflow.com/a/51003685/12577650 -->
   <button
     mat-raised-button
     color="primary"
-    type="submit"
+    type="button"
     [disabled]="!form.valid || form.prestine"
+    (click)="onSubmit(form.value)"
   >
     Submit
   </button>
