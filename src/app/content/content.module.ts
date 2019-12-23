@@ -5,7 +5,11 @@ import { ContentComponent } from "./index";
 import { ContentCreateComponent } from "./create";
 import { ContentManageComponent } from "./manage";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { ShareButtonsModule } from "@ngx-share/buttons";
+import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import { SlugPipe, ReplacePipe, Nl2brPipe, KeepHtmlPipe } from "./pipes";
 
+//material design
 import {
   MatFormFieldModule,
   MatInputModule,
@@ -19,7 +23,39 @@ import {
   MatProgressBarModule,
   MatSnackBarModule
 } from "@angular/material";
-import { SlugPipe, ReplacePipe, Nl2brPipe, KeepHtmlPipe } from "./pipes";
+
+//fontawsome icons
+import { library as fontAwsome } from "@fortawesome/fontawesome-svg-core";
+
+import {
+  faFacebookF,
+  faTwitter,
+  faRedditAlien,
+  faLinkedinIn,
+  faGooglePlusG,
+  faTumblr,
+  faPinterestP,
+  faWhatsapp,
+  faFacebookMessenger,
+  faTelegramPlane,
+  faMix,
+  faXing,
+  faLine
+} from "@fortawesome/free-brands-svg-icons";
+import {
+  faCommentAlt,
+  faMinus,
+  faEllipsisH,
+  faLink,
+  faExclamation,
+  faPrint,
+  faCheck,
+  faEnvelope,
+  faBook,
+  faLightbulb,
+  faCoffee,
+  faInfo
+} from "@fortawesome/free-solid-svg-icons";
 
 const routes: Routes = [
   { path: "", component: ContentComponent },
@@ -54,9 +90,37 @@ const routes: Routes = [
     MatIconModule,
     MatListModule,
     MatProgressBarModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    ShareButtonsModule,
+    FontAwesomeModule
   ],
   providers: [],
   bootstrap: []
 })
-export class ContentModule {}
+export class ContentModule {
+  constructor() {
+    fontAwsome.add(
+      faFacebookF,
+      faTwitter,
+      faLinkedinIn,
+      faGooglePlusG,
+      faPinterestP,
+      faRedditAlien,
+      faTumblr,
+      faWhatsapp,
+      faFacebookMessenger,
+      faTelegramPlane,
+      faMix,
+      faXing,
+      faCommentAlt,
+      faLine,
+      faEnvelope,
+      faCheck,
+      faPrint,
+      faExclamation,
+      faLink,
+      faEllipsisH,
+      faMinus
+    );
+  }
+}
