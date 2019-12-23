@@ -47,6 +47,7 @@ function getData(type: string, id?: string | Number) {
 }
 
 function saveData(type: string, data): void {
+  //console.log("saveData", data);
   if (data) {
     if (!fs.existsSync("./data")) fs.mkdirSync("./data", { recursive: true });
 
@@ -87,6 +88,7 @@ app.use(
     fileSize: 5 * 1024 * 1024,
     files: 20,
     fileFilter: function(req, file, cb) {
+      //console.log("multer", { req, file, cb });
       cb(null, true); //to reject this file cb(null,false) or cb(new error(..))
     },
     storage: multer.diskStorage({
@@ -114,6 +116,7 @@ app.use(
 );*/
 
 app.post("/api/:type", (req, res) => {
+  //console.log("server post", { body: req.body });
   if (req.body) saveData(req.params.type, req.body);
   res.send({ ok: true }); //todo: update the existing data in html
 });

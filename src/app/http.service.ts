@@ -25,12 +25,11 @@ export class HttpService {
     return this.http.get<T>(`/api/${type}/${id}`);
   }
 
-  post(type: string, data: Obj, options?: Obj) {
+  post(type: string, data: Obj, options: Obj = {}) {
     console.log("httpService post", { type, data });
-    if (options && options.formData) {
-      data = this.toFormData(data);
-      delete options.formData;
-    }
+    options = options || {};
+    if (options.formData !== false) data = this.toFormData(data); //typescript 3.2 dosen't support null safe operator i.e: options?.formData
+    delete options.formData;
     return this.http.post<any>(`/api/${type}`, data, options);
   }
 
@@ -43,8 +42,12 @@ export class HttpService {
     if (data instanceof FormData) return data;
     let formData = new FormData();
     for (let key in data) {
-      if (data.hasOwnProperty(key)) formData.append(key, data[key]);
+      if (data.hasOwnProperty(key)) {
+        if (data[key] == null) data[key] = ""; //formData converts null to "null" , FormData can contain only strings or blobs
+        formData.append(key, data[key]);
+      }
     }
+    console.log({ formData });
     return formData;
   }
 

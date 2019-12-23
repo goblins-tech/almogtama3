@@ -7,7 +7,10 @@ import { Observable } from "rxjs";
 export interface Obj {
   [key: string]: any;
 }
-
+export interface Params extends Obj {
+  type: string;
+  id?: string;
+}
 export interface Article extends Obj {
   title: string;
   subtitle: string;
@@ -17,11 +20,6 @@ export interface Article extends Obj {
 export interface Data {
   type: string; //item|index
   payload: Article | Article[];
-}
-
-export interface Params extends Obj {
-  type: string;
-  id?: string;
 }
 
 @Component({

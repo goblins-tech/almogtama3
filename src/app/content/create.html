@@ -1,4 +1,4 @@
-<h3>Create new {{params.type}}</h3>
+<h3 *ngIf="params?.type">Create new {{params?.type}}</h3>
 <div
   *ngIf="msg!=''"
   class="alert"
@@ -92,6 +92,7 @@
     Submit
   </button>
 </form>
-<hr />
-
-{{ data | async | json }}
+<!--
+<hr /> form: {{form.value|json}}
+<hr /> topic: {{data$ | async | json}}
+-->

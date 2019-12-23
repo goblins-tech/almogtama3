@@ -5,6 +5,7 @@ import { FormBuilder, Validators } from "@angular/forms";
 import { Observable, forkJoin } from "rxjs";
 import { HttpEventType } from "@angular/common/http";
 import { MatSnackBar } from "@angular/material";
+import { Data } from "./index"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
 
 export interface Params {
   type: string;
@@ -17,7 +18,7 @@ export interface Params {
 })
 export class ContentCreateComponent implements OnInit {
   params: Params;
-  data: Observable<Object>;
+  data$: Observable<Object>;
   form;
 
   //uploading vars
@@ -46,14 +47,20 @@ export class ContentCreateComponent implements OnInit {
       cover: null
     });
 
-    this.getData();
+    //todo: if($_GET[id])getData(type,id)
+    this.route.paramMap.subscribe(params => {
+      this.params = {
+        type: params.get("type"),
+        id: params.get("id") || ""
+      };
+
+      if (this.params.id != "") this.data$ = this.getData();
+      console.log({ params, calculatedParamas: this.params });
+    });
   }
 
   getData() {
-    this.route.paramMap.subscribe(params => {
-      this.params = { type: params.get("type"), id: params.get("id") };
-      this.data = this.httpService.get(this.params.type, this.params.id);
-    });
+    return this.httpService.get<Data>(this.params.type, this.params.id);
   }
 
   onSubmit(data) {

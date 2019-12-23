@@ -28,7 +28,7 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
     </mat-card-header>
     <img
       mat-card-image
-      *ngIf="item.cover"
+      *ngIf="item.cover && item.cover!='' && item.cover!='null'"
       src="/data/uploads/{{params.type}}/{{item.cover}}"
     />
     <mat-card-content
