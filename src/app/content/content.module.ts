@@ -4,10 +4,12 @@ import { Routes, RouterModule } from "@angular/router";
 import { ContentComponent } from "./index";
 import { ContentCreateComponent } from "./create";
 import { ContentManageComponent } from "./manage";
-import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { ShareButtonsModule } from "@ngx-share/buttons";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { SlugPipe, ReplacePipe, Nl2brPipe, KeepHtmlPipe } from "./pipes";
+import { ReactiveFormsModule } from "@angular/forms";
+import { FormlyModule } from "@ngx-formly/core";
+import { FormlyMaterialModule } from "@ngx-formly/material";
 
 //material design
 import {
@@ -80,6 +82,8 @@ const routes: Routes = [
     RouterModule.forChild(routes),
     FormsModule,
     ReactiveFormsModule,
+    FormlyModule.forRoot(),
+    FormlyMaterialModule,
     MatFormFieldModule,
     MatInputModule,
     MatOptionModule,

@@ -43,7 +43,6 @@ const firebaseConfig = {
     BrowserAnimationsModule,
     AngularFireModule.initializeApp(firebaseConfig),
     AngularFireAuthModule,
-
     HttpClientModule
   ],
   providers: [

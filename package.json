@@ -46,6 +46,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.12.0",
     "@nguniversal/express-engine": "^8.1.1",
     "@nguniversal/module-map-ngfactory-loader": "8.1.1",
+    "@ngx-formly/schematics": "^5.5.7",
     "@ngx-share/button": "^7.1.4",
     "@ngx-share/buttons": "^7.1.4",
     "@ngx-share/core": "^7.1.4",
@@ -60,7 +61,9 @@
     "multer": "^1.4.2",
     "rxjs": "~6.4.0",
     "tslib": "^1.10.0",
-    "zone.js": "~0.9.1"
+    "zone.js": "~0.9.1",
+    "@ngx-formly/core": "^5.0.0",
+    "@ngx-formly/material": "^5.0.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.803.8",

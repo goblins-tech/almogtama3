@@ -96,3 +96,20 @@
 <hr /> form: {{form.value|json}}
 <hr /> topic: {{data$ | async | json}}
 -->
+
+<form [formGroup]="form2.group">
+  <formly-form
+    [form]="form2.group"
+    [fields]="form2.fields"
+    [model]="form2.model"
+  ></formly-form>
+  <button
+    mat-raised-button
+    color="primary"
+    type="button"
+    [disabled]="!form2.valid || form2.prestine"
+    (click)="onSubmit(form2.value)"
+  >
+    Submit
+  </button>
+</form>
