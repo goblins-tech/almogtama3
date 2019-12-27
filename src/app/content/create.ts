@@ -6,11 +6,13 @@ import { Observable, forkJoin } from "rxjs";
 import { HttpEventType } from "@angular/common/http";
 import { MatSnackBar } from "@angular/material";
 import { Data } from "./index"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
+import { article } from "./formly";
 
 export interface Params {
   type: string;
   id?: string;
 }
+
 @Component({
   selector: "app-content",
   templateUrl: "./create.html",
@@ -31,12 +33,15 @@ export class ContentCreateComponent implements OnInit {
   uploadSuccessful = false;
   progress;
   msg = "";
+  articleForm;
   constructor(
     private route: ActivatedRoute,
     private httpService: HttpService,
-    private formBuilder: FormBuilder,
+    private formBuilder: FormBuilder, //formly uses FormGroup and FormArray intead of FormBuilder
     private snackBar: MatSnackBar
-  ) {}
+  ) {
+    this.articleForm = article;
+  }
   ngOnInit() {
     this.form = this.formBuilder.group({
       title: ["", [Validators.required, Validators.maxLength(100)]],

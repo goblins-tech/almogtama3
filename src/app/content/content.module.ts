@@ -7,9 +7,10 @@ import { ContentManageComponent } from "./manage";
 import { ShareButtonsModule } from "@ngx-share/buttons";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { SlugPipe, ReplacePipe, Nl2brPipe, KeepHtmlPipe } from "./pipes";
-import { ReactiveFormsModule } from "@angular/forms";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { FormlyModule } from "@ngx-formly/core";
 import { FormlyMaterialModule } from "@ngx-formly/material";
+import { FormlyFieldFile } from "./formly";
 
 //material design
 import {
@@ -74,7 +75,8 @@ const routes: Routes = [
     SlugPipe,
     ReplacePipe,
     Nl2brPipe,
-    KeepHtmlPipe
+    KeepHtmlPipe,
+    FormlyFieldFile
   ],
   exports: [RouterModule],
   imports: [
@@ -82,7 +84,11 @@ const routes: Routes = [
     RouterModule.forChild(routes),
     FormsModule,
     ReactiveFormsModule,
-    FormlyModule.forRoot(),
+    FormlyModule.forRoot({
+      types: [
+        { name: "file", component: FormlyFieldFile, wrappers: ["form-field"] } //todo: add to component instead of module
+      ]
+    }),
     FormlyMaterialModule,
     MatFormFieldModule,
     MatInputModule,

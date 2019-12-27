@@ -6,27 +6,50 @@
 >
   {{msg=='ok'?'form submitted successfully':'error:'+msg}}
 </div>
-<form
-  #formElement="ngForm"
-  [formGroup]="form"
-  method="post"
-  enctype="multipart/form-data"
->
-  <mat-form-field appearance="legacy">
-    <mat-label for="title">Title</mat-label>
-    <input matInput placeholder="title" formControlName="title" />
-    <mat-hint align="end"
-      ><span class="hint">no more than 70 chatacters</span></mat-hint
-    >
-    <mat-error *ngIf="!isValid('title')"
-      >{{ getErrorMessage("title") }}</mat-error
-    >
-  </mat-form-field>
 
-  <mat-form-field appearance="legacy">
-    <mat-label for="subtitle">Subtitle</mat-label>
-    <input matInput placeholder="subtitle" formControlName="subtitle" />
-  </mat-form-field>
+<ng-container *ngIf="articleForm; else loading">
+  <form
+    [formGroup]="articleForm.form"
+    #formElement="ngForm"
+    method="post"
+    enctype="multipart/form-data"
+  >
+    <formly-form
+      [form]="articleForm.form"
+      [fields]="articleForm.fields"
+      [model]="articleForm.model"
+    ></formly-form>
+
+    <!--
+  using (ngSubmit)="onSubmit(..)" causes the form to show errors after submitting
+  so we replaced it with (click)="onSubmit(..)", and  type="submit" with type="button"
+  https://stackoverflow.com/a/51003685/12577650 -->
+    <button
+      mat-raised-button
+      color="primary"
+      type="button"
+      [disabled]="!articleForm.form.valid || articleForm.form.prestine"
+      (click)="onSubmit(articleForm.form.value)"
+    >
+      Submit
+    </button>
+  </form>
+</ng-container>
+
+<ng-template #loading>Loading ......</ng-template>
+
+<!-- material design form-field example:
+<mat-form-field appearance="legacy">
+  <mat-label for="title">Title</mat-label>
+  <input matInput placeholder="title" formControlName="title" />
+  <mat-hint align="end"
+    ><span class="hint">no more than 70 chatacters</span></mat-hint
+  >
+  <mat-error *ngIf="!isValid('title')"
+    >{{ getErrorMessage("title") }}</mat-error
+  >
+</mat-form-field>
+
 
   <mat-form-field appearance="legacy">
     <mat-label for="content">Content</mat-label>
@@ -40,10 +63,6 @@
     ></textarea>
   </mat-form-field>
 
-  <mat-form-field appearance="legacy">
-    <mat-label for="keywords">Keywords</mat-label>
-    <input matInput placeholder="keywords" formControlName="keywords" />
-  </mat-form-field>
 
   <h4>Cover image</h4>
   <input
@@ -67,7 +86,7 @@
   <mat-list>
     <mat-list-item *ngFor="let file of files">
       <h4 mat-line>{{file.name}}</h4>
-      <!-- todo: add cancel btn -->
+
     </mat-list-item>
     <mat-progress-bar
       *ngIf="uploadedFiles"
@@ -75,41 +94,4 @@
       [value]="uploadedFiles.progress | async"
     ></mat-progress-bar>
   </mat-list>
-
-  <hr />
-
-  <!--
-  using (ngSubmit)="onSubmit(..)" causes the form to show errors after submitting
-  so we replaced it with (click)="onSubmit(..)", and  type="submit" with type="button"
-  https://stackoverflow.com/a/51003685/12577650 -->
-  <button
-    mat-raised-button
-    color="primary"
-    type="button"
-    [disabled]="!form.valid || form.prestine"
-    (click)="onSubmit(form.value)"
-  >
-    Submit
-  </button>
-</form>
-<!--
-<hr /> form: {{form.value|json}}
-<hr /> topic: {{data$ | async | json}}
 -->
-
-<form [formGroup]="form2.group">
-  <formly-form
-    [form]="form2.group"
-    [fields]="form2.fields"
-    [model]="form2.model"
-  ></formly-form>
-  <button
-    mat-raised-button
-    color="primary"
-    type="button"
-    [disabled]="!form2.valid || form2.prestine"
-    (click)="onSubmit(form2.value)"
-  >
-    Submit
-  </button>
-</form>
