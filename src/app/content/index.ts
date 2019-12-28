@@ -16,6 +16,7 @@ export interface Article extends Obj {
   subtitle: string;
   content: string;
   keywords: string | string[];
+  cover: string;
 }
 export interface Data {
   type: string; //item|index
@@ -29,6 +30,7 @@ export interface Data {
 })
 export class ContentComponent implements OnInit {
   data$: Observable<Data>;
+  data: Data;
   params: Params;
   layout = "grid";
 
@@ -52,8 +54,15 @@ export class ContentComponent implements OnInit {
         type,
         id: item.substring(0, item.indexOf("-")) || item //todo: parse as number
       };
-      if (this.params.type == "jobs") this.layout = "list";
-      this.data$ = this.getData();
+      //if (this.params.type == "jobs") this.layout = "list";
+      this.getData().subscribe(data => {
+        //here we can change the data
+
+        if (data.payload && data.type == "item" && this.params.type == "jobs")
+          (data.payload as Article).content +=
+            "<hr />" + (data.payload as Article).contacts;
+        this.data = data;
+      });
       console.log({ params, calculatedParamas: this.params });
     });
   }

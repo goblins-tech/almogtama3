@@ -2,7 +2,7 @@
 todo: *ngIf="data$ | async as data && data.payload && data.payload.length>0; else noContent"
 https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-data-payload-else-nocontent
  -->
-<ng-container *ngIf="data$ | async as data; else loading">
+<ng-container *ngIf="data; else loading">
   <ng-container
     *ngIf="(data.type=='item' && data.payload) || (data.type=='list' && data.payload?.length>0); else noContent"
   >
@@ -34,7 +34,7 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
 
     <mat-card-content
       dir="auto"
-      innerHtml="{{item.content+'<hr  />'+(item.contacts || '') | nl2br | keepHtml}}"
+      innerHtml="{{item.content | nl2br | keepHtml}}"
     ></mat-card-content>
     <!-- todo: use content[] to add content segments, ex: for jobs we need to add: expiration alert -> content -> contacts -->
     <mat-card-actions>
