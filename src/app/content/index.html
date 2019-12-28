@@ -2,7 +2,7 @@
 todo: *ngIf="data$ | async as data && data.payload && data.payload.length>0; else noContent"
 https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-data-payload-else-nocontent
  -->
-<ng-container *ngIf="data$ | async as data; else noContent">
+<ng-container *ngIf="data$ | async as data; else loading">
   <ng-container
     *ngIf="(data.type=='item' && data.payload) || (data.type=='list' && data.payload?.length>0); else noContent"
   >
@@ -97,3 +97,5 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
   >No content! <br />
   <a href="/{{params.type}}">Back</a></ng-template
 >
+
+<ng-template #loading dir="auto">Loading ....</ng-template>
