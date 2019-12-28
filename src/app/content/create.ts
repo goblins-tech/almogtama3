@@ -84,7 +84,7 @@ export class ContentCreateComponent implements OnInit {
     this.httpService.upload(this.params.type, data, (type, event, value) => {
       if (type == "progress") this.progress = value;
       //todo: send to articleForm.fields[type=file]
-      else if (type == "event") {
+      else if (type == "response") {
         console.log(event.body);
         if (event.body!.ok) this.msg = "ok";
         else this.msg = event.body!.msg;
@@ -94,7 +94,7 @@ export class ContentCreateComponent implements OnInit {
           3000
         );
         //this.uploadedFiles=event.body;
-        this.articleForm.reset();
+        this.articleForm.form.reset();
         this.formElement.reset(); //https://stackoverflow.com/a/49789012/12577650; also see create.html
         //  this.files.clear();
         this.files = [];
