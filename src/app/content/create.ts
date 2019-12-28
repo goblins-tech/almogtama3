@@ -39,9 +39,7 @@ export class ContentCreateComponent implements OnInit {
     private httpService: HttpService,
     private formBuilder: FormBuilder, //formly uses FormGroup and FormArray intead of FormBuilder
     private snackBar: MatSnackBar
-  ) {
-    this.articleForm = article;
-  }
+  ) {}
   ngOnInit() {
     this.form = this.formBuilder.group({
       title: ["", [Validators.required, Validators.maxLength(100)]],
@@ -61,6 +59,32 @@ export class ContentCreateComponent implements OnInit {
 
       if (this.params.id != "") this.data$ = this.getData();
       console.log({ params, calculatedParamas: this.params });
+
+      if (this.params.type == "jobs") {
+        //delete cover image since jobs.layout=="list" not grid
+        //dont use delete article.fields(...)
+        article.fields.splice(
+          article.fields.findIndex(el => el.type == "file"),
+          1
+        );
+
+        //add field:contacts after content
+        article.fields.splice(
+          article.fields.findIndex(el => el.key == "content") + 1,
+          0,
+          {
+            key: "contacts",
+            type: "textarea",
+            templateOptions: {
+              label: "contacts",
+              required: false,
+              rows: 2
+            }
+          }
+        );
+      }
+      this.articleForm = article;
+      console.log({ article });
     });
   }
 

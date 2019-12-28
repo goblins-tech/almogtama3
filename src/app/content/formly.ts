@@ -65,7 +65,7 @@ export let basic = {
 };
 
 export let article = {
-  ...basic,
+  ...basic, //todo: is this method cause that the same form controls (i.e basic.form) to be used with every form?
   fields: [
     {
       key: "title", //todo:add validators: <100 chars, no special chars,...
@@ -105,7 +105,7 @@ export let article = {
       key: "cover",
       type: "file", //or: component:FormlyFieldFile, wasn't tested
       templateOptions: {
-        label: "Cover image", //todo: move this to attributes
+        label: "Cover image", //todo: move this to attributes.label
         change: "onFilesAdded()",
         attributes: { label: "cover image label" }
       }
