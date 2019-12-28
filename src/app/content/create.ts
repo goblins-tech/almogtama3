@@ -21,7 +21,6 @@ export interface Params {
 export class ContentCreateComponent implements OnInit {
   params: Params;
   data$: Observable<Object>;
-  form;
 
   //uploading vars
   @ViewChild("file", { static: false }) file; //access #file DOM element
@@ -37,19 +36,9 @@ export class ContentCreateComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private httpService: HttpService,
-    private formBuilder: FormBuilder, //formly uses FormGroup and FormArray intead of FormBuilder
     private snackBar: MatSnackBar
   ) {}
   ngOnInit() {
-    this.form = this.formBuilder.group({
-      title: ["", [Validators.required, Validators.maxLength(100)]],
-      subtitle: "",
-      slug: "", //todo: default = title
-      content: ["", [Validators.required]],
-      keywords: "",
-      cover: null
-    });
-
     //todo: if($_GET[id])getData(type,id)
     this.route.paramMap.subscribe(params => {
       this.params = {
@@ -115,7 +104,7 @@ export class ContentCreateComponent implements OnInit {
             3000
           );
           //this.uploadedFiles=event.body;
-          this.form.reset();
+          this.articleForm.reset();
           this.formElement.reset(); //https://stackoverflow.com/a/49789012/12577650; also see create.html
           this.files.clear();
         }
