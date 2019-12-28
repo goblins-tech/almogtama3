@@ -83,15 +83,5 @@
   >
     Add Files
   </button>
-  <mat-list>
-    <mat-list-item *ngFor="let file of files">
-      <h4 mat-line>{{file.name}}</h4>
 
-    </mat-list-item>
-    <mat-progress-bar
-      *ngIf="uploadedFiles"
-      mode="determinate"
-      [value]="uploadedFiles.progress | async"
-    ></mat-progress-bar>
-  </mat-list>
 -->

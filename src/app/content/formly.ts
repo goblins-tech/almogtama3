@@ -7,6 +7,7 @@ import { FieldType } from "@ngx-formly/material";
 //todo: pass attributes, such as style="display:none;" to replace it with a button
 //add it to module:   FormlyModule.forRoot({types: [{ name: 'file', component: FormlyFieldFile, wrappers:['form-field'] }, ]}),
 //todo: pass label:  {type:"file",label:"we don't want this value, pass it to out child component as an attribute", templateOptions:{attributes:{label:"cover image"}}}
+//todo: emit events: progress, response, change (fileAdded)
 @Component({
   selector: "formly-field-file",
   template: `
@@ -26,16 +27,29 @@ import { FieldType } from "@ngx-formly/material";
       color="primary"
       (click)="addFiles()"
     >
-      Add Files
-    </button>
+      Add Files</button
+    ><br />
+
+    <!-- show files with progress -->
+    <mat-list>
+      <mat-list-item *ngFor="let file of files">
+        <h4 mat-line>{{ file.name }}</h4>
+      </mat-list-item>
+      <mat-progress-bar
+        mode="determinate"
+        [value]="progress"
+      ></mat-progress-bar>
+    </mat-list>
   `
 })
 export class FormlyFieldFile extends FieldType {
   @ViewChild("file", { static: false }) file;
   @Input() label: string = "upload";
+  @Input() progress: number = 0;
   files: Set<File> = new Set();
 
   addFiles() {
+    //clicks on <input #file>
     this.file.nativeElement.click();
   }
 
@@ -106,7 +120,7 @@ export let article = {
       type: "file", //or: component:FormlyFieldFile, wasn't tested
       templateOptions: {
         label: "Cover image", //todo: move this to attributes.label
-        change: "onFilesAdded()",
+        //  change: "onFilesAdded()", //todo: error??
         attributes: { label: "cover image label" }
       }
     }

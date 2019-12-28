@@ -11,11 +11,6 @@ export interface Obj {
   [key: string]: any;
 }
 
-export interface Upload {
-  files: any;
-  progress: Observable<number>;
-}
-
 @Injectable({
   providedIn: "root"
 })
@@ -39,6 +34,7 @@ export class HttpService {
   }
 
   toFormData(data): FormData {
+    console.log("toFormData:", data);
     if (data instanceof FormData) return data;
     let formData = new FormData();
     for (let key in data) {
@@ -51,36 +47,19 @@ export class HttpService {
     return formData;
   }
 
-  upload(type, files: Set<File>, fieldName = "file"): Upload {
+  //same as post, but reports the progress
+  upload(type, data, cb) {
     //to show the progress for each file separately, each one must be uploaded separately; use upload() for each file alone
-    let filesMap: Upload;
-    let formData: FormData = new FormData();
 
-    files.forEach(file => {
-      formData.append(fieldName, file, file.name);
-    });
-    let req = this.request("POST", type, formData, { reportProgress: true });
-
-    // create a new progress-subject for every file
-    let progress = new Subject<number>();
-
-    // send the http-request and subscribe for progress-updates
-    this.http.request(req).subscribe(event => {
-      if (event.type === HttpEventType.UploadProgress) {
-        // calculate the progress percentage, and pass it to the progress-stream
-        progress.next(Math.round((event.loaded * 100) / event.total));
-      } else if (event instanceof HttpResponse) {
-        // if we get an answer form the API,The upload is complete & Close the progress-stream
-        progress.complete();
+    return this.post(type, data, {
+      reportProgress: true,
+      observe: "events"
+    }).subscribe(event => {
+      if (cb && typeof cb == "function") {
+        if (event.type === HttpEventType.UploadProgress)
+          cb("progress", event, Math.round((event.loaded * 100) / event.total));
+        else if (event.type === HttpEventType.Response) cb("response", event);
       }
     });
-
-    filesMap = { progress: progress.asObservable(), files: {} };
-    formData.forEach((value, key) => {
-      filesMap.files[key] = value;
-    });
-
-    // return the map of progress.observables
-    return filesMap;
   }
 }
