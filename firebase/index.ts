@@ -7,6 +7,7 @@ const app = require("../server"); //keep it as require(), not `import` to preven
 enableProdMode();
 
 // to test: https://us-central1-<projectId>.cloudfunctions.net/<functionName>
+// or http://localhost:4201/<projectId>/us-central1/ssr
 export const test = functions.https.onRequest((request, response) => {
   response.send("firebase function works");
 });

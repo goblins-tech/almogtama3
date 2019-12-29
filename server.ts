@@ -7,7 +7,6 @@ import * as bodyParser from "body-parser";
 import cors from "cors"; //To be able to access our API from an angular application
 //import formidable from "formidable"; //to handle the uploaded files https://flaviocopes.com/express-forms-files/
 import multer from "multer";
-import * as functions from "firebase-functions";
 
 export interface Obj {
   [key: string]: any;
