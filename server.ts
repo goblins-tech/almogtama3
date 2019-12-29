@@ -35,16 +35,11 @@ function getData(type: string, id?: string | Number) {
   try {
     data = fs.readFileSync(`./data/${type}.json`).toString();
     if (data) data = JSON.parse(data);
-    if (!data) return;
-    if (id && data instanceof Array) {
-      for (let i = 0; i < data.length; i++) {
-        if (+data[i]["id"] == +id) return data[i];
-      }
-    }
+    if (id && data instanceof Array) return data.find(el => el.id == id);
+    return data;
   } catch (e) {
     console.warn(`getData() reading ${type}.json faild!`, e);
   }
-  return data;
 }
 
 function saveData(type: string, data): void {
