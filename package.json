@@ -19,7 +19,9 @@
     "firebase:deploy": "firebase deploy --token 1//03hIcBxe_qHw9CgYIARAAGAMSNwF-L9IrhPsvqD_Ukl58YSK-Si0a5qBeOYoQtVWi78RCDBW6FDjHJy7e5B7XwPpw1qYXRGnctX8",
     "firebase:functions": "npm run firebase:build && npm run firebase:deploy -- --only functions",
     "firebase:serve": "firebase serve --token 1//03hIcBxe_qHw9CgYIARAAGAMSNwF-L9IrhPsvqD_Ukl58YSK-Si0a5qBeOYoQtVWi78RCDBW6FDjHJy7e5B7XwPpw1qYXRGnctX8",
-    "firebase:token": "firebase login:ci"
+    "firebase:token": "firebase login:ci",
+    "firebase:start": "npm run build && npm run firebase:build && npm run firebase:serve",
+    "firebase:start:dev": "npm run build:dev && npm run firebase:build && npm run firebase:serve"
   },
   "engines": {
     "node": "10",
