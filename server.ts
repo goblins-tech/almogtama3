@@ -7,6 +7,7 @@ import * as bodyParser from "body-parser";
 import cors from "cors"; //To be able to access our API from an angular application
 //import formidable from "formidable"; //to handle the uploaded files https://flaviocopes.com/express-forms-files/
 import multer from "multer";
+import * as functions from "firebase-functions";
 
 export interface Obj {
   [key: string]: any;
@@ -74,12 +75,17 @@ app.engine(
 app.set("view engine", "html");
 app.set("views", DIST_FOLDER);
 app.use(bodyParser.json());
-app.use(
-  cors({
-    origin: "*",
-    optionsSuccessStatus: 200
-  })
-);
+app.use(cors());
+/*
+ cors default options:
+ {
+  "origin": "*",
+  "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+  "preflightContinue": false,
+  "optionsSuccessStatus": 204
+}
+
+ */
 
 //multer hanles multipart/form-data ONLY, make sure to add enctype="multipart/form-data" to <form>
 //todo: add multer to specific urls: app.post(url,multer,(req,res)=>{})
