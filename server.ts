@@ -7,6 +7,7 @@ import * as bodyParser from "body-parser";
 import cors from "cors"; //To be able to access our API from an angular application
 //import formidable from "formidable"; //to handle the uploaded files https://flaviocopes.com/express-forms-files/
 import multer from "multer";
+import mongoose from "mongoose";
 
 export interface Obj {
   [key: string]: any;
@@ -29,7 +30,7 @@ const {
   provideModuleMap
 } = require("./dist/server/main");
 
-function getData(type: string, id?: string | Number) {
+function getJson(type: string, id?: string | Number) {
   let data;
   try {
     data = fs.readFileSync(`./data/${type}.json`).toString();
@@ -41,13 +42,40 @@ function getData(type: string, id?: string | Number) {
   }
 }
 
-function saveData(type: string, data): void {
-  //console.log("saveData", data);
+function getData(type: string, id) {
+  //todo: id?:ObjectId
+  return connect().then(
+    () => {
+      let contentModel = model(type);
+      if (id) return contentModel.findById(id);
+      return contentModel.find({}, null, { limit: 10 });
+    },
+    err => {}
+  );
+}
+
+function saveData(type: string, data) {
+  console.log("saveData", data);
+
+  return connect().then(
+    () => {
+      if (data) {
+        console.log("connected");
+        let contentModel = model(type);
+        let content = new contentModel(data);
+        return content.save();
+      }
+    },
+    err => console.error({ err })
+  );
+}
+
+function saveJson(type: string, data): void {
   if (data) {
     if (!fs.existsSync("./data")) fs.mkdirSync("./data", { recursive: true });
 
-    let allData = getData(type) || [];
-    var ids = getData("ids") || { [type]: 0 };
+    let allData = getJson(type) || [];
+    var ids = getJson("ids") || { [type]: 0 };
     ids[type] = (ids[type] || 0) + 1;
     data["id"] = ids[type];
 
@@ -55,6 +83,44 @@ function saveData(type: string, data): void {
     fs.writeFileSync(`./data/${type}.json`, JSON.stringify(allData));
     fs.writeFileSync("./data/ids.json", JSON.stringify(ids));
   }
+}
+
+let db;
+function encode(str: string) {
+  return encodeURIComponent(str);
+}
+function connect() {
+  if (!db) {
+    let url = `mongodb+srv://${encode("xxyyzz2050")}:${encode(
+      "Xx159753@@"
+    )}@cluster-test-kuwit.gcp.mongodb.net/test?retryWrites=true&w=majority`;
+    db = mongoose.connect(url, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+  }
+
+  return db;
+}
+
+function model(type) {
+  console.log(
+    "model: " +
+      { type, models: mongoose.models, modelNames: mongoose.modelNames() }
+  );
+  if (mongoose.models[type]) return mongoose.models[type];
+  var contentObj = {
+    title: String,
+    subtitle: String,
+    content: String,
+    keywoards: String,
+    date: { type: Date, default: Date.now }
+  };
+  if (type == "jobs")
+    contentObj = { ...contentObj, contacts: String } as typeof contentObj; //https://stackoverflow.com/a/31816062/12577650 & https://github.com/microsoft/TypeScript/issues/18075
+  let contentSchema = new mongoose.Schema(contentObj);
+  let contentModel = mongoose.model(type, contentSchema);
+  return contentModel;
 }
 
 // Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
@@ -117,16 +183,30 @@ app.use(
 
 app.post("/api/:type", (req, res) => {
   //console.log("server post", { body: req.body });
-  if (req.body) saveData(req.params.type, req.body);
-  res.send({ ok: true }); //todo: update the existing data in html
+  saveData(req.params.type, req.body).then(
+    data => {
+      console.log({ data });
+      res.send({ ok: true, data });
+    },
+    err => {
+      console.log({ err });
+      res.send({ ok: false, err });
+    }
+  );
 });
 
 app.get("/api/:type/:id?", (req, res) => {
   let id = req.params.id;
-  res.json({
-    type: id ? "item" : "list",
-    payload: getData(req.params.type, id)
-  });
+  getData(req.params.type, id).then(
+    data => {
+      console.log({ data });
+      res.json({ type: id ? "item" : "list", payload: data });
+    },
+    err => {
+      console.log({ err });
+      res.json({ type: id ? "item" : "list", err });
+    }
+  );
 });
 
 // Example Express Rest API endpoints

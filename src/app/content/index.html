@@ -20,7 +20,7 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
       <div mat-card-avatar><img src="assets/avatar-female.png" /></div>
       <mat-card-title dir="auto">
         <a
-          href="{{params.type}}/{{item.id}}-{{item.slug?item.slug:item.title | slug }}"
+          href="{{params.type}}/{{item._id}}-{{item.slug?item.slug:item.title | slug }}"
           >{{item.title}}</a
         ></mat-card-title
       >
@@ -50,7 +50,7 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
         <div mat-card-avatar><img src="assets/avatar-male.png" /></div>
         <mat-card-title dir="auto"
           ><a
-            href="{{params.type}}/{{item.id}}-{{item.slug?item.slug:item.title | slug}}"
+            href="{{params.type}}/{{item._id}}-{{item.slug?item.slug:item.title | slug}}"
             >{{item.title}}</a
           ></mat-card-title
         >
@@ -78,7 +78,7 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
     <mat-list-item *ngFor="let item of data">
       <h4 mat-line dir="auto">
         <a
-          href="{{params.type}}/{{item.id}}-{{item.slug?item.slug:item.title | slug }}"
+          href="{{params.type}}/{{item._id}}-{{item.slug?item.slug:item.title | slug }}"
           >{{item.title}}</a
         >
       </h4>
