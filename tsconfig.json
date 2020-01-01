@@ -22,7 +22,9 @@
     "noUnusedParameters": false,
     "noImplicitReturns": false,
     "paths": {
-      "*": ["node_modules/*", "types/*"]
+      "*": ["node_modules/*", "types/*"],
+      "eldeeb": ["dist/eldeeb"],
+      "eldeeb/*": ["dist/eldeeb/*"]
     },
     "rootDir": "./",
     "allowSyntheticDefaultImports": true,
@@ -30,7 +32,6 @@
     "preserveSymlinks": true,
     "sourceRoot": "",
     "mapRoot": "",
-    "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "locale": "en",
     "watch": false
