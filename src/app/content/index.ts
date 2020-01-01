@@ -61,10 +61,20 @@ export class ContentComponent implements OnInit {
         //here we can change the data
 
         if (data.payload && data.type == "item" && this.params.type == "jobs")
-          (data.payload as Article).content +=
-            "<hr />" + (data.payload as Article).contacts;
+          (data.payload as Article).content += `<div class='contacts'>${
+            (data.payload as Article).contacts
+          }</div>`;
         this.data = data;
-        this.meta.setTags(data);
+
+        //todo: import site meta tage from config
+        //todo: if(data.type==list)
+        if (data.type == "item")
+          this.meta.setTags({
+            ...data,
+            name: "almogtama3",
+            hashtag: "@almogtama3", //todo: @hashtag or #hashtag for twitter??
+            baseUrl: "https://www.almogtama3.com/"
+          });
       });
       console.log({ params, calculatedParamas: this.params });
     });

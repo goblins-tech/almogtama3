@@ -10,6 +10,7 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { HttpService } from "./http.service";
 import { ContentModule } from "./content/content.module";
 import { UniversalInterceptor } from "../../universal-interceptor";
+import { MetaService } from "./content/meta.service";
 
 const routes: Routes = [
   { path: "", redirectTo: "", pathMatch: "full" },
@@ -47,6 +48,7 @@ const firebaseConfig = {
   ],
   providers: [
     HttpService,
+    MetaService, //todo: only provide this service in content.module
     {
       provide: HTTP_INTERCEPTORS,
       useClass: UniversalInterceptor,

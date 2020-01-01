@@ -11,6 +11,7 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { FormlyModule } from "@ngx-formly/core";
 import { FormlyMaterialModule } from "@ngx-formly/material";
 import { FormlyFieldFile } from "./formly";
+import { MetaService } from "./meta.service";
 
 //material design
 import {
@@ -104,7 +105,7 @@ const routes: Routes = [
     ShareButtonsModule,
     FontAwesomeModule
   ],
-  providers: [],
+  providers: [MetaService],
   bootstrap: []
 })
 export class ContentModule {
