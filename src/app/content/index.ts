@@ -3,6 +3,7 @@ import { ActivatedRoute } from "@angular/router";
 import { HttpService } from "../http.service";
 import { FormBuilder, Validators } from "@angular/forms";
 import { Observable } from "rxjs";
+import { MetaService } from "./meta.service";
 
 export interface Obj {
   [key: string]: any;
@@ -36,7 +37,8 @@ export class ContentComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private httpService: HttpService
+    private httpService: HttpService,
+    private meta: MetaService
   ) {}
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
@@ -62,6 +64,7 @@ export class ContentComponent implements OnInit {
           (data.payload as Article).content +=
             "<hr />" + (data.payload as Article).contacts;
         this.data = data;
+        this.meta.setTags(data);
       });
       console.log({ params, calculatedParamas: this.params });
     });
