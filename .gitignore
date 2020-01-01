@@ -1,8 +1,9 @@
-# http://help.github.com/ignore-files/ 
+# http://help.github.com/ignore-files/
 
 # compiled output
 /dist
 /tmp
+temp
 /out-tsc
 # Only exists if Bazel was run
 /bazel-out

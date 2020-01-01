@@ -30,20 +30,10 @@ const {
   provideModuleMap
 } = require("./dist/server/main");
 
-function getJson(type: string, id?: string | Number) {
-  let data;
-  try {
-    data = fs.readFileSync(`./data/${type}.json`).toString();
-    if (data) data = JSON.parse(data);
-    if (id && data instanceof Array) return data.find(el => el.id == id);
-    return data;
-  } catch (e) {
-    console.warn(`getData() reading ${type}.json faild!`, e);
-  }
-}
-
 function getData(type: string, id) {
   //todo: id?:ObjectId
+  let data = json.get(type, id);
+  if (data) return Promise.resolve(data); //i.e: from cache
   return connect().then(
     () => {
       let contentModel = model(type);
@@ -70,20 +60,25 @@ function saveData(type: string, data) {
   );
 }
 
-function saveJson(type: string, data): void {
-  if (data) {
-    if (!fs.existsSync("./data")) fs.mkdirSync("./data", { recursive: true });
-
-    let allData = getJson(type) || [];
-    var ids = getJson("ids") || { [type]: 0 };
-    ids[type] = (ids[type] || 0) + 1;
-    data["id"] = ids[type];
-
-    allData.push(data);
-    fs.writeFileSync(`./data/${type}.json`, JSON.stringify(allData));
-    fs.writeFileSync("./data/ids.json", JSON.stringify(ids));
+const json = {
+  get(type: string, id?: string | Number) {
+    let file = `./temp/${type}/${id || "index"}.json`;
+    try {
+      return JSON.parse(fs.readFileSync(file).toString() || null);
+    } catch (e) {
+      console.warn(`json.get(${type},${id}) failed`, e);
+    }
+  },
+  save(type: string, data) {
+    if (data) {
+      let dir = `./temp/${type}`;
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      if (data instanceof Array)
+        fs.writeFileSync(`${dir}/index.json`, JSON.stringify(data));
+      else fs.writeFileSync(`${dir}/${data._id}.json`, JSON.stringify(data));
+    }
   }
-}
+};
 
 let db;
 function encode(str: string) {
@@ -185,7 +180,8 @@ app.post("/api/:type", (req, res) => {
   //console.log("server post", { body: req.body });
   saveData(req.params.type, req.body).then(
     data => {
-      console.log({ data });
+      console.log("app.post", { type: req.params.type, data });
+      json.save(req.params.type, data);
       res.send({ ok: true, data });
     },
     err => {
@@ -196,10 +192,14 @@ app.post("/api/:type", (req, res) => {
 });
 
 app.get("/api/:type/:id?", (req, res) => {
-  let id = req.params.id;
-  getData(req.params.type, id).then(
+  let type = req.params.type,
+    id = req.params.id;
+  let data = json.get(type, id);
+  if (data) return Promise.resolve(data);
+  getData(type, id).then(
     data => {
-      console.log({ data });
+      console.log("app.get", { type, id, data });
+      json.save(type, data);
       res.json({ type: id ? "item" : "list", payload: data });
     },
     err => {
