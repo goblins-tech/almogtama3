@@ -31,8 +31,10 @@ export class MetaService {
       content: "text/html"
     };
 
-    tags = Object.assign(tags, defaultTags);
+    tags = Object.assign(defaultTags, tags);
+    //console.log({ tags });
 
+    tags.title = tags.title || tags.name;
     if (tags.title != tags.name) {
       tags.title += " | " + tags.name;
     }

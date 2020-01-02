@@ -70,10 +70,10 @@ export class ContentComponent implements OnInit {
         //todo: if(data.type==list)
         if (data.type == "item")
           this.meta.setTags({
-            ...data,
             name: "almogtama3",
             hashtag: "@almogtama3", //todo: @hashtag or #hashtag for twitter??
-            baseUrl: "https://www.almogtama3.com/"
+            baseUrl: "https://www.almogtama3.com/",
+            ...data.payload
           });
       });
       console.log({ params, calculatedParamas: this.params });
