@@ -38,7 +38,9 @@ function getData(type: string, id) {
     () => {
       let contentModel = model(type);
       if (id) return contentModel.findById(id);
-      return contentModel.find({}, null, { limit: 10 });
+      let content = contentModel.find({}, null, { limit: 10 });
+      json.save(type, content); //todo: test if a non-exist content fetched
+      return content;
     },
     err => {}
   );
@@ -179,23 +181,15 @@ app.use(
 app.post("/api/:type", (req, res) => {
   //console.log("server post", { body: req.body });
   saveData(req.params.type, req.body).then(
-    data => {
-      console.log("app.post", { type: req.params.type, data });
-      json.save(req.params.type, data);
-      res.send({ ok: true, data });
-    },
-    err => {
-      console.log({ err });
-      res.send({ ok: false, err });
-    }
+    data => res.send({ ok: true, data }),
+    err => res.send({ ok: false, err })
   );
 });
 
 app.get("/api/:type/:id?", (req, res) => {
   let type = req.params.type,
     id = req.params.id;
-  let data = json.get(type, id);
-  if (data) return Promise.resolve(data);
+
   getData(type, id).then(
     data => {
       console.log("app.get", { type, id, data });
