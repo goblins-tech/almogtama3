@@ -16,7 +16,7 @@
     "rewrites": [
       {
         "source": "**",
-        "destination": "./dist/browser/index.html"
+        "destination": "/index.html"
       }
     ]
   },
