@@ -133,6 +133,15 @@ app.set("view engine", "html");
 app.set("views", DIST_FOLDER);
 app.use(bodyParser.json());
 app.use(cors());
+
+//add trailing slash to all requests,
+//https://expressjs.com/en/guide/using-middleware.html
+//https://dev.to/splodingsocks/getting-all-404s-with-your-firebase-functions-3p1
+
+app.use((req, res, next) => {
+  if (!req.path) req.url = `/{req.url}`;
+  next();
+});
 /*
  cors default options:
  {
