@@ -19,7 +19,6 @@ export interface Request extends Obj {}
 // Express server
 const app = express();
 
-const PORT = process.env.PORT || 4200;
 const DIST_FOLDER = join(process.cwd(), "./dist/browser"); //process.cwd() dosen't include /dist
 
 // * NOTE :: leave this as require() since this file is built Dynamically from webpack
@@ -225,13 +224,6 @@ app.get("*", (req, res) => {
   res.render("index", { req });
 });
 
-/*
-// Start up the Node server
-//todo: check if app already listening.
-let server = app
-  .listen(PORT, () => {
-    console.log(`Node Express server listening on port:${PORT}`); //,{server}
-  })
-  .on("error", error => console.warn("express server error:", { error }));
-*/
+//app.listen() moved to a separate file `server-start.ts`, because firebase will handle it automatically
+//when using this server without firebase, use `node dist/server-start`
 export { app }; //for firebase
