@@ -8,7 +8,8 @@ var tasks = {
       let newDir = `${dir}/${el}`;
       if (fs.statSync(newDir).isDirectory()) this.terser(newDir);
       else {
-        if (newDir.endsWith(".js")) {
+        //todo: terser runtime-es2015 -> error: ngDevMode is not defined
+        if (newDir.endsWith(".js") && !newDir.includes("main-es2015.")) {
           console.log(`>> terser ${newDir}`);
           execSync(
             `npx terser ${newDir} --output ${newDir} --compress --mangle --keep-fnames --ie8 --safari10`
