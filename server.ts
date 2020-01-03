@@ -38,7 +38,6 @@ function getData(type: string, id) {
       let contentModel = model(type);
       if (id) return contentModel.findById(id);
       let content = contentModel.find({}, null, { limit: 10 });
-      json.save(type, content); //todo: test if a non-exist content fetched
       return content;
     },
     err => {}
@@ -201,7 +200,7 @@ app.get("/api/:type/:id?", (req, res) => {
   getData(type, id).then(
     data => {
       console.log("app.get", { type, id, data });
-      json.save(type, data);
+      json.save(type, data); //todo: only if fetched by database (i.e: no cache)
       res.json({ type: id ? "item" : "list", payload: data });
     },
     err => {
