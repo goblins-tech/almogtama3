@@ -20,7 +20,12 @@ module.exports = {
   output: {
     // Puts the output at the root of the dist folder
     path: path.join(__dirname, "dist"),
-    filename: "[name].js"
+    filename: "[name].js",
+    library: "",
+    libraryTarget: "commonjs-module"
+    //fix: setting library & libraryTarget to fix issue: require('./server.js') == undefined
+    //https://github.com/webpack/webpack/issues/2030#issuecomment-232886608
+    //https://github.com/webpack/webpack/issues/2030#issuecomment-290363910
   },
   module: {
     noParse: /polyfills-.*\.js/,
