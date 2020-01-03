@@ -7,7 +7,7 @@
     "build:server": "ng run almogtama3:server:production --bundleDependencies all",
     "build:server:dev": "ng run almogtama3:server --bundleDependencies all",
     "webpack:server": "webpack --config webpack.server.config.js --progress --colors",
-    "build:terser": "npx terser dist/server/main.js --output dist/server/main.js --compress --mangle --ie8 --safari10",
+    "build:terser": "npx terser dist/server/main.js --output dist/server/main.js --compress --mangle --keep-fnames --ie8 --safari10",
     "build": "npm run build:browser && npm run build:server && npm run webpack:server && npm run build:terser",
     "build:dev": "npm run build:browser:dev && npm run build:server:dev && npm run webpack:server",
     "serve:ng": "ng serve -o",
