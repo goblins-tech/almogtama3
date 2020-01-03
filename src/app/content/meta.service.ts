@@ -18,7 +18,7 @@ export namespace types {
 @Injectable()
 export class MetaService {
   constructor(
-    private meta: MetaTagsService,
+    private metaService: MetaTagsService,
     private titleService: TitleService
   ) {}
 
@@ -82,15 +82,15 @@ export class MetaService {
       }
     }
 
-    this.meta.addTags(_tags, false);
+    this.metaService.addTags(_tags, false);
     // todo: icon, refresh:url | [url,time],
   }
 
   updateTags(tags: types.Meta) {
     // todo: when updating title 'for example', also update og:title, twitter:title, ...
-    // there is no method called: this.meta.updateTags()
+    // there is no method called: this.metaService.updateTags()
     for (let key in tags) {
-      this.meta.updateTag(this.prepare(key, tags[key]));
+      this.metaService.updateTag(this.prepare(key, tags[key]));
     }
   }
 
