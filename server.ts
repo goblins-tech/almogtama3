@@ -212,8 +212,6 @@ app.get("/api/:type/:id?", (req, res) => {
   );
 });
 
-// Example Express Rest API endpoints
-// app.get('/api/**', (req, res) => { });
 // Serve static files from /browser
 app.get(
   "*.*",
@@ -227,9 +225,13 @@ app.get("*", (req, res) => {
   res.render("index", { req });
 });
 
+/*
 // Start up the Node server
-app.listen(PORT, () => {
-  console.log(`Node Express server listening on http://localhost:${PORT}`);
-});
-
+//todo: check if app already listening.
+let server = app
+  .listen(PORT, () => {
+    console.log(`Node Express server listening on port:${PORT}`); //,{server}
+  })
+  .on("error", error => console.warn("express server error:", { error }));
+*/
 export { app }; //for firebase
