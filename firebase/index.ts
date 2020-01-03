@@ -10,7 +10,6 @@ enableProdMode();
 // or http://localhost:4201/<projectId>/us-central1/ssr
 export const test = functions.https.onRequest((request, response) => {
   response.send("firebase function works");
-  console.log({ app }); //todo: undefined??
 });
 
 export const ssr = functions.https.onRequest(app);
