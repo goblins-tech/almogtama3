@@ -8,6 +8,7 @@ import cors from "cors"; //To be able to access our API from an angular applicat
 //import formidable from "formidable"; //to handle the uploaded files https://flaviocopes.com/express-forms-files/
 import multer from "multer";
 import mongoose from "mongoose";
+import parseDomain from "parse-domain";
 
 export interface Obj {
   [key: string]: any;
@@ -131,6 +132,28 @@ app.engine(
 
 app.set("view engine", "html");
 app.set("views", DIST_FOLDER);
+
+app.use((req, res, next) => {
+  //redirect http -> https & naked -> www
+  let parts = parseDomain(req.hostname);
+  //ex: www.example.com.eg -> {domain:example, subdomain:www, tld:.com.eg}
+  //if the url cannot parsed (ex: http://localhost), parts= null, so we just skip to the next() middliware
+  //to use req.protocol in case of using a proxy in between (ex: cloudflare, heroku, ..) you need to set app.enable("trust proxy"); //https://stackoverflow.com/a/46475726
+  if (parts && (!parts.subdomain || !req.secure)) {
+    let url = `https://${parts.subdomain || "www"}.${parts.domain}.${
+      parts.tld
+    }${req.url}`;
+    console.log(`redirecting to: ${url}`, {
+      host: req.hostname,
+      secure: req.secure,
+      protocol: req.protocol,
+      subdomain: parts.subdomain,
+      url: req.url
+    });
+    return res.redirect(301, url);
+  }
+  next();
+});
 app.use(bodyParser.json());
 app.use(cors());
 
