@@ -1,6 +1,6 @@
 import { BrowserModule } from "@angular/platform-browser";
 import { NgModule } from "@angular/core";
-import { Routes, RouterModule, Router } from "@angular/router";
+import { Routes, RouterModule } from "@angular/router";
 import { AppComponent } from "./app.component";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { ErrorComponent } from "./error/error.component";
@@ -13,13 +13,14 @@ import { UniversalInterceptor } from "../../universal-interceptor";
 import { MetaService } from "./content/meta.service";
 import { SocialComponent } from "./social";
 
-const routes: Routes = [
-  { path: "social", component: SocialComponent },
-  {
-    path: ":type",
-    loadChildren: () =>
-      import("./content/content.module").then(m => m.ContentModule)
-  },
+/*
+routes are devided into routes (for AppRutingModule) & appRoutes (for AppModule)
+because Modules are proceeded befor RouterModule.forRoot() and RouterModule.forChild()
+we need to load AppRutingModule first then routes defineded in ContentModule (contains RouterModule.forChild())
+then appRoutes in the last (because it contains '**')
+ */
+const routes: Routes = [{ path: "social", component: SocialComponent }];
+const appRoutes: Routes = [
   { path: "", redirectTo: "", pathMatch: "full" },
   { path: "**", component: ErrorComponent }
 ];
@@ -36,16 +37,24 @@ const firebaseConfig = {
   appId: "1:684865417357:web:e4ff28c37e5336548cb2c4",
   measurementId: "G-59RT8HNS31"
 };
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes, { enableTracing })],
+  exports: [RouterModule]
+})
+export class AppRoutingModule {}
+
 @NgModule({
   declarations: [AppComponent, ErrorComponent, SocialComponent],
   imports: [
-    ContentModule,
-    RouterModule.forRoot(routes, { enableTracing }),
+    RouterModule.forRoot(appRoutes, { enableTracing }), //will be proceed after AppRutingModule and ContentModule
     BrowserModule.withServerTransition({ appId: "serverApp" }),
     BrowserAnimationsModule,
     AngularFireModule.initializeApp(firebaseConfig),
     AngularFireAuthModule,
-    HttpClientModule
+    HttpClientModule,
+    AppRoutingModule, //Modules will process before RouterModule.forRoot() https://blogs.msmvps.com/deborahk/angular-route-ordering/
+    ContentModule //must be after AppRoutingModule
   ],
   providers: [
     HttpService,
@@ -58,4 +67,13 @@ const firebaseConfig = {
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule {}
+export class AppModule {
+  /*
+  constructor(router: Router) {
+    //test the routers' order; inject Router i.e:constructor(router: Router->from @angular/router)
+    const replacer = (key, value) =>
+      typeof value === "function" ? value.name : value;
+    console.log("Routes: ", JSON.stringify(router.config, replacer, 2));
+
+  }*/
+}
