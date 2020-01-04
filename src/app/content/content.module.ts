@@ -62,10 +62,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 const routes: Routes = [
-  { path: "", component: ContentComponent },
-  { path: "create", component: ContentCreateComponent },
-  { path: "manage", component: ContentManageComponent },
-  { path: ":item", component: ContentComponent } //item =  id-slug
+  { path: ":type", component: ContentComponent },
+  { path: ":type/create", component: ContentCreateComponent },
+  { path: ":type/manage", component: ContentManageComponent },
+  { path: ":type/:item", component: ContentComponent } //item =  id-slug
 ];
 
 @NgModule({

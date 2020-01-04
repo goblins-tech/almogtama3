@@ -46,12 +46,6 @@ export class ContentComponent implements OnInit {
       var type = params.get("type"),
         item = params.get("item") || "";
 
-      //todo: a workaround for https://github.com/angular/angular/issues/34504
-      if (!type) {
-        type = item;
-        item = "";
-      }
-
       this.params = {
         type,
         id: item.substring(0, item.indexOf("-")) || item //todo: parse as number
