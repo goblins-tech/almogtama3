@@ -86,6 +86,7 @@ function encode(str: string) {
 }
 function connect() {
   if (!db) {
+    console.log("connecting...", { mode: process.env.NODE_ENV });
     let dbName = process.env.NODE_ENV == "production" ? "almogtama3" : "test";
     let url = `mongodb+srv://${encode("xxyyzz2050")}:${encode(
       "Xx159753@@"
