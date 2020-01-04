@@ -133,12 +133,16 @@ app.engine(
 app.set("view engine", "html");
 app.set("views", DIST_FOLDER);
 
+//to use req.protocol in case of using a proxy in between (ex: cloudflare, heroku, ..), without it express may always returns req.protocole="https" even if GET/ https://***
+//https://stackoverflow.com/a/46475726
+app.enable("trust proxy");
+
 app.use((req, res, next) => {
   //redirect http -> https & naked -> www
   let parts = parseDomain(req.hostname);
   //ex: www.example.com.eg -> {domain:example, subdomain:www, tld:.com.eg}
   //if the url cannot parsed (ex: http://localhost), parts= null, so we just skip to the next() middliware
-  //to use req.protocol in case of using a proxy in between (ex: cloudflare, heroku, ..) you need to set app.enable("trust proxy"); //https://stackoverflow.com/a/46475726
+
   if (parts && (!parts.subdomain || !req.secure)) {
     let url = `https://${parts.subdomain || "www"}.${parts.domain}.${
       parts.tld
