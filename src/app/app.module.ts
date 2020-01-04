@@ -1,6 +1,6 @@
 import { BrowserModule } from "@angular/platform-browser";
 import { NgModule } from "@angular/core";
-import { Routes, RouterModule } from "@angular/router";
+import { Routes, RouterModule, Router } from "@angular/router";
 import { AppComponent } from "./app.component";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { ErrorComponent } from "./error/error.component";
@@ -11,15 +11,16 @@ import { HttpService } from "./http.service";
 import { ContentModule } from "./content/content.module";
 import { UniversalInterceptor } from "../../universal-interceptor";
 import { MetaService } from "./content/meta.service";
+import { SocialComponent } from "./social";
 
 const routes: Routes = [
-  { path: "", redirectTo: "", pathMatch: "full" },
+  { path: "social", component: SocialComponent },
   {
     path: ":type",
     loadChildren: () =>
       import("./content/content.module").then(m => m.ContentModule)
   },
-
+  { path: "", redirectTo: "", pathMatch: "full" },
   { path: "**", component: ErrorComponent }
 ];
 
@@ -36,7 +37,7 @@ const firebaseConfig = {
   measurementId: "G-59RT8HNS31"
 };
 @NgModule({
-  declarations: [AppComponent, ErrorComponent],
+  declarations: [AppComponent, ErrorComponent, SocialComponent],
   imports: [
     ContentModule,
     RouterModule.forRoot(routes, { enableTracing }),
