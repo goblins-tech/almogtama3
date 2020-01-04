@@ -14,10 +14,15 @@ export class SlugPipe implements PipeTransform {
    * @return [description]
    */
   transform(value: string, length = 200): string {
-    let slug = value.replace(/\s+/g, "-");
+    let slug = value
+      .trim() //remove trailing spaces
+      .replace(/\s+/g, "-") //replace inner spaces with '-'
+      .replace("/", "") //replace '/' with '-', to prevent changing the current route ex: url/slug1-slug2 instead of /slug1/slug2
+      .replace(/-{2,}/g, "-") //remove sequental slaches
+      .replace(/^-+|-+$/g, ""); //remove trailing slashes, equivilant to php .trim('-'), starts or ends with one or more slashes
     if (length) slug = slug.slice(0, length);
     return slug;
-    //todo: remove unwanted words
+    //todo: remove unwanted charachters & very short words
   }
 }
 
@@ -55,6 +60,10 @@ export class KeepHtmlPipe implements PipeTransform {
  */
   transform(content: string) {
     return content;
+    /*
+    - apply nl2br, keepHTML
+    - hypernate links 
+     */
 
     return this.sanitizer.bypassSecurityTrustHtml(content);
   }

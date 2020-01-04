@@ -95,7 +95,7 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
 
 <ng-template #noContent dir="auto"
   >No content! <br />
-  <a href="/{{params.type}}">Back</a></ng-template
+  <a href="/{{params.type || '/'}}">Back</a></ng-template
 >
 
 <ng-template #loading dir="auto">Loading ....</ng-template>
