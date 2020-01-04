@@ -86,9 +86,10 @@ function encode(str: string) {
 }
 function connect() {
   if (!db) {
+    let dbName = process.env.NODE_ENV == "production" ? "almogtama3" : "test";
     let url = `mongodb+srv://${encode("xxyyzz2050")}:${encode(
       "Xx159753@@"
-    )}@cluster-test-kuwit.gcp.mongodb.net/test?retryWrites=true&w=majority`;
+    )}@almogtama3-gbdqa.gcp.mongodb.net/${dbName}?retryWrites=true&w=majority`;
     db = mongoose.connect(url, {
       useNewUrlParser: true,
       useUnifiedTopology: true
