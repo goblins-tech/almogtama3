@@ -9,7 +9,7 @@ import cors from "cors"; //To be able to access our API from an angular applicat
 import multer from "multer";
 import mongoose from "mongoose";
 import parseDomain from "parse-domain";
-import { cache } from "./projects/eldeeb/src/fs";
+import { cache } from "./eldeeb/fs";
 
 export interface Obj {
   [key: string]: any;

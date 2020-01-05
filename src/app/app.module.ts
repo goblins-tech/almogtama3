@@ -3,7 +3,7 @@ import { NgModule } from "@angular/core";
 import { Routes, RouterModule } from "@angular/router";
 import { AppComponent } from "./app.component";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
-import { ErrorComponent } from "./error/error.component";
+import { ErrorComponent } from "./error";
 import { AngularFireModule } from "@angular/fire";
 import { AngularFireAuthModule } from "@angular/fire/auth";
 import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
