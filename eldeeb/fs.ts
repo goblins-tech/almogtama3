@@ -120,67 +120,6 @@ export function mtime(file: types.PathLike): number | bigint {
   return fs.statSync(file).mtimeMs;
 }
 
-/**
- * create a new directory
- * @method mkdir
- * @param  path  [description]
- * @param  mode  permissions ex: 0777
- * @param  index the content of index.html that will be created inside the newly created dir, pass `false` to disable it
- * @return [description]
- */
-export function mkdir(
-  path: types.PathLike | types.PathLike[],
-  mode?: number | string, // ex: 0777
-  index?: string | boolean
-): boolean | { [key: string]: boolean } {
-  // todo: if(path:array)return {file:true}
-  if (path instanceof Array) {
-    const result = {};
-    path.forEach(el => (result[el.toString()] = mkdir(el, mode, index)));
-    return result;
-  }
-
-  const fullPath = resolve(path);
-  // mode=mode||"0777"
-  /*
-     //recursive https://stackoverflow.com/a/24311711
-     let parts = path.split(Path.sep)
-     //eldeeb.log(parts, 'mkdir/parts')
-     let n = parts[0].indexOf(':') ? 2 : 1
-       //on windows the absoulute path starts with a drive letter (ex: C:),
-       //path.join('C:')=>'C:.' witch gives an error when we try to create it and we don't need to create a drive
-     for (let i = n; i <= parts.length; i++) {
-       let partPath = Path.join.apply(null, parts.slice(0, i))
-       //eldeeb.log({ partPath: partPath, slice: parts.slice(0, i) },'mkdir/partPath')
-       try {
-         fs.existsSync(partPath) || fs.mkdirSync(partPath, {mode:mode}) //needs review -> use try&catch ?
-         if (index !== false) {
-           if (!index) index = '<meta http-equiv="REFRESH" content="0;url=/">'
-           fs.writeFileSync(Path.join(partPath, 'index.htm'), index)
-           //don't return true here, because it will exit the loop
-         }
-       } catch (e) {
-         eldeeb.log(e, 'mkdir/error', 'error')
-         return false
-       }
-     }*/
-
-  try {
-    // path = <data.PathLike>path;
-    fs.existsSync(fullPath) || fs.mkdirSync(fullPath, { recursive: true });
-    if (index !== false) {
-      if (!index) {
-        index = '<meta http-equiv="REFRESH" content="0;url=/">';
-      } // null or undefined
-      fs.writeFileSync(Path.join(path.toString(), "index.html"), index);
-      return true;
-    }
-  } catch (e) {
-    console.log("mkdir/error: ", e);
-    return false;
-  }
-}
-
 //
 // nx:
 /*
@@ -252,7 +191,8 @@ export async function cache(
    */
 
   file = resolve(file);
-  mkdir(Path.dirname(file as string));
+  mdir(file as string, true);
+
   if (ext(file) == ".json") json = true;
   if (
     !fs.existsSync(file) ||
@@ -284,6 +224,17 @@ export async function cache(
   }
   return data;
 }
+export function mdir(path: string | string[], file = false) {
+  if (path instanceof Array) {
+    let result = {};
+    path.forEach(el => {
+      result[el.toString()] = mdir(el, file);
+    });
+    return result;
+  }
+  if (file) path = Path.dirname(path);
+  fs.existsSync(path) || fs.mkdirSync(path, { recursive: true });
+}
 
 export let json = {
   read(file: string) {
@@ -294,8 +245,7 @@ export let json = {
   },
   write(file: string, data: any) {
     if (data) {
-      let dir = Path.dirname(file);
-      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      mdir(file, true);
 
       if (["array", "object"].includes(objectType(data)))
         data = JSON.stringify(data);
