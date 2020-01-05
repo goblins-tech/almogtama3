@@ -9,6 +9,7 @@ import cors from "cors"; //To be able to access our API from an angular applicat
 import multer from "multer";
 import mongoose from "mongoose";
 import parseDomain from "parse-domain";
+import { cache } from "./projects/eldeeb/src/fs";
 
 export interface Obj {
   [key: string]: any;
@@ -30,18 +31,20 @@ const {
   provideModuleMap
 } = require("./dist/server/main");
 
+//todo: id (ObjectId | shortId) | limit (number)
 function getData(type: string, id) {
-  //todo: id?:ObjectId
-  let data = json.get(type, id);
-  if (data) return Promise.resolve(data); //i.e: from cache
-  return connect().then(
+  //todo: directly pass data sa Promise, i.e: cach(file,connect()) instead of cache(file,()=>connect())
+  return cache(
+    `./temp/${type}/${id || "index"}.json`,
     () => {
-      let contentModel = model(type);
-      if (id) return contentModel.findById(id);
-      let content = contentModel.find({}, null, { limit: 10 });
-      return content;
+      connect().then(() => {
+        let contentModel = model(type);
+        if (id) return contentModel.findById(id); //todo:   //id: objectId or shortId
+        let content = contentModel.find({}, null, { limit: 10 });
+        return content;
+      });
     },
-    err => {}
+    id ? 0 : 24 //index must be updated every 3hrs (even if it removed on update), item may be remain forever
   );
 }
 

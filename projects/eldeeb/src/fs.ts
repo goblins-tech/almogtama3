@@ -1,15 +1,15 @@
 // todo: create fileSync
 
-import fs from 'fs';
-import Path from 'path';
-import { objectType, isEmpty, now, exportAll } from './general';
+import fs from "fs";
+import Path from "path";
+import { objectType, isEmpty, now, exportAll } from "./general";
 
 export namespace types {
   export enum moveOptionsExisting {
-    'replace',
-    'rename', // todo: rename pattern ex: {{filename}}({{count++}}).{{ext}}
-    'continue', // ignore
-    'stop'
+    "replace",
+    "rename", // todo: rename pattern ex: {{filename}}({{count++}}).{{ext}}
+    "continue", // ignore
+    "stop"
   }
   export interface MoveOptions {
     existing: moveOptionsExisting;
@@ -19,7 +19,7 @@ export namespace types {
     keepDir?: boolean; // if false, delete the folder content, but not the folder itself, default=false
     // [name: string]: any;
   }
-  export type PathLike = import ('fs').PathLike;
+  export type PathLike = import("fs").PathLike;
   // = string | Buffer | URL, but URL here refers to typescript/URL not node/URL
 }
 
@@ -47,11 +47,11 @@ export function resolve(...paths: types.PathLike[]): string {
  * @return [description]
  */
 export function ext(file: types.PathLike): string {
-  if (typeof file != 'string') {
-    return null;
-  }
+  if (typeof file != "string") return null;
+
   // TODO: if(file[0]=='.' && no other ".")return file ex: .gitignore
-  return Path.extname(file); // todo: remove `.` from extention
+  return Path.extname(file).toLowerCase(); // todo: remove `.` from extention
+  //or: file.split(".").pop().toLowerCase()
 
   // old: return file.split(".").pop()
 }
@@ -63,13 +63,13 @@ export function ext(file: types.PathLike): string {
  * @param  unit [description]
  * @return [description]
  */
-export function size(file?: types.PathLike, unit?: 'kb' | 'mb' | 'gb'): number {
+export function size(file?: types.PathLike, unit?: "kb" | "mb" | "gb"): number {
   const Size = 123456; // todo: get file size
-  if (unit == 'kb') {
+  if (unit == "kb") {
     return Size / 1024;
-  } else if (unit == 'mb') {
+  } else if (unit == "mb") {
     return Size / (1024 * 1024);
-  } else if (unit == 'gb') {
+  } else if (unit == "gb") {
     return Size / (1024 * 1024 * 1024);
   } else {
     return Size;
@@ -172,11 +172,11 @@ export function mkdir(
       if (!index) {
         index = '<meta http-equiv="REFRESH" content="0;url=/">';
       } // null or undefined
-      fs.writeFileSync(Path.join(path.toString(), 'index.html'), index);
+      fs.writeFileSync(Path.join(path.toString(), "index.html"), index);
       return true;
     }
   } catch (e) {
-    console.log('mkdir/error: ', e);
+    console.log("mkdir/error: ", e);
     return false;
   }
 }
@@ -234,7 +234,7 @@ export function remove(
  * @method cache
  * @param  file       [description]
  * @param  data       [description]
- * @param  expire     MS
+ * @param  expire     in hours
  * @param  type       [description]
  * @param  allowEmpty [description]
  * @return [description]
@@ -242,7 +242,7 @@ export function remove(
 export async function cache(
   file: types.PathLike,
   data?: any,
-  expire = 0, // in hours
+  expire = 0,
   json = false,
   allowEmpty = false
 ) {
@@ -253,9 +253,7 @@ export async function cache(
 
   file = resolve(file);
   mkdir(Path.dirname(file as string));
-  if (ext(file) == '.json') {
-    json = true;
-  }
+  if (ext(file) == ".json") json = true;
   if (
     !fs.existsSync(file) ||
     expire < 0 ||
@@ -265,11 +263,12 @@ export async function cache(
   ) {
     // save data to file, and return the original data
     // console.log(`cache: ${file} updated`);
-    if (typeof data == 'function') {
+    //todo: if(data: promise -> wait until it resolved), also support rxjs.Observable
+    if (typeof data == "function") {
       data = await data();
     } // data() may be async or a Promise
     const dataType = objectType(data);
-    if (dataType == 'array' || dataType == 'object') {
+    if (dataType == "array" || dataType == "object") {
       fs.writeFileSync(file, JSON.stringify(data));
     } else if (allowEmpty || !isEmpty(data)) {
       fs.writeFileSync(file, data);
@@ -277,7 +276,7 @@ export async function cache(
     // todo: do we need to convert data to string? i.e: writeFileSync(file.toString()), try some different types of data
   } else {
     // retrive data from file and return it as the required type
-    data = fs.readFileSync(file, 'utf8'); // without encoding (i.e utf-8) will return a stream insteadof a string
+    data = fs.readFileSync(file, "utf8"); // without encoding (i.e utf-8) will return a stream insteadof a string
     if (json) {
       return JSON.parse(data);
     }
@@ -285,6 +284,33 @@ export async function cache(
   }
   return data;
 }
+
+export let json = {
+  read(file: string) {
+    if (!file) return null;
+    var data = fs.readFileSync(file);
+    if (data) data = JSON.parse(data.toString());
+    return data;
+  },
+  write(file: string, data: any) {
+    if (data) {
+      let dir = `./temp/${type}`;
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+      if (["array", "object"].includes(objectType(data)))
+        data = JSON.stringify(data);
+      fs.writeFileSync(file, data);
+    }
+  },
+  convert(data: any) {
+    if (typeof data == "string") {
+      if (ext(data) == ".json") return this.read(data);
+      if (data.trim().charAt(0) == "{") return JSON.parse(data) || null;
+    } else {
+      return JSON.stringify(data);
+    }
+  }
+};
 
 /*
 todo:
