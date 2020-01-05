@@ -294,7 +294,7 @@ export let json = {
   },
   write(file: string, data: any) {
     if (data) {
-      let dir = `./temp/${type}`;
+      let dir = Path.dirname(file);
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
       if (["array", "object"].includes(objectType(data)))
