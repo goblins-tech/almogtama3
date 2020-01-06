@@ -176,7 +176,7 @@ export function remove(
  * @param  expire     in hours
  * @param  type       [description]
  * @param  allowEmpty [description]
- * @return [description]
+ * @return Promise<data:any>
  */
 export async function cache(
   file: types.PathLike,
@@ -189,7 +189,7 @@ export async function cache(
        allowEmpty: allow creating an empty cache file
        expire (hours)
    */
-
+  console.log("cache():", { file, data });
   file = resolve(file);
   mdir(file as string, true);
 
@@ -201,28 +201,32 @@ export async function cache(
     expire != 0 && // if expire=0 never expires
       (mtime(file) as number) + expire * 60 * 60 * 1000 < now()) // todo: convert mimetime() to number or convert expire to bigInt??
   ) {
-    // save data to file, and return the original data
-    // console.log(`cache: ${file} updated`);
-    //todo: if(data: promise -> wait until it resolved), also support rxjs.Observable
-    if (typeof data == "function") {
-      data = await data();
-    } // data() may be async or a Promise
-    const dataType = objectType(data);
-    if (dataType == "array" || dataType == "object") {
-      fs.writeFileSync(file, JSON.stringify(data));
-    } else if (allowEmpty || !isEmpty(data)) {
-      fs.writeFileSync(file, data);
+    console.log("new data");
+    function cache_save(data) {
+      console.log("cache_save:", data);
+      if (["array", "object"].includes(objectType(data)))
+        fs.writeFileSync(file, JSON.stringify(data));
+      else if (allowEmpty || !isEmpty(data)) fs.writeFileSync(file, data);
+      return data;
     }
+    //todo: also support rxjs.Observable
+    //no need to support Async functions, because it is nonsense if data() function returns another function. (func.constructor.name === "AsyncFunction")
+    if (typeof data == "function") data = await data();
+    console.log("cache data()", data);
+    if (data && (data instanceof Promise || typeof data.then == "function"))
+      return data.then(data => cache_save(data));
+    else return new Promise(r => r(cache_save(data)));
+
     // todo: do we need to convert data to string? i.e: writeFileSync(file.toString()), try some different types of data
   } else {
+    console.log("old data", json);
     // retrive data from file and return it as the required type
-    data = fs.readFileSync(file, "utf8"); // without encoding (i.e utf-8) will return a stream insteadof a string
-    if (json) {
-      return JSON.parse(data);
-    }
+    data = fs.readFileSync(file, "utf8").toString(); // without encoding (i.e utf-8) will return a stream insteadof a string
+    if (json) data = JSON.parse(data);
+    console.log({ data });
+    return new Promise(r => r(data));
     // todo: elseif(type=="number") elseif ...
   }
-  return data;
 }
 export function mdir(path: string | string[], file = false) {
   if (path instanceof Array) {

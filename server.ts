@@ -11,6 +11,8 @@ import mongoose from "mongoose";
 import parseDomain from "parse-domain";
 import { cache } from "./eldeeb/fs";
 
+console.clear();
+
 export interface Obj {
   [key: string]: any;
 }
@@ -33,28 +35,28 @@ const {
 
 //todo: id (ObjectId | shortId) | limit (number)
 function getData(type: string, id) {
-  //todo: directly pass data sa Promise, i.e: cach(file,connect()) instead of cache(file,()=>connect())
   return cache(
     `./temp/${type}/${id || "index"}.json`,
-    () => {
+    () =>
       connect().then(() => {
-        let contentModel = model(type);
-        if (id) return contentModel.findById(id); //todo:   //id: objectId or shortId
-        let content = contentModel.find({}, null, { limit: 10 });
+        let contentModel = model(type),
+          content;
+        if (id) content = contentModel.findById(id); //todo:   //id: objectId or shortId
+        content = contentModel.find({}, null, { limit: 10 });
+        //console.log("content", content);
         return content;
-      });
-    },
+      }),
     id ? 0 : 24 //index must be updated every 3hrs (even if it removed on update), item may be remain forever
   );
 }
 
 function saveData(type: string, data) {
-  console.log("saveData", data);
+  //console.log("saveData", data);
 
   return connect().then(
     () => {
       if (data) {
-        console.log("connected");
+        //console.log("connected");
         let contentModel = model(type);
         let content = new contentModel(data);
         return content.save();
@@ -105,10 +107,7 @@ function connect() {
 }
 
 function model(type) {
-  console.log(
-    "model: " +
-      { type, models: mongoose.models, modelNames: mongoose.modelNames() }
-  );
+  //console.log("model: " +{ type, models: mongoose.models, modelNames: mongoose.modelNames() });
   if (mongoose.models[type]) return mongoose.models[type];
   var contentObj = {
     title: String,
@@ -150,13 +149,14 @@ app.use((req, res, next) => {
     let url = `https://${parts.subdomain || "www"}.${parts.domain}.${
       parts.tld
     }${req.url}`;
-    console.log(`redirecting to: ${url}`, {
+    /*console.log(`redirecting to: ${url}`, {
       host: req.hostname,
       secure: req.secure,
       protocol: req.protocol,
       subdomain: parts.subdomain,
       url: req.url
     });
+    */
     return res.redirect(301, url);
   }
   next();
@@ -225,21 +225,15 @@ app.post("/api/:type", (req, res) => {
   );
 });
 
-app.get("/api/:type/:id?", (req, res) => {
+app.get("/api/:type/:id?", (req, res, next) => {
   let type = req.params.type,
     id = req.params.id;
-
-  getData(type, id).then(
-    data => {
-      console.log("app.get", { type, id, data });
-      json.save(type, data); //todo: only if fetched by database (i.e: no cache)
-      res.json({ type: id ? "item" : "list", payload: data });
-    },
-    err => {
-      console.log({ err });
-      res.json({ type: id ? "item" : "list", err });
-    }
-  );
+  getData(type, id)
+    .then(
+      payload => res.json({ type: id ? "item" : "list", payload }),
+      error => ({ type: error, error }) //todo: content/index.html admin:show error
+    )
+    .catch(next); //https://expressjs.com/en/advanced/best-practice-performance.html#use-promises
 });
 
 // Serve static files from /browser
