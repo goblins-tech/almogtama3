@@ -1,6 +1,6 @@
 import { BrowserModule } from "@angular/platform-browser";
 import { NgModule } from "@angular/core";
-import { Routes, RouterModule } from "@angular/router";
+import { Routes, RouterModule, Router } from "@angular/router";
 import { AppComponent } from "./app.component";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { ErrorComponent } from "./error";
@@ -9,6 +9,7 @@ import { AngularFireAuthModule } from "@angular/fire/auth";
 import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { HttpService } from "./http.service";
 import { ContentModule } from "./content/content.module";
+import { FormModule } from "./forms/forms.module";
 import { UniversalInterceptor } from "../../universal-interceptor";
 import { MetaService } from "./content/meta.service";
 import { SocialComponent } from "./social";
@@ -54,7 +55,8 @@ export class AppRoutingModule {}
     AngularFireAuthModule,
     HttpClientModule,
     AppRoutingModule, //Modules will process before RouterModule.forRoot() https://blogs.msmvps.com/deborahk/angular-route-ordering/
-    ContentModule //must be after AppRoutingModule
+    FormModule,
+    ContentModule //must be after other modules, because it's first part is dynamic :item/..
   ],
   providers: [
     HttpService,
@@ -68,12 +70,9 @@ export class AppRoutingModule {}
   bootstrap: [AppComponent]
 })
 export class AppModule {
-  /*
   constructor(router: Router) {
-    //test the routers' order; inject Router i.e:constructor(router: Router->from @angular/router)
-    const replacer = (key, value) =>
-      typeof value === "function" ? value.name : value;
-    console.log("Routes: ", JSON.stringify(router.config, replacer, 2));
-
-  }*/
+    //test the routers' order;
+    if (process.env.NODE_ENV == "development")
+      console.log("Routes: ", router.config);
+  }
 }
