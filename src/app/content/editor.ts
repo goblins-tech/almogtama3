@@ -13,10 +13,10 @@ export interface Params {
 
 @Component({
   selector: "app-content",
-  templateUrl: "./create.html",
-  styleUrls: ["./create.scss"]
+  templateUrl: "./editor.html",
+  styleUrls: ["./editor.scss"]
 })
-export class ContentCreateComponent implements OnInit {
+export class ContentEditorComponent implements OnInit {
   params: Params;
   data$: Observable<Object>;
 

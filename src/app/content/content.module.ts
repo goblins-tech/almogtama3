@@ -2,7 +2,7 @@ import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Routes, RouterModule } from "@angular/router";
 import { ContentComponent } from "./index";
-import { ContentCreateComponent } from "./create";
+import { ContentEditorComponent } from "./editor";
 import { ContentManageComponent } from "./manage";
 import { ShareButtonsModule } from "@ngx-share/buttons";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
@@ -70,8 +70,8 @@ import {
 
 const routes: Routes = [
   { path: ":type", component: ContentComponent },
-  { path: ":type/editor", component: ContentCreateComponent },
-  { path: ":type/editor/:id", component: ContentCreateComponent },
+  { path: ":type/editor", component: ContentEditorComponent },
+  { path: ":type/editor/:id", component: ContentEditorComponent },
   { path: ":type/manage", component: ContentManageComponent },
   { path: ":type/:item", component: ContentComponent } //item = id-slug
 ];
@@ -79,7 +79,7 @@ const routes: Routes = [
 @NgModule({
   declarations: [
     ContentComponent,
-    ContentCreateComponent,
+    ContentEditorComponent,
     ContentManageComponent,
     SlugPipe,
     ReplacePipe,
