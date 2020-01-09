@@ -41,7 +41,7 @@ mat-card{
 mat-card div[mat-card-avatar]{
    overflow: hidden; border: solid medium gray;
 }
-mat-card img{margin: auto;}
+mat-card-img{margin:16px auto;}
 
 /* bootstrap-like alerts */
 .alert-error {
