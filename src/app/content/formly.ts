@@ -31,22 +31,30 @@ import { FieldType } from "@ngx-formly/material";
     ><br />
 
     <!-- show files with progress -->
+    <mat-progress-bar mode="determinate" [value]="progress"></mat-progress-bar>
+
     <mat-list>
       <mat-list-item *ngFor="let file of files">
-        <h4 mat-line>{{ file.name }}</h4>
+        <p mat-line>
+          {{ file.name }}
+          <span
+            (click)="remove(file)"
+            style="cursor:pointer"
+            title="remove this file"
+          >
+            <mat-icon>delete_forever</mat-icon>
+          </span>
+        </p>
       </mat-list-item>
-      <mat-progress-bar
-        mode="determinate"
-        [value]="progress"
-      ></mat-progress-bar>
     </mat-list>
   `
 })
 export class FormlyFieldFile extends FieldType {
   @ViewChild("file", { static: false }) file;
   @Input() label: string = "upload";
-  @Input() progress: number = 0;
+  @Input() progress: number = 0; //todo: progress:Observable & subscribe to it
   files: Set<File> = new Set();
+  //todo: pass formControl, field?
 
   addFiles() {
     //clicks on <input #file>
@@ -60,6 +68,10 @@ export class FormlyFieldFile extends FieldType {
         this.files.add(files[key]);
       }
     }
+  }
+
+  remove(file) {
+    this.files.delete(file);
   }
 }
 
