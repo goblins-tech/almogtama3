@@ -1,15 +1,16 @@
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { CreateComponent } from "./create";
-import { IndexComponent } from "./index"; //show the form
+import { IndexComponent } from "./index"; //show the form ()
 import { ViewComponent } from "./view"; //shows user's forms list & form data (item details)
 import { Routes, RouterModule } from "@angular/router";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 
 const routes: Routes = [
   { path: "forms", component: IndexComponent },
-  { path: "forms/create", component: CreateComponent },
-  { path: "forms/view/:id", component: ViewComponent },
+  { path: "forms/editor", component: CreateComponent },
+  { path: "forms/editor/:id", component: CreateComponent },
+  { path: "forms/data/:id", component: ViewComponent },
   { path: "forms/:item", component: IndexComponent }
 ];
 
