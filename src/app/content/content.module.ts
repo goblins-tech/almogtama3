@@ -70,9 +70,10 @@ import {
 
 const routes: Routes = [
   { path: ":type", component: ContentComponent },
-  { path: ":type/create", component: ContentCreateComponent },
+  { path: ":type/editor", component: ContentCreateComponent },
+  { path: ":type/editor/:id", component: ContentCreateComponent },
   { path: ":type/manage", component: ContentManageComponent },
-  { path: ":type/:item", component: ContentComponent } //item =  id-slug
+  { path: ":type/:item", component: ContentComponent } //item = id-slug
 ];
 
 @NgModule({
