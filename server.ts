@@ -195,12 +195,12 @@ app.use(
     fileSize: 5 * 1024 * 1024,
     files: 20,
     fileFilter: function(req, file, cb) {
-      //console.log("multer", { req, file, cb });
+      console.log("multer", { req, file, cb });
       cb(null, true); //to reject this file cb(null,false) or cb(new error(..))
     },
     storage: multer.diskStorage({
       destination: function(req, file, cb) {
-        let dir = `./data/uploads/${req.params.type}`;
+        let dir = `./assets/uploads/${req.params.type}`;
 
         if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
         cb(null, dir);

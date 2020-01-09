@@ -30,7 +30,7 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
     <img
       mat-card-image
       *ngIf="item.cover && item.cover!='' && item.cover!='null'"
-      src="/data/uploads/{{params.type}}/{{item.cover}}"
+      src="/assets/uploads/{{params.type}}/cover/{{item.cover}}"
     />
 
     <mat-card-content
@@ -56,7 +56,10 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
         >
         <mat-card-subtitle dir="auto">{{item.subtitle}}</mat-card-subtitle>
       </mat-card-header>
-      <img mat-card-image src="assets/book.png" />
+      <img
+        mat-card-image
+        src="/assets/uploads/{{params.type}}/cover/{{item.cover}}"
+      />
       <mat-card-content
         dir="auto"
         [innerHtml]="item.content | content"
