@@ -19,12 +19,13 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
     <mat-card-header>
       <div mat-card-avatar><img src="assets/avatar-female.png" /></div>
       <mat-card-title dir="auto">
-        <a
-          href="{{params.type}}/{{item._id}}-{{item.slug?item.slug:item.title | slug }}"
-          >{{item.title}}</a
+        <a href="{{params.type}}/{{item._id}}-{{item | slug }}"
+          >{{item.title | length:200}}</a
         ></mat-card-title
       >
-      <mat-card-subtitle dir="auto">{{item.subtitle}}</mat-card-subtitle>
+      <mat-card-subtitle dir="auto"
+        >{{item.subtitle | length:200}}</mat-card-subtitle
+      >
     </mat-card-header>
     <img
       mat-card-image
@@ -34,7 +35,7 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
 
     <mat-card-content
       dir="auto"
-      innerHtml="{{item.content | nl2br | keepHtml}}"
+      innerHtml="{{item.content | content}}"
     ></mat-card-content>
     <!-- todo: use content[] to add content segments, ex: for jobs we need to add: expiration alert -> content -> contacts -->
     <mat-card-actions>
@@ -49,8 +50,7 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
       <mat-card-header>
         <div mat-card-avatar><img src="assets/avatar-male.png" /></div>
         <mat-card-title dir="auto"
-          ><a
-            href="{{params.type}}/{{item._id}}-{{item.slug?item.slug:item.title | slug}}"
+          ><a href="{{params.type}}/{{item._id}}-{{item | slug}}"
             >{{item.title}}</a
           ></mat-card-title
         >
@@ -59,7 +59,7 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
       <img mat-card-image src="assets/book.png" />
       <mat-card-content
         dir="auto"
-        [innerHtml]="item.content | nl2br | keepHtml"
+        [innerHtml]="item.content | content"
       ></mat-card-content>
       <!-- <mat-card-actions>
         <button mat-flat-button color="primary">
@@ -77,17 +77,12 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
   <mat-list>
     <mat-list-item *ngFor="let item of data">
       <h4 mat-line dir="auto">
-        <a
-          href="{{params.type}}/{{item._id}}-{{item.slug?item.slug:item.title | slug }}"
-          >{{item.title}}</a
+        <a href="{{params.type}}/{{item._id}}-{{item | slug }}"
+          >{{item.title | length:200}}</a
         >
       </h4>
-      <h6 mat-line dir="auto">{{item.subtitle}}</h6>
-      <div
-        mat-line
-        [innerHtml]="item.content | nl2br | keepHtml"
-        dir="auto"
-      ></div>
+      <h6 mat-line dir="auto">{{item.subtitle | length:200}}</h6>
+      <div mat-line [innerHtml]="item.content | content" dir="auto"></div>
       <!-- todo: add cancel btn -->
     </mat-list-item>
   </mat-list>

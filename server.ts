@@ -35,14 +35,17 @@ const {
 
 //todo: id (ObjectId | shortId) | limit (number)
 function getData(type: string, id) {
+  //console.log("getData", { type, id });
   return cache(
     `./temp/${type}/${id || "index"}.json`,
     () =>
       connect().then(() => {
         let contentModel = model(type),
           content;
-        if (id) content = contentModel.findById(id); //todo:   //id: objectId or shortId
-        content = contentModel.find({}, null, { limit: 10 });
+        //  console.log("getData.cache()", { type, id });
+        if (id) content = contentModel.findById(id);
+        //todo:   //id: objectId or shortId
+        else content = contentModel.find({}, null, { limit: 10 });
         //console.log("content", content);
         return content;
       }),
@@ -97,6 +100,8 @@ function connect() {
     let url = `mongodb+srv://${encode("xxyyzz2050")}:${encode(
       "Xx159753@@"
     )}@almogtama3-gbdqa.gcp.mongodb.net/${dbName}?retryWrites=true&w=majority`;
+
+    if (process.env.NODE_ENV) console.log({ url });
     db = mongoose.connect(url, {
       useNewUrlParser: true,
       useUnifiedTopology: true
@@ -228,6 +233,7 @@ app.post("/api/:type", (req, res) => {
 app.get("/api/:type/:id?", (req, res, next) => {
   let type = req.params.type,
     id = req.params.id;
+  console.log("app.get", { type, id });
   getData(type, id)
     .then(
       payload => res.json({ type: id ? "item" : "list", payload }),

@@ -189,10 +189,11 @@ export async function cache(
        allowEmpty: allow creating an empty cache file
        expire (hours)
    */
-  console.log("cache():", { file, data });
   file = resolve(file);
-  mdir(file as string, true);
 
+  if (process.env.NODE_ENV == "development")
+    console.log("cache():", { file, data });
+  mdir(file as string, true);
   if (ext(file) == ".json") json = true;
   if (
     !fs.existsSync(file) ||
@@ -201,7 +202,7 @@ export async function cache(
     expire != 0 && // if expire=0 never expires
       (mtime(file) as number) + expire * 60 * 60 * 1000 < now()) // todo: convert mimetime() to number or convert expire to bigInt??
   ) {
-    console.log("new data");
+    console.log("cache: new data");
     function cache_save(data) {
       console.log("cache_save:", data);
       if (["array", "object"].includes(objectType(data)))
@@ -219,11 +220,11 @@ export async function cache(
 
     // todo: do we need to convert data to string? i.e: writeFileSync(file.toString()), try some different types of data
   } else {
-    console.log("old data", json);
+    console.log("cache: old data", { json });
     // retrive data from file and return it as the required type
     data = fs.readFileSync(file, "utf8").toString(); // without encoding (i.e utf-8) will return a stream insteadof a string
     if (json) data = JSON.parse(data);
-    console.log({ data });
+    console.log({ cach_data: data });
     return new Promise(r => r(data));
     // todo: elseif(type=="number") elseif ...
   }

@@ -1,5 +1,18 @@
 import { Pipe, PipeTransform } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
+import { objectType } from "../../../eldeeb/general";
+
+export type ContentValue = any; //todo: article{} | string
+
+function getValue(value, keys?: string | string[]) {
+  if (objectType(value) == "object") {
+    if (!(keys instanceof Array)) keys = [keys];
+    for (let i = 0; i < keys.length; i++)
+      if (value[keys[i]] && value[keys[i]] !== "") return value[keys[i]];
+  }
+  if (typeof value != "string") return "";
+  return value;
+}
 
 @Pipe({
   name: "slug"
@@ -13,8 +26,8 @@ export class SlugPipe implements PipeTransform {
    * @param  value     [description]
    * @return [description]
    */
-  transform(value: string, length = 200): string {
-    let slug = value
+  transform(value: ContentValue, length = 200): string {
+    let slug = getValue(value)
       .trim() //remove trailing spaces
       .replace(/\s+/g, "-") //replace inner spaces with '-'
       .replace("/", "") //replace '/' with '-', to prevent changing the current route ex: url/slug1-slug2 instead of /slug1/slug2
@@ -23,6 +36,17 @@ export class SlugPipe implements PipeTransform {
     if (length) slug = slug.slice(0, length);
     return slug;
     //todo: remove unwanted charachters & very short words
+  }
+}
+
+@Pipe({
+  name: "content"
+})
+export class ContentPipe implements PipeTransform {
+  constructor(private sanitizer: DomSanitizer) {}
+  transform(value: ContentValue): string {
+    return getValue(value, ["content"]).replace(/\r\n|\n\r|\r|\n/g, "<br />"); //nl2br
+    //todo: KeepHTML, hypernate links,
   }
 }
 
@@ -36,11 +60,20 @@ export class ReplacePipe implements PipeTransform {
 }
 
 @Pipe({
+  name: "length"
+})
+export class LengthPipe implements PipeTransform {
+  transform(value: string, length = 200): string {
+    return getValue(value).slice(0, length);
+  }
+}
+
+@Pipe({
   name: "nl2br"
 })
 export class Nl2brPipe implements PipeTransform {
   transform(value: string): string {
-    return value.replace(/\r\n|\n\r|\r|\n/g, "<br />");
+    return getValue(value).replace(/\r\n|\n\r|\r|\n/g, "<br />");
   }
 }
 
@@ -62,7 +95,7 @@ export class KeepHtmlPipe implements PipeTransform {
     return content;
     /*
     - apply nl2br, keepHTML
-    - hypernate links 
+    - hypernate links
      */
 
     return this.sanitizer.bypassSecurityTrustHtml(content);

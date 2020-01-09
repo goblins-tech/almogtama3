@@ -6,7 +6,14 @@ import { ContentCreateComponent } from "./create";
 import { ContentManageComponent } from "./manage";
 import { ShareButtonsModule } from "@ngx-share/buttons";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { SlugPipe, ReplacePipe, Nl2brPipe, KeepHtmlPipe } from "./pipes";
+import {
+  SlugPipe,
+  ReplacePipe,
+  Nl2brPipe,
+  KeepHtmlPipe,
+  ContentPipe,
+  LengthPipe
+} from "./pipes";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { FormlyModule } from "@ngx-formly/core";
 import { FormlyMaterialModule } from "@ngx-formly/material";
@@ -77,6 +84,8 @@ const routes: Routes = [
     ReplacePipe,
     Nl2brPipe,
     KeepHtmlPipe,
+    ContentPipe,
+    LengthPipe,
     FormlyFieldFile
   ],
   exports: [RouterModule],
