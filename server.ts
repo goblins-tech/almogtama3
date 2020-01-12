@@ -45,7 +45,11 @@ function getData(type: string, id) {
         //  console.log("getData.cache()", { type, id });
         if (id) content = contentModel.findById(id);
         //todo:   //id: objectId or shortId
-        else content = contentModel.find({}, null, { limit: 10 });
+        else
+          content = contentModel.find({}, null, {
+            limit: 10,
+            sort: { _id: -1 }
+          });
         //console.log("content", content);
         return content;
       }),
