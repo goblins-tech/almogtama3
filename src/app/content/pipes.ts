@@ -27,7 +27,7 @@ export class SlugPipe implements PipeTransform {
    * @return [description]
    */
   transform(value: ContentValue, length = 200): string {
-    let slug = getValue(value)
+    let slug = getValue(value, ["slug", "title"])
       .trim() //remove trailing spaces
       .replace(/\s+/g, "-") //replace inner spaces with '-'
       .replace("/", "") //replace '/' with '-', to prevent changing the current route ex: url/slug1-slug2 instead of /slug1/slug2

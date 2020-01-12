@@ -1,11 +1,16 @@
 <h3 *ngIf="params?.type">Create new {{params?.type}}</h3>
 <div
-  *ngIf="msg!=''"
+  *ngIf="response"
   class="alert"
-  [ngClass]="msg=='ok'?'alert-ok':'alert-error'"
+  [ngClass]="response.ok==true?'alert-ok':'alert-error'"
 >
-  {{msg=='ok'?'form submitted successfully':'error:'+msg}}
+  <ng-container *ngIf="response.ok==true; else error"></ng-container>
+  form submitted successfully<br />
+  <a href="/{{params.type}}/{{response.data._id}}-{{response.data | slug}}"
+    >{{response.data.title}}</a
+  >
 </div>
+<ng-template #error>Error: {{response.msg}}</ng-template>
 
 <ng-container *ngIf="articleForm; else loading">
   <form

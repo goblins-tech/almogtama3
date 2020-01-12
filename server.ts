@@ -225,7 +225,13 @@ app.use(
 app.post("/api/:type", (req, res) => {
   //console.log("server post", { body: req.body });
   saveData(req.params.type, req.body).then(
-    data => res.send({ ok: true, data }),
+    data => {
+      //todo: delete cache index & item (if __id)
+      cache(`./temp/${req.params.type}/index.json`, ":purge:");
+      if (req.params._id)
+        cache(`./temp/${req.params.type}/${req.params._id}.json`, ":purge:");
+      res.send({ ok: true, data });
+    },
     err => res.send({ ok: false, err })
   );
 });

@@ -190,6 +190,7 @@ export async function cache(
        expire (hours)
    */
   file = resolve(file);
+  if (data === ":purge:") return fs.unlink(file, () => {}); //purging the cache; not a promise
 
   if (process.env.NODE_ENV == "development")
     console.log("cache():", { file, data });
@@ -206,8 +207,9 @@ export async function cache(
     function cache_save(data) {
       console.log("cache_save:", data);
       if (["array", "object"].includes(objectType(data)))
-        fs.writeFileSync(file, JSON.stringify(data));
-      else if (allowEmpty || !isEmpty(data)) fs.writeFileSync(file, data);
+        data = JSON.stringify(data);
+
+      if (allowEmpty || !isEmpty(data)) fs.writeFileSync(file, data);
       return data;
     }
     //todo: also support rxjs.Observable

@@ -25,7 +25,7 @@ export class ContentEditorComponent implements OnInit {
   @ViewChild("formElement", { static: false }) formElement;
   files = []; //Set<File> = new Set();
   progress;
-  msg = "";
+  response;
   articleForm;
   constructor(
     private route: ActivatedRoute,
@@ -86,11 +86,10 @@ export class ContentEditorComponent implements OnInit {
       if (type == "progress") this.progress = value;
       //todo: send to articleForm.fields[type=file]
       else if (type == "response") {
-        console.log(event.body);
-        if (event.body!.ok) this.msg = "ok";
-        else this.msg = event.body!.msg;
+        console.log("response", event.body);
+        this.response = event.body;
         this.showSnackBar(
-          this.msg == "ok" ? "form submitted" : this.msg,
+          event.body.ok ? "form submitted" : "Error " + event.body.msg || "",
           "close",
           3000
         );
