@@ -1,4 +1,4 @@
-import { Component, ViewChild, Input } from "@angular/core";
+import { Component, ViewChild, Input, OnInit } from "@angular/core";
 import { FormGroup, FormArray } from "@angular/forms";
 import { FormlyFieldConfig, FormlyFormOptions } from "@ngx-formly/core";
 import { FieldType } from "@ngx-formly/material";
@@ -11,7 +11,7 @@ import { FieldType } from "@ngx-formly/material";
 @Component({
   selector: "formly-field-file",
   template: `
-    <h4 *ngIf="label">{{ label }}</h4>
+    <!--h4 *ngIf="label">{{ header }}</h4-->
     <input
       type="file"
       #file
@@ -49,12 +49,18 @@ import { FieldType } from "@ngx-formly/material";
     </mat-list>
   `
 })
-export class FormlyFieldFile extends FieldType {
+export class FormlyFieldFile extends FieldType implements OnInit {
   @ViewChild("file", { static: false }) file;
-  @Input() label: string = "upload";
   @Input() progress: number = 0; //todo: progress:Observable & subscribe to it
   files: Set<File> = new Set();
-  //todo: pass formControl, field?
+
+  ngOnInit() {
+    console.log({
+      templateOptions: this.to, //contains any data that passed to Field.templateOptions{}, same as using nativeElement
+      label: this.to.label, //in template: {{to.label}}
+      label2: this.file.nativeElement.getAttribute("label") //Field.templateOptions.attributes are passed to <input file> itself, not to the component
+    }); //any data passed to Field.templateOptions{}
+  }
 
   addFiles() {
     //clicks on <input #file>
@@ -98,9 +104,14 @@ export let article = {
       type: "input",
       templateOptions: {
         label: "Title",
-        description: "maximum: 100 charachters",
+        description: "maximum: 200 charachters",
         required: true,
-        maxLength: 100
+        maxLength: 200
+      },
+      validation: {
+        messages: {
+          maxLength: "title is too long"
+        }
       }
     },
     {
@@ -108,7 +119,7 @@ export let article = {
       type: "input",
       templateOptions: {
         label: "Subtitle",
-        maxLength: 100
+        maxLength: 200
       }
     },
     {
@@ -131,9 +142,9 @@ export let article = {
       key: "cover",
       type: "file", //or: component:FormlyFieldFile, wasn't tested
       templateOptions: {
-        label: "Cover image", //todo: move this to attributes.label
+        label: "Cover image" //todo: move this to attributes.label
         //  change: "onFilesAdded()", //todo: error??
-        attributes: { label: "cover image label" }
+        //to add a header: attributes: {data-header:'say something'}
       }
     }
 
