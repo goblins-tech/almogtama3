@@ -81,6 +81,7 @@ export class ContentEditorComponent implements OnInit {
     //todo: data.files= {cover: #cover.files.data}
 
     console.log("content.ts onSubmit()", data);
+    let files = this.articleForm.fields.filter(el => el.type == "file"); //todo: articleForm.form.get('cover').files?
     this.httpService.upload(this.params.type, data, (type, event, value) => {
       if (type == "progress") this.progress = value;
       //todo: send to articleForm.fields[type=file]
