@@ -26,6 +26,7 @@ export class ContentEditorComponent implements OnInit {
   files = []; //Set<File> = new Set();
   progress;
   response;
+  submitting = false;
   articleForm;
   constructor(
     private route: ActivatedRoute,
@@ -81,12 +82,14 @@ export class ContentEditorComponent implements OnInit {
     //todo: data.files= {cover: #cover.files.data}
 
     console.log("content.ts onSubmit()", data);
+    this.submitting = true;
     let files = this.articleForm.fields.filter(el => el.type == "file"); //todo: articleForm.form.get('cover').files?
     this.httpService.upload(this.params.type, data, (type, event, value) => {
       if (type == "progress") this.progress = value;
       //todo: send to articleForm.fields[type=file]
       else if (type == "response") {
         console.log("response", event.body);
+        this.submitting = false;
         this.response = event.body;
         this.showSnackBar(
           event.body.ok ? "form submitted" : "Error " + event.body.msg || "",
