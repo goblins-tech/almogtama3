@@ -14,7 +14,7 @@ import { FieldType } from "@ngx-formly/material";
     <!--h4 *ngIf="label">{{ header }}</h4-->
     <input
       type="file"
-      #file
+      #fileInput
       style="display: none"
       (change)="onFilesAdded()"
       multiple
@@ -50,25 +50,25 @@ import { FieldType } from "@ngx-formly/material";
   `
 })
 export class FormlyFieldFile extends FieldType implements OnInit {
-  @ViewChild("file", { static: false }) file;
+  @ViewChild("fileInput", { static: false }) fileInput;
   @Input() progress: number = 0; //todo: progress:Observable & subscribe to it
   files: Set<File> = new Set();
 
-  ngOnInit() {
+  ngAfterViewInit() {
     console.log({
       templateOptions: this.to, //contains any data that passed to Field.templateOptions{}, same as using nativeElement
       label: this.to.label, //in template: {{to.label}}
-      label2: this.file.nativeElement.getAttribute("label") //Field.templateOptions.attributes are passed to <input file> itself, not to the component
+      label2: this.fileInput.nativeElement.getAttribute("data-test") //Field.templateOptions.attributes are passed to <input file> itself, not to the component
     }); //any data passed to Field.templateOptions{}
   }
 
   addFiles() {
     //clicks on <input #file>
-    this.file.nativeElement.click();
+    this.fileInput.nativeElement.click();
   }
 
   onFilesAdded() {
-    let files: { [key: string]: File } = this.file.nativeElement.files;
+    let files: { [key: string]: File } = this.fileInput.nativeElement.files;
     for (let key in files) {
       if (!isNaN(parseInt(key))) {
         this.files.add(files[key]);
