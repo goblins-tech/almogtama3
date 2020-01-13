@@ -99,8 +99,8 @@ const routes: Routes = [
     ReactiveFormsModule,
     FormlyModule.forRoot({
       types: [
-        { name: "file", component: FormlyFieldFile }, //todo: add to component instead of module
-        { name: "quill", component: FormlyFieldQuill }
+        { name: "file", component: FormlyFieldFile, wrappers: ["form-field"] }, //todo: add to component instead of module
+        { name: "quill", component: FormlyFieldQuill, wrappers: ["form-field"] }
       ]
     }),
     FormlyMaterialModule,

@@ -46,7 +46,11 @@ export class ContentEditorComponent implements OnInit {
       if (this.params.id != "") this.data$ = this.getData();
       console.log({ params, calculatedParamas: this.params });
 
-      /*if (this.params.type == "jobs") {
+      //change content.type from textarea to quill
+      article.fields[article.fields.findIndex(el => el.key == "content")].type =
+        "quill";
+
+      if (this.params.type == "jobs") {
         //delete cover image since jobs.layout=="list" not grid
         //dont use delete article.fields(...)
         article.fields.splice(
@@ -68,9 +72,9 @@ export class ContentEditorComponent implements OnInit {
             }
           }
         );
-      }*/
+      }
       this.articleForm = article;
-      console.log({ article });
+      console.log({ articleForm: article });
     });
   }
 

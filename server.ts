@@ -235,7 +235,8 @@ app.post("/api/:type", (req, res) => {
       cache(`./temp/${req.params.type}/index.json`, ":purge:");
       if (req.params._id)
         cache(`./temp/${req.params.type}/${req.params._id}.json`, ":purge:");
-      res.send({ ok: true, data });
+      if (data && data._id) res.send({ ok: true, data });
+      else res.send({ ok: false, err: "no data" });
     },
     err => res.send({ ok: false, err })
   );
