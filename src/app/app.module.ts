@@ -13,6 +13,8 @@ import { FormModule } from "./forms/forms.module";
 import { UniversalInterceptor } from "../../universal-interceptor";
 import { MetaService } from "./content/meta.service";
 import { SocialComponent } from "./social";
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { environment } from '../environments/environment';
 
 /*
 routes are devided into routes (for AppRutingModule) & appRoutes (for AppModule)
@@ -40,7 +42,7 @@ const firebaseConfig = {
 };
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { enableTracing })],
+  imports: [RouterModule.forRoot(routes, { enableTracing }), ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })],
   exports: [RouterModule]
 })
 export class AppRoutingModule {}
