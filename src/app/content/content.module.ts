@@ -6,6 +6,7 @@ import { ContentEditorComponent } from "./editor";
 import { ContentManageComponent } from "./manage";
 import { ShareButtonsModule } from "@ngx-share/buttons";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import { QuillModule } from "ngx-quill";
 import {
   SlugPipe,
   ReplacePipe,
@@ -113,7 +114,8 @@ const routes: Routes = [
     MatProgressBarModule,
     MatSnackBarModule,
     ShareButtonsModule,
-    FontAwesomeModule
+    FontAwesomeModule,
+    QuillModule.forRoot()
   ],
   providers: [MetaService],
   bootstrap: []

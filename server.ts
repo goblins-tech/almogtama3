@@ -97,6 +97,7 @@ let db;
 function encode(str: string) {
   return encodeURIComponent(str);
 }
+//todo: use eldeeb.mongoose
 function connect() {
   if (!db) {
     console.log("connecting...", { mode: process.env.NODE_ENV });

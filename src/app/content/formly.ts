@@ -123,8 +123,8 @@ export let article = {
       }
     },
     {
-      key: "content", //todo: autosize, rows=5
-      type: "textarea",
+      key: "content", //todo: auto resize,
+      template: "<quill-editor></quill-editor>",
       templateOptions: {
         label: "Content",
         required: true,

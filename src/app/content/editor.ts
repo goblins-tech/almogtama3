@@ -6,6 +6,8 @@ import { MatSnackBar } from "@angular/material";
 import { Data } from "./index"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
 import { article } from "./formly";
 
+import { FormlyFieldConfig, FormlyFormOptions } from "@ngx-formly/core";
+
 export interface Params {
   type: string;
   id?: string;
@@ -44,7 +46,7 @@ export class ContentEditorComponent implements OnInit {
       if (this.params.id != "") this.data$ = this.getData();
       console.log({ params, calculatedParamas: this.params });
 
-      if (this.params.type == "jobs") {
+      /*if (this.params.type == "jobs") {
         //delete cover image since jobs.layout=="list" not grid
         //dont use delete article.fields(...)
         article.fields.splice(
@@ -66,7 +68,7 @@ export class ContentEditorComponent implements OnInit {
             }
           }
         );
-      }
+      }*/
       this.articleForm = article;
       console.log({ article });
     });
