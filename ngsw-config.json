@@ -14,7 +14,8 @@
           "/*.js"
         ]
       }
-    }, {
+    },
+    {
       "name": "assets",
       "installMode": "lazy",
       "updateMode": "prefetch",
@@ -23,6 +24,28 @@
           "/assets/**",
           "/*.(eot|svg|cur|jpg|png|webp|gif|otf|ttf|woff|woff2|ani)"
         ]
+      }
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "api-long-term",
+      "urls": ["/api/*", "/social"],
+      "version": 1,
+      "cacheConfig": {
+        "maxSize": 100,
+        "maxAge": "3d",
+        "strategy": "performance"
+      }
+    },
+    {
+      "name": "api-short-term",
+      "urls": ["/jobs", "/articles"],
+      "version": 1,
+      "cacheConfig": {
+        "maxSize": 100,
+        "maxAge": "1h",
+        "strategy": "freshness"
       }
     }
   ]

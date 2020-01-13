@@ -53,7 +53,7 @@ export class ContentComponent implements OnInit {
       //if (this.params.type == "jobs") this.layout = "list";
       this.getData().subscribe(data => {
         //here we can change the data
-
+        if (typeof data == "string") data = JSON.parse(data); //ex: the url fetched via a ServiceWorker
         if (data.payload && data.type == "item" && this.params.type == "jobs")
           (data.payload as Article).content += `<div class='contacts'>${
             (data.payload as Article).contacts
