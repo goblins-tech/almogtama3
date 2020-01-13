@@ -254,12 +254,7 @@ app.get("/api/:type/:id?", (req, res, next) => {
 });
 
 // Serve static files from /browser
-app.get(
-  "*.*",
-  express.static(DIST_FOLDER, {
-    maxAge: "1y"
-  })
-);
+app.get("*.*", express.static(DIST_FOLDER, { maxAge: "1y" }));
 
 // All regular routes use the Universal engine
 app.get("*", (req, res) => {
