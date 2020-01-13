@@ -18,7 +18,7 @@ import {
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { FormlyModule } from "@ngx-formly/core";
 import { FormlyMaterialModule } from "@ngx-formly/material";
-import { FormlyFieldFile } from "./formly";
+import { FormlyFieldFile, FormlyFieldQuill } from "./formly";
 import { MetaService } from "./meta.service";
 
 //material design
@@ -88,7 +88,8 @@ const routes: Routes = [
     KeepHtmlPipe,
     ContentPipe,
     LengthPipe,
-    FormlyFieldFile
+    FormlyFieldFile,
+    FormlyFieldQuill
   ],
   exports: [RouterModule],
   imports: [
@@ -98,7 +99,8 @@ const routes: Routes = [
     ReactiveFormsModule,
     FormlyModule.forRoot({
       types: [
-        { name: "file", component: FormlyFieldFile } //todo: add to component instead of module
+        { name: "file", component: FormlyFieldFile }, //todo: add to component instead of module
+        { name: "quill", component: FormlyFieldQuill }
       ]
     }),
     FormlyMaterialModule,

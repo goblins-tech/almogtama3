@@ -2,6 +2,7 @@ import { Component, ViewChild, Input, OnInit } from "@angular/core";
 import { FormGroup, FormArray } from "@angular/forms";
 import { FormlyFieldConfig, FormlyFormOptions } from "@ngx-formly/core";
 import { FieldType } from "@ngx-formly/material";
+import { QuillEditorComponent } from "ngx-quill";
 
 //formly doesn't support 'file' type, so we create a custom one.
 //todo: pass attributes, such as style="display:none;" to replace it with a button
@@ -81,6 +82,14 @@ export class FormlyFieldFile extends FieldType implements OnInit {
   }
 }
 
+@Component({
+  selector: "formly-field-quill",
+  template: `
+    <quill-editor></quill-editor>
+  `
+})
+export class FormlyFieldQuill extends FieldType {}
+
 //create some basic forms
 export interface Formly {
   form: FormGroup | FormArray;
@@ -124,7 +133,7 @@ export let article = {
     },
     {
       key: "content", //todo: auto resize,
-      template: "<quill-editor></quill-editor>",
+      type: "textarea",
       templateOptions: {
         label: "Content",
         required: true,
@@ -146,6 +155,18 @@ export let article = {
         //  change: "onFilesAdded()", //todo: error??
         //to add a header: attributes: {data-header:'say something'}
       }
+    },
+    {
+      key: "Quill",
+      template: "<b>Quill:</b> <quill-editor></quill-editor>"
+    },
+    {
+      key: "Quill2",
+      component: QuillEditorComponent
+    },
+    {
+      key: "Quill3",
+      type: "quill"
     }
 
     //todo:cover image
