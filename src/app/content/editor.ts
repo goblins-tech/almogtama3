@@ -47,8 +47,27 @@ export class ContentEditorComponent implements OnInit {
       console.log({ params, calculatedParamas: this.params });
 
       //change content.type from textarea to quill
-      article.fields[article.fields.findIndex(el => el.key == "content")].type =
-        "quill";
+      let content =
+        article.fields[article.fields.findIndex(el => el.key == "content")];
+      content.type = "quill";
+      if (!content.templateOptions)
+        content.templateOptions = { label: "content" };
+      content.templateOptions["modules"] = {
+        toolbar: [
+          ["bold", "italic", "underline", "strike"],
+          ["blockquote", "code-block"],
+          [{ header: [false, 2, 3, 4] }],
+          [{ list: "ordered" }, { list: "bullet" }],
+          [{ script: "sub" }, { script: "super" }],
+          [{ direction: ["rtl", "ltr"] }],
+          [{ size: ["small", false, "large"] }],
+          [{ color: [] }, { background: [] }],
+          [{ align: [] }],
+          ["link", "image", "video"],
+          ["clean"]
+        ]
+        //syntax:true ->install highlight.js or ngx-highlight
+      };
 
       if (this.params.type == "jobs") {
         //delete cover image since jobs.layout=="list" not grid

@@ -88,10 +88,13 @@ export class FormlyFieldFile extends FieldType implements OnInit {
     <quill-editor
       [formControl]="formControl"
       [formlyAttributes]="field"
+      [modules]="to.modules"
     ></quill-editor>
   `
 })
-export class FormlyFieldQuill extends FieldType {}
+export class FormlyFieldQuill extends FieldType {
+  //@Input() modules = {};
+}
 
 //create some basic forms
 export interface Formly {
@@ -132,6 +135,15 @@ export let article = {
       templateOptions: {
         label: "Subtitle",
         maxLength: 200
+      }
+    },
+    {
+      key: "slug",
+      type: "input",
+      templateOptions: {
+        label: "slug",
+        maxLength: 50,
+        description: "maximum: 50 charachters"
       }
     },
     {
