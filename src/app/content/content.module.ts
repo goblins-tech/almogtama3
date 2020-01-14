@@ -20,6 +20,7 @@ import { FormlyModule } from "@ngx-formly/core";
 import { FormlyMaterialModule } from "@ngx-formly/material";
 import { FormlyFieldFile, FormlyFieldQuill } from "./formly";
 import { MetaService } from "./meta.service";
+import { HighlightModule } from "ngx-highlightjs";
 
 //material design
 import {
@@ -117,7 +118,8 @@ const routes: Routes = [
     MatSnackBarModule,
     ShareButtonsModule,
     FontAwesomeModule,
-    QuillModule.forRoot()
+    QuillModule.forRoot(),
+    HighlightModule //todo: import common languages only https://ngx-highlight.netlify.com/
   ],
   providers: [MetaService],
   bootstrap: []

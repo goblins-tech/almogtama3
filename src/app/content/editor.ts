@@ -5,6 +5,7 @@ import { Observable } from "rxjs";
 import { MatSnackBar } from "@angular/material";
 import { Data } from "./index"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
 import { article } from "./formly";
+import { HighlightJS } from "ngx-highlightjs";
 
 export interface Params {
   type: string;
@@ -31,7 +32,8 @@ export class ContentEditorComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private httpService: HttpService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private hljs: HighlightJS
   ) {}
   ngOnInit() {
     //todo: if($_GET[id])getData(type,id)
