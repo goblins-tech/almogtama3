@@ -1,6 +1,6 @@
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { Routes, RouterModule } from "@angular/router";
+import { Routes, RouterModule, UrlSegment } from "@angular/router";
 import { ContentComponent } from "./index";
 import { ContentEditorComponent } from "./editor";
 import { ContentManageComponent } from "./manage";
@@ -70,12 +70,86 @@ import {
   faInfo
 } from "@fortawesome/free-solid-svg-icons";
 
+/*
+currently aot doesn't support lambda or anonumous functions,
+so we need to export the function and then pass it to matcher
+Wrong: matcher:function(url){} or matcher:url=>{}
+correct: export function something(url){}  matcher:something
+
+error:
+ Function expressions are not supported in decorators
+ Consider changing the function expression into an exported function
+
+it will work in dev mode, but gives error in prod mode (i.e: when --aot enabled).
+
+https://angular.io/guide/aot-metadata-errors#function-calls-not-supported
+https://angular.io/guide/aot-compiler#function-expression
+https://medium.com/angular-in-depth/solving-aot-error-in-ngrx-function-calls-are-not-supported-in-decorators-5c337381457a
+ */
+export function editorMatcher(url) {
+  return url.length > 1 &&
+    ["jobs", "articles"].includes(url[0].path) &&
+    url[1].path == "editor"
+    ? {
+        consumed: url,
+        posParams: {
+          type: new UrlSegment(url[0].path, {}),
+          id: new UrlSegment(url[2].path, {})
+        }
+      }
+    : null;
+}
+
+export function manageMatcher(url) {
+  return url.length == 2 &&
+    ["jobs", "articles"].includes(url[0].path) &&
+    url[1].path == "manage"
+    ? {
+        consumed: url,
+        posParams: {
+          type: new UrlSegment(url[0].path, {})
+        }
+      }
+    : null;
+}
+
+export function contentMatcher(url) {
+  return (url.length == 1 || url.length == 2) &&
+    ["jobs", "articles"].includes(url[0].path)
+    ? {
+        consumed: url,
+        posParams: {
+          type: new UrlSegment(url[0].path, {}),
+          item: new UrlSegment(url[1].path, {})
+        }
+      }
+    : null;
+}
 const routes: Routes = [
-  { path: ":type", component: ContentComponent },
-  { path: ":type/editor", component: ContentEditorComponent },
-  { path: ":type/editor/:id", component: ContentEditorComponent },
-  { path: ":type/manage", component: ContentManageComponent },
-  { path: ":type/:item", component: ContentComponent } //item = id-slug
+  {
+    // (jobs|articles)/editor/:id
+    matcher: editorMatcher,
+    component: ContentEditorComponent
+  },
+  {
+    // (jobs|articles)/manage
+    matcher: manageMatcher,
+    component: ContentManageComponent
+  },
+  {
+    // (jobs|articles)/:id
+    matcher: contentMatcher,
+    component: ContentComponent
+  },
+
+  //arbitrary content type ex: /content/test/editor
+  //todo: error: clicking on the article title link will nagigate to /:type/:item instead of /content/:type/:item
+  //solutions: 1- pass content:boolean to paramMap, 2-use angular navigator
+  { path: "content/:type", component: ContentComponent },
+  { path: "content/:type/editor", component: ContentEditorComponent },
+  { path: "content/:type/editor/:id", component: ContentEditorComponent },
+  { path: "content/:type/manage", component: ContentManageComponent },
+  { path: "content/:type/:item", component: ContentComponent }
 ];
 
 @NgModule({
