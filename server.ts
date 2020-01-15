@@ -34,26 +34,33 @@ const {
 } = require("./dist/server/main");
 
 //todo: id (ObjectId | shortId) | limit (number)
-function getData(type: string, id) {
+function getData(params) {
   //console.log("getData", { type, id });
   return cache(
-    `./temp/${type}/${id || "index"}.json`,
+    `./temp/${params.type}/${params.id || "index"}.json`,
     () =>
       connect().then(() => {
-        let contentModel = model(type),
+        let contentModel = model(params.type),
           content;
         //  console.log("getData.cache()", { type, id });
-        if (id) content = contentModel.findById(id);
+        if (params.id) {
+          if (params.id.length == 24)
+            content = contentModel.findById(params.id);
+          else
+            content = contentModel.find({ shortId: params.id }, null, {
+              limit: 1
+            });
+        }
         //todo:   //id: objectId or shortId
         else
           content = contentModel.find({}, null, {
-            limit: 10,
+            limit: params.limit || 50,
             sort: { _id: -1 }
           });
         //console.log("content", content);
         return content;
       }),
-    id ? 0 : 24 //index must be updated every 3hrs (even if it removed on update), item may be remain forever
+    params.id ? 0 : 24 //index must be updated periodly (even if it removed on update), item may be remain forever
   );
 }
 
@@ -88,7 +95,11 @@ const json = {
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
       if (data instanceof Array)
         fs.writeFileSync(`${dir}/index.json`, JSON.stringify(data));
-      else fs.writeFileSync(`${dir}/${data._id}.json`, JSON.stringify(data));
+      else
+        fs.writeFileSync(
+          `${dir}/${data.shortId || data._id}.json`,
+          JSON.stringify(data)
+        );
     }
   }
 };
@@ -251,7 +262,7 @@ app.get("/api/:type/:id?", (req, res, next) => {
   let type = req.params.type,
     id = req.params.id;
   console.log("app.get", { type, id });
-  getData(type, id)
+  getData(req.params)
     .then(
       payload => res.json({ type: id ? "item" : "list", payload }),
       error => ({ type: error, error }) //todo: content/index.html admin:show error
