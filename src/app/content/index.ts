@@ -92,10 +92,10 @@ export class ContentComponent implements OnInit, AfterViewInit {
         this.hljs.highlightBlock(item).subscribe();
       });
 
-    document.querySelectorAll("pre.ql-syntax").forEach((item: any) => {
+    /*  document.querySelectorAll("pre.ql-syntax").forEach((item: any) => {
       this.hljs.highlightBlock(item).subscribe();
     });
-
+*/
     this.quillView.nativeElement
       .querySelectorAll("pre.ql-syntax")
       .forEach((item: any) => {
