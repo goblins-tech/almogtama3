@@ -195,22 +195,27 @@ app.use((req, res, next) => {
 
 //multer hanles multipart/form-data ONLY, make sure to add enctype="multipart/form-data" to <form>
 //todo: add multer to specific urls: app.post(url,multer,(req,res)=>{})
+//todo: if(error)res.json(error)
 app.use(
   multer({
-    fileSize: 5 * 1024 * 1024,
-    files: 20,
+    limits: {
+      fileSize: 5 * 1024 * 1024,
+      fieldSize: 10 * 1024 * 1024, //form total size; formData[content] contains some images (base64 encoded)
+      files: 20
+    },
     fileFilter: function(req, file, cb) {
-      console.log("multer", { req, file, cb });
+      console.log("multer fileFilter", { req, file, cb });
       cb(null, true); //to reject this file cb(null,false) or cb(new error(..))
     },
     storage: multer.diskStorage({
       destination: function(req, file, cb) {
+        console.log("multer destination", { req, file, cb });
         let dir = `./assets/uploads/${req.params.type}`;
-
         if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
         cb(null, dir);
       },
       filename: function(req, file, cb) {
+        console.log("multer filename", { req, file, cb });
         cb(null, Date.now() + Path.extname(file.originalname)); //todo: $id-$img-alt|post-title-timestamp.$ext
       }
     })
