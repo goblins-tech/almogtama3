@@ -12,6 +12,7 @@ import { Observable } from "rxjs";
 import { MetaService } from "./meta.service";
 import { HighlightJS } from "ngx-highlightjs";
 import { QuillViewComponent } from "ngx-quill"; //todo: enable sanitizing https://www.npmjs.com/package/ngx-quill#security-hint
+import { environment as env } from "../../environments/environment";
 
 export interface Obj {
   [key: string]: any;
@@ -79,28 +80,36 @@ export class ContentComponent implements OnInit, AfterViewInit {
             baseUrl: "https://www.almogtama3.com/",
             ...data.payload
           });
+
+        console.log({
+          params,
+          calculatedParamas: this.params,
+          "typeof data": typeof data
+          //data
+        });
       });
-      console.log({ params, calculatedParamas: this.params });
     });
   }
   ngAfterViewInit() {
     //or this.hljs.initHighlighting().subscribe(); Applies highlighting to all <pre><code>..</code></pre> blocks on a page.
     //don't use document.querySelectorAll(..), it will search over all elements even those outside this component
-    this.comp.nativeElement
-      .querySelectorAll("pre.ql-syntax")
-      .forEach((item: any) => {
-        this.hljs.highlightBlock(item).subscribe();
-      });
+    if (this.comp)
+      this.comp.nativeElement
+        .querySelectorAll("pre.ql-syntax")
+        .forEach((item: any) => {
+          this.hljs.highlightBlock(item).subscribe();
+        });
 
     /*  document.querySelectorAll("pre.ql-syntax").forEach((item: any) => {
       this.hljs.highlightBlock(item).subscribe();
     });
 */
-    this.quillView.nativeElement
-      .querySelectorAll("pre.ql-syntax")
-      .forEach((item: any) => {
-        this.hljs.highlightBlock(item).subscribe();
-      });
+    if (this.quillView)
+      this.quillView.nativeElement
+        .querySelectorAll("pre.ql-syntax")
+        .forEach((item: any) => {
+          this.hljs.highlightBlock(item).subscribe();
+        });
 
     let comp = this.comp.nativeElement;
     console.log("selector", {
@@ -111,6 +120,17 @@ export class ContentComponent implements OnInit, AfterViewInit {
       p: comp.querySelectorAll("p"),
       html: comp.querySelectorAll("html")
     });
+
+    //activate adsense
+    if (env.production) {
+      let adsense = document.getElementById("adsense");
+      if (adsense) {
+        //adsense.setAttribute("data-ad-client", "ca-pub-8421502147716920"); //todo: ad sharing
+        let adsenseSrc = adsense.dataset.src; //to avoid warning: adSense head tag doesn't support data-src attribut
+        adsense.removeAttribute("data-src");
+        adsense.setAttribute("src", adsenseSrc);
+      }
+    } else console.warn("adsense disabled in dev mode.");
   }
   getData() {
     return this.httpService.get<Data>(this.params.type, this.params.id);
