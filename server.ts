@@ -23,7 +23,8 @@ export interface Request extends Obj {}
 // Express server
 const app = express();
 
-const DIST_FOLDER = join(process.cwd(), "./dist/browser"); //process.cwd() dosen't include /dist
+const DIST = join(process.cwd(), "./dist/browser"); //process.cwd() dosen't include /dist
+const MEDIA = join(process.cwd(), "./data/media"); //don't save media files inside dist, as dist may be deleted at any time
 
 // * NOTE :: leave this as require() since this file is built Dynamically from webpack
 const {
@@ -160,11 +161,20 @@ app.engine(
 );
 
 app.set("view engine", "html");
-app.set("views", DIST_FOLDER);
+app.set("views", DIST);
 
 //to use req.protocol in case of using a proxy in between (ex: cloudflare, heroku, ..), without it express may always returns req.protocole="https" even if GET/ https://***
 //https://stackoverflow.com/a/46475726
 app.enable("trust proxy");
+
+//add trailing slash to all requests,
+//https://expressjs.com/en/guide/using-middleware.html
+//https://dev.to/splodingsocks/getting-all-404s-with-your-firebase-functions-3p1
+
+app.use((req, res, next) => {
+  if (!req.path) req.url = `/{req.url}`;
+  next();
+});
 
 app.use((req, res, next) => {
   //redirect http -> https & naked -> www
@@ -188,17 +198,10 @@ app.use((req, res, next) => {
   }
   next();
 });
+
 app.use(bodyParser.json());
 app.use(cors());
 
-//add trailing slash to all requests,
-//https://expressjs.com/en/guide/using-middleware.html
-//https://dev.to/splodingsocks/getting-all-404s-with-your-firebase-functions-3p1
-
-app.use((req, res, next) => {
-  if (!req.path) req.url = `/{req.url}`;
-  next();
-});
 /*
  cors default options:
  {
@@ -227,7 +230,7 @@ app.use(
     storage: multer.diskStorage({
       destination: function(req, file, cb) {
         console.log("multer destination", { req, file, cb });
-        let dir = `./assets/uploads/${req.params.type}`;
+        let dir = `${MEDIA}/uploads/${req.params.type}`;
         if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
         cb(null, dir);
       },
@@ -251,17 +254,33 @@ app.use(
 
 app.post("/api/:type", (req, res) => {
   //console.log("server post", { body: req.body });
-  saveData(req.params.type, req.body).then(
-    data => {
-      //todo: delete cache index & item (if __id)
-      cache(`./temp/${req.params.type}/index.json`, ":purge:");
-      if (req.params._id)
-        cache(`./temp/${req.params.type}/${req.params._id}.json`, ":purge:");
-      if (data && data._id) res.send({ ok: true, data });
-      else res.send({ ok: false, err: "no data" });
-    },
-    err => res.send({ ok: false, err })
-  );
+  //handle base64 data
+  if (req.body && req.body.content) {
+    let data = new Date();
+    req.body.content = req.body.content.replace(
+      /<img src="data:image\/(.+?);base64,(.+?)==">/g,
+      (match, group1, group2, position, fullString) => {
+        let dir = `${MEDIA}/${req.params.type}`, //todo: send to firebase bucket
+          file = `${data.getTime()}-${req.body.title}.${group1}`; //todo: slug(title,limit=50)
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(`${dir}/${file}`, group2, "base64");
+
+        return `<img src="${req.params.type}/${file}" alt="${req.body.title}" />`;
+      }
+    );
+
+    saveData(req.params.type, req.body).then(
+      data => {
+        //todo: delete cache index & item (if __id)
+        cache(`./temp/${req.params.type}/index.json`, ":purge:");
+        if (req.params._id)
+          cache(`./temp/${req.params.type}/${req.params._id}.json`, ":purge:");
+        if (data && data._id) res.send({ ok: true, data });
+        else res.send({ ok: false, err: "no data" });
+      },
+      err => res.send({ ok: false, err })
+    );
+  } else res.send({ ok: false, err: "no data" });
 });
 
 app.get("/api/:type/:id?", (req, res, next) => {
@@ -276,8 +295,9 @@ app.get("/api/:type/:id?", (req, res, next) => {
     .catch(next); //https://expressjs.com/en/advanced/best-practice-performance.html#use-promises
 });
 
-// Serve static files from /browser
-app.get("*.*", express.static(DIST_FOLDER, { maxAge: "1y" }));
+// Serve static files; /file.ext will be served from /dist/browser/file.ext then /data/media/file.ext
+app.get("*.*", express.static(DIST, { maxAge: "1y" })); //static assets i.e: created at build time; may be deleted at any time and recreated at build time
+app.get("*.*", express.static(MEDIA, { maxAge: "1y" })); //data files i.e: created at runtime via API calls
 
 // All regular routes use the Universal engine
 app.get("*", (req, res) => {
