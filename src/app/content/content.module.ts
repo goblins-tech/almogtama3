@@ -9,11 +9,11 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { QuillModule } from "ngx-quill";
 import {
   SlugPipe,
-  ReplacePipe,
   Nl2brPipe,
   KeepHtmlPipe,
   ContentPipe,
-  LengthPipe
+  LengthPipe,
+  SummaryPipe
 } from "./pipes";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { FormlyModule } from "@ngx-formly/core";
@@ -120,7 +120,7 @@ export function contentMatcher(url) {
         consumed: url,
         posParams: {
           type: new UrlSegment(url[0].path, {}),
-          item: url[1] ? new UrlSegment(url[1].path, {}) : null
+          item: url[1] ? new UrlSegment(url[1].path, {}) : null //todo: error: Cannot read property 'path' of null
         }
       }
     : null;
@@ -158,11 +158,11 @@ const routes: Routes = [
     ContentEditorComponent,
     ContentManageComponent,
     SlugPipe,
-    ReplacePipe,
     Nl2brPipe,
     KeepHtmlPipe,
     ContentPipe,
     LengthPipe,
+    SummaryPipe,
     FormlyFieldFile,
     FormlyFieldQuill
   ],

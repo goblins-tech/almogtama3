@@ -1,18 +1,5 @@
 import { Pipe, PipeTransform } from "@angular/core";
-import { DomSanitizer } from "@angular/platform-browser";
-import { objectType } from "../../../eldeeb/general";
-
-export type ContentValue = any; //todo: article{} | string
-
-function getValue(value, keys?: string | string[]) {
-  if (objectType(value) == "object") {
-    if (!(keys instanceof Array)) keys = [keys];
-    for (let i = 0; i < keys.length; i++)
-      if (value[keys[i]] && value[keys[i]] !== "") return value[keys[i]];
-  }
-  if (typeof value != "string") return "";
-  return value;
-}
+import * as fn from "./functions";
 
 @Pipe({
   name: "slug"
@@ -26,16 +13,8 @@ export class SlugPipe implements PipeTransform {
    * @param  value     [description]
    * @return [description]
    */
-  transform(value: ContentValue, length = 200): string {
-    let slug = getValue(value, ["slug", "title"])
-      .trim() //remove trailing spaces
-      .replace(/\s+/g, "-") //replace inner spaces with '-'
-      .replace("/", "") //replace '/' with '-', to prevent changing the current route ex: url/slug1-slug2 instead of /slug1/slug2
-      .replace(/-{2,}/g, "-") //remove sequental slaches
-      .replace(/^-+|-+$/g, ""); //remove trailing slashes, equivilant to php .trim('-'), starts or ends with one or more slashes
-    if (length) slug = slug.slice(0, length);
-    return slug;
-    //todo: remove unwanted charachters & very short words
+  transform(value, length = 200): string {
+    return fn.slug(value, length);
   }
 }
 
@@ -43,19 +22,18 @@ export class SlugPipe implements PipeTransform {
   name: "content"
 })
 export class ContentPipe implements PipeTransform {
-  constructor(private sanitizer: DomSanitizer) {}
-  transform(value: ContentValue): string {
-    return getValue(value, ["content"]).replace(/\r\n|\n\r|\r|\n/g, "<br />"); //nl2br
-    //todo: KeepHTML, hypernate links,
+  //constructor(private sanitizer: DomSanitizer) {}
+  transform(value): string {
+    return fn.content(value);
   }
 }
 
 @Pipe({
-  name: "replace"
+  name: "summary"
 })
-export class ReplacePipe implements PipeTransform {
-  transform(value: string, x: string | RegExp, y: string = ""): string {
-    return value.replace(x, y);
+export class SummaryPipe implements PipeTransform {
+  transform(value): string {
+    return fn.summary(value);
   }
 }
 
@@ -64,7 +42,7 @@ export class ReplacePipe implements PipeTransform {
 })
 export class LengthPipe implements PipeTransform {
   transform(value: string, length = 200): string {
-    return getValue(value).slice(0, length);
+    return fn.length(value, length);
   }
 }
 
@@ -73,13 +51,13 @@ export class LengthPipe implements PipeTransform {
 })
 export class Nl2brPipe implements PipeTransform {
   transform(value: string): string {
-    return getValue(value).replace(/\r\n|\n\r|\r|\n/g, "<br />");
+    return fn.nl2br(value);
   }
 }
 
 @Pipe({ name: "keepHtml", pure: false })
 export class KeepHtmlPipe implements PipeTransform {
-  constructor(private sanitizer: DomSanitizer) {}
+  constructor(/*private sanitizer: DomSanitizer*/) {}
   /**
   Display HTML without sanitizing
   don't do: <p>{{content | keepHtml}}</p> -> error: SafeValue must use [property]=binding
@@ -91,13 +69,7 @@ export class KeepHtmlPipe implements PipeTransform {
  * @param  content   [description]
  * @return [description]
  */
-  transform(content: string) {
-    return content;
-    /*
-    - apply nl2br, keepHTML
-    - hypernate links
-     */
-
-    return this.sanitizer.bypassSecurityTrustHtml(content);
+  transform(content) {
+    return fn.keepHtml(content /*, this.sanitizer*/);
   }
 }

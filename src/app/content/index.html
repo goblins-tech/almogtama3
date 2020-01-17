@@ -74,7 +74,7 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
       />
       <mat-card-content
         dir="auto"
-        [innerHtml]="item.content | content"
+        [innerHtml]="item.content | summary"
       ></mat-card-content>
       <!-- <mat-card-actions>
         <button mat-flat-button color="primary">
@@ -97,7 +97,7 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
         >
       </h4>
       <h6 mat-line dir="auto">{{item.subtitle | length:200}}</h6>
-      <div mat-line [innerHtml]="item.content | content" dir="auto"></div>
+      <div mat-line [innerHtml]="item.content | summary" dir="auto"></div>
       <!-- todo: add cancel btn -->
     </mat-list-item>
   </mat-list>
