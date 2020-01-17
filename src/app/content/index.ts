@@ -13,6 +13,7 @@ import { MetaService } from "./meta.service";
 import { HighlightJS } from "ngx-highlightjs";
 import { QuillViewComponent } from "ngx-quill"; //todo: enable sanitizing https://www.npmjs.com/package/ngx-quill#security-hint
 import { environment as env } from "../../environments/environment";
+import { summary } from "./functions";
 
 export interface Obj {
   [key: string]: any;
@@ -73,8 +74,9 @@ export class ContentComponent implements OnInit, AfterViewInit {
 
         //todo: import site meta tage from config
         //todo: if(data.type==list)
-        if (data.type == "item")
+        if (data.type == "item" && data.payload)
           this.meta.setTags({
+            description: summary((data.payload as Article).contacts),
             name: "almogtama3",
             hashtag: "@almogtama3", //todo: @hashtag or #hashtag for twitter??
             baseUrl: "https://www.almogtama3.com/",

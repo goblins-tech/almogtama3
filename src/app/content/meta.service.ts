@@ -38,7 +38,7 @@ export class MetaService {
     if (tags.title != tags.name) {
       tags.title += " | " + tags.name;
     }
-    tags.description = tags.description || tags.desc;
+    tags.description = tags.description || tags.desc; //todo: || summary(content) from ./functions
     tags.image_src = tags.image_src || tags.image || tags.img;
     tags.url =
       (tags.baseUrl + tags.baseUrl.substr(-1) !== "/" ? "/" : "" || "") + // todo: check this line if baseUrl is empty or null
