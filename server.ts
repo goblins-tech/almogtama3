@@ -39,27 +39,33 @@ function getData(params) {
   return cache(
     `./temp/${params.type}/${params.id || "index"}.json`,
     () =>
-      connect().then(() => {
-        let contentModel = model(params.type),
-          content;
-        //  console.log("getData.cache()", { type, id });
-        if (params.id) {
-          if (params.id.length == 24)
-            content = contentModel.findById(params.id);
+      connect()
+        .then(() => {
+          let contentModel = model(params.type),
+            content;
+          //  console.log("getData.cache()", { type, id });
+          if (params.id) {
+            if (params.id.length == 24)
+              content = contentModel.findById(params.id);
+            else
+              content = contentModel.find({ shortId: params.id }, null, {
+                limit: 1
+              }); //note that the returned result is an array, not object
+          }
+          //todo:   //id: objectId or shortId
           else
-            content = contentModel.find({ shortId: params.id }, null, {
-              limit: 1
+            content = contentModel.find({}, null, {
+              limit: params.limit || 50,
+              sort: { _id: -1 }
             });
-        }
-        //todo:   //id: objectId or shortId
-        else
-          content = contentModel.find({}, null, {
-            limit: params.limit || 50,
-            sort: { _id: -1 }
-          });
-        //console.log("content", content);
-        return content;
-      }),
+          //console.log("content", content);
+          return content;
+        })
+        .then(content =>
+          params.id && params.id.length != 24 && content instanceof Array
+            ? content[0]
+            : content
+        ),
     params.id ? 0 : 24 //index must be updated periodly (even if it removed on update), item may be remain forever
   );
 }
