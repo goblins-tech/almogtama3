@@ -5,7 +5,10 @@ import { ContentComponent } from "./index";
 import { ContentEditorComponent } from "./editor";
 import { ContentManageComponent } from "./manage";
 import { ShareButtonsModule } from "@ngx-share/buttons";
-import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import {
+  FontAwesomeModule,
+  FaIconLibrary
+} from "@fortawesome/angular-fontawesome";
 import { QuillModule } from "ngx-quill";
 import {
   SlugPipe,
@@ -37,38 +40,8 @@ import {
   MatSnackBarModule
 } from "@angular/material";
 
-//fontawsome icons
-import { library as fontAwsome } from "@fortawesome/fontawesome-svg-core";
-
-import {
-  faFacebookF,
-  faTwitter,
-  faRedditAlien,
-  faLinkedinIn,
-  faGooglePlusG,
-  faTumblr,
-  faPinterestP,
-  faWhatsapp,
-  faFacebookMessenger,
-  faTelegramPlane,
-  faMix,
-  faXing,
-  faLine
-} from "@fortawesome/free-brands-svg-icons";
-import {
-  faCommentAlt,
-  faMinus,
-  faEllipsisH,
-  faLink,
-  faExclamation,
-  faPrint,
-  faCheck,
-  faEnvelope,
-  faBook,
-  faLightbulb,
-  faCoffee,
-  faInfo
-} from "@fortawesome/free-solid-svg-icons";
+import { fab } from "@fortawesome/free-brands-svg-icons";
+import { fas } from "@fortawesome/free-solid-svg-icons";
 
 /*
 currently aot doesn't support lambda or anonumous functions,
@@ -199,29 +172,7 @@ const routes: Routes = [
   bootstrap: []
 })
 export class ContentModule {
-  constructor() {
-    fontAwsome.add(
-      faFacebookF,
-      faTwitter,
-      faLinkedinIn,
-      faGooglePlusG,
-      faPinterestP,
-      faRedditAlien,
-      faTumblr,
-      faWhatsapp,
-      faFacebookMessenger,
-      faTelegramPlane,
-      faMix,
-      faXing,
-      faCommentAlt,
-      faLine,
-      faEnvelope,
-      faCheck,
-      faPrint,
-      faExclamation,
-      faLink,
-      faEllipsisH,
-      faMinus
-    );
+  constructor(faIconLibrary: FaIconLibrary) {
+    faIconLibrary.addIconPacks(fab, fas);
   }
 }
