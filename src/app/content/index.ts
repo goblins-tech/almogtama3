@@ -66,22 +66,25 @@ export class ContentComponent implements OnInit, AfterViewInit {
       this.getData().subscribe(data => {
         //here we can change the data
         if (typeof data == "string") data = JSON.parse(data); //ex: the url fetched via a ServiceWorker
-        if (data.payload && data.type == "item" && this.params.type == "jobs")
-          (data.payload as Article).content += `<div class='contacts'>${
-            (data.payload as Article).contacts
-          }</div>`;
-        this.data = data;
 
         //todo: import site meta tage from config
         //todo: if(data.type==list)
-        if (data.type == "item" && data.payload)
+        if (data.type == "item" && data.payload) {
           this.meta.setTags({
-            description: summary((data.payload as Article).contacts),
+            description: summary((data.payload as Article).content),
             name: "almogtama3",
             hashtag: "@almogtama3", //todo: @hashtag or #hashtag for twitter??
             baseUrl: "https://www.almogtama3.com/",
             ...data.payload
           });
+
+          if (this.params.type == "jobs")
+            (data.payload as Article).content += `<div class='contacts'>${
+              (data.payload as Article).contacts
+            }</div>`;
+        }
+
+        this.data = data;
 
         console.log({
           params,

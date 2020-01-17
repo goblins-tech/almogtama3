@@ -20,7 +20,7 @@ module.exports = {
   },
   output: {
     // Puts the output at the root of the dist folder
-    path: path.join(__dirname, "dist"),
+    path: path.join(__dirname, "dist"), //todo: dist/this.mode
     filename: "[name].js",
     library: "",
     libraryTarget: "commonjs-module"
