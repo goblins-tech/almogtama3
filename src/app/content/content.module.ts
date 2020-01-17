@@ -94,7 +94,7 @@ export function editorMatcher(url) {
         consumed: url,
         posParams: {
           type: new UrlSegment(url[0].path, {}),
-          id: url[2] ? new UrlSegment(url[2].path, {}) : null
+          id: new UrlSegment(url[2] ? url[2].path : null, {})
         }
       }
     : null;
@@ -120,7 +120,7 @@ export function contentMatcher(url) {
         consumed: url,
         posParams: {
           type: new UrlSegment(url[0].path, {}),
-          item: url[1] ? new UrlSegment(url[1].path, {}) : null //todo: error: Cannot read property 'path' of null
+          item: new UrlSegment(url[1] ? url[1].path : null, {}) //todo: error: Cannot read property 'path' of null
         }
       }
     : null;
