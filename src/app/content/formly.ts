@@ -8,10 +8,11 @@ import { FieldType } from "@ngx-formly/material";
 //add it to module:   FormlyModule.forRoot({types: [{ name: 'file', component: FormlyFieldFile, wrappers:['form-field'] }, ]}),
 //todo: pass label:  {type:"file",label:"we don't want this value, pass it to out child component as an attribute", templateOptions:{attributes:{label:"cover image"}}}
 //todo: emit events: progress, response, change (fileAdded)
+//todo: move custom types (such as quill) out of formly
+
 @Component({
   selector: "formly-field-file",
   template: `
-    <!--h4 *ngIf="label">{{ header }}</h4-->
     <input
       type="file"
       #fileInput
@@ -20,6 +21,7 @@ import { FieldType } from "@ngx-formly/material";
       multiple
       [formControl]="formControl"
       [formlyAttributes]="field"
+      [name]="name"
     />
     <button
       type="button"
@@ -53,8 +55,14 @@ export class FormlyFieldFile extends FieldType implements OnInit {
   @ViewChild("fileInput", { static: false }) fileInput;
   @Input() progress: number = 0; //todo: progress:Observable & subscribe to it
   files: Set<File> = new Set();
+  name = "";
 
   ngAfterViewInit() {
+    console.log({
+      formControl: this.to.formControl,
+      formControl2: this.to.formControl2,
+      formControl3: this.formControl //todo: this.formControl.fields contains only this input, not all form inputs,we need to pass articleForm.form to this.formControl
+    });
     console.log({
       templateOptions: this.to, //contains any data that passed to Field.templateOptions{}, same as using nativeElement
       label: this.to.label, //in template: {{to.label}}
@@ -166,7 +174,9 @@ export let article = {
       key: "cover",
       type: "file", //or: component:FormlyFieldFile, wasn't tested
       templateOptions: {
-        label: "Cover image" //todo: move this to attributes.label
+        label: "Cover image", //todo: move this to attributes.label
+        formControl: basic.form,
+        formControl2: this.form
         //  change: "onFilesAdded()", //todo: error??
         //to add a header: attributes: {data-header:'say something'}
       }

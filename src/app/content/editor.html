@@ -25,10 +25,6 @@
       [model]="articleForm.model"
     ></formly-form>
 
-    <!--tmp:-->
-    <input type="file" name="test" formControlName="cover" value="" />
-    <!--Cannot find control with name: 'file'-->
-
     <!--
   using (ngSubmit)="onSubmit(..)" causes the form to show errors after submitting
   so we replaced it with (click)="onSubmit(..)", and  type="submit" with type="button"
