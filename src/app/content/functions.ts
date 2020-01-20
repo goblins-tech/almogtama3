@@ -65,9 +65,9 @@ export function nl2br(value: string) {
   return getValue(value).replace(/\r\n|\n\r|\r|\n/g, "<br />");
 }
 
-export function keepHtml(value: ContentValue, sanitizer?) {
-  //todo: if(!sanitizer)sanitizer=new DomSanitizer() or use DI (dependency injection)
+//prevent Angular from sanitizing DOM, https://angular.io/guide/security#xss
+export function keepHtml(value: ContentValue, sanitizer?): string {
+  //if (!sanitizer) sanitizer = new DomSanitizer(); //todo: error TS2511: Cannot create an instance of an abstract class.
   let content = getValue(value, "content");
-  return content;
-  //todo: return sanitizer.bypassSecurityTrustHtml(content);
+  return sanitizer.bypassSecurityTrustHtml(content);
 }
