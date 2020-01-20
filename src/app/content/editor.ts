@@ -6,6 +6,7 @@ import { MatSnackBar } from "@angular/material";
 import { Data } from "./index"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
 import { article } from "./formly";
 import { HighlightJS } from "ngx-highlightjs";
+import { keepHtml } from "./functions";
 
 export interface Params {
   type: string;
@@ -77,15 +78,26 @@ export class ContentEditorComponent implements OnInit {
           1
         );
 
-        article.fields.push({
-          key: "pictures",
-          type: "file",
-          templateOptions: {
-            label: "Pictures",
-            description: "Upload some nice pictures",
-            required: true
+        article.fields.push(
+          {
+            key: "pictures",
+            type: "file",
+            templateOptions: {
+              label: "Pictures",
+              description: "Upload some nice pictures",
+              required: true
+            }
+          },
+          {
+            key: "test",
+            template: keepHtml(`test: <input type="text" />`),
+            templateOptions: {
+              label: "test",
+              description: "test using keepHtml",
+              required: true
+            }
           }
-        });
+        );
 
         //add field:contacts after content
         article.fields.splice(

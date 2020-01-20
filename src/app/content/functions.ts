@@ -1,5 +1,5 @@
 import { objectType } from "../../../eldeeb/general";
-import { DomSanitizer } from "@angular/platform-browser";
+import { DomSanitizer, ɵDomSanitizerImpl } from "@angular/platform-browser";
 
 export type ContentValue = any; //todo: article{} | string
 export interface Obj {
@@ -67,7 +67,9 @@ export function nl2br(value: string) {
 
 //prevent Angular from sanitizing DOM, https://angular.io/guide/security#xss
 export function keepHtml(value: ContentValue, sanitizer?): string {
-  //if (!sanitizer) sanitizer = new DomSanitizer(); //todo: error TS2511: Cannot create an instance of an abstract class.
   let content = getValue(value, "content");
-  return sanitizer.bypassSecurityTrustHtml(content);
+  //  if (!sanitizer) sanitizer = new DomSanitizer(); //todo: error TS2511: Cannot create an instance of an abstract class.
+  //also ɵDomSanitizerImpl();needs 1 argument constructor(_doc)
+  //  return sanitizer.bypassSecurityTrustHtml(content);
+  return content;
 }
