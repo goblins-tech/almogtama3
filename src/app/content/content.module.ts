@@ -1,4 +1,4 @@
-import { NgModule } from "@angular/core";
+import { LOCALE_ID, NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Routes, RouterModule, UrlSegment } from "@angular/router";
 import { ContentComponent } from "./index";
@@ -24,6 +24,11 @@ import { FormlyMaterialModule } from "@ngx-formly/material";
 import { FormlyFieldFile, FormlyFieldQuill } from "./formly";
 import { MetaService } from "./meta.service";
 import { HighlightModule } from "ngx-highlightjs";
+import {
+  FileTypeComponent,
+  FileTypeModule,
+  FileTypeValidationMessages
+} from "ngx-formly-material-file";
 
 //material design
 import {
@@ -125,6 +130,9 @@ const routes: Routes = [
   { path: "content/:type/:item", component: ContentComponent }
 ];
 
+export const APP_LOCALE_ID = "en-US";
+export const fileTypeModule = FileTypeModule.forRoot();
+
 @NgModule({
   declarations: [
     ContentComponent,
@@ -145,11 +153,14 @@ const routes: Routes = [
     RouterModule.forChild(routes),
     FormsModule,
     ReactiveFormsModule,
+    fileTypeModule, //https://github.com/ng-packagr/ng-packagr/issues/1127#issuecomment-437351093 , https://github.com/alEX860111/ngx-formly-material-file/issues/1
     FormlyModule.forRoot({
       types: [
-        { name: "file", component: FormlyFieldFile, wrappers: ["form-field"] }, //todo: add to component instead of module
+        //{ name: "file", component: FormlyFieldFile, wrappers: ["form-field"] }, //todo: add to component instead of module
+        { name: "file", component: FileTypeComponent }, //from ngx-formly-material-file
         { name: "quill", component: FormlyFieldQuill, wrappers: ["form-field"] }
       ]
+      //validationMessages: new FileTypeValidationMessages(APP_LOCALE_ID).validationMessages
     }),
     FormlyMaterialModule,
     MatFormFieldModule,
@@ -168,7 +179,7 @@ const routes: Routes = [
     QuillModule.forRoot(),
     HighlightModule //todo: import common languages only https://ngx-highlight.netlify.com/
   ],
-  providers: [MetaService],
+  providers: [MetaService, { provide: LOCALE_ID, useValue: APP_LOCALE_ID }],
   bootstrap: []
 })
 export class ContentModule {

@@ -77,6 +77,16 @@ export class ContentEditorComponent implements OnInit {
           1
         );
 
+        article.fields.push({
+          key: "pictures",
+          type: "file",
+          templateOptions: {
+            label: "Pictures",
+            description: "Upload some nice pictures",
+            required: true
+          }
+        });
+
         //add field:contacts after content
         article.fields.splice(
           article.fields.findIndex(el => el.key == "content") + 1,
