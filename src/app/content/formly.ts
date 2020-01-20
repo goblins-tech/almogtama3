@@ -2,6 +2,25 @@ import { Component, ViewChild, Input, OnInit } from "@angular/core";
 import { FormGroup, FormArray } from "@angular/forms";
 import { FormlyFieldConfig, FormlyFormOptions } from "@ngx-formly/core";
 import { FieldType } from "@ngx-formly/material";
+/*
+the following properties are available from node_modules/@ngx-formly/core/lib/templates/fileType.d.ts
+-> can be used inside the template: ex: {{field | json}}
+->go to {FieldType} to see all properties from parent classes.
+
+ - field: F;  -> {key, type, id, templateOptions, hooks, ...}
+ - defaultOptions?: F;
+ - model: any;
+ - form: FormGroup;
+ - options: F['options'];
+ - readonly key: string;
+ - readonly formControl: import("@angular/forms").AbstractControl;
+ - readonly to ... ; //same as field.templateOptions{}
+ - readonly showError: boolean;
+ - readonly id: string; //same as field.id
+ - readonly formState: any;
+
+ in addition to properties from node_modules/@ngx-formly/lib/components/formly.field.config.d.ts
+ */
 
 //formly doesn't support 'file' type, so we create a custom one.
 //todo: pass attributes, such as style="display:none;" to replace it with a button
