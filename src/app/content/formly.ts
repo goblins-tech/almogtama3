@@ -112,14 +112,14 @@ export interface Formly {
   options?: FormlyFormOptions;
 }
 
-export let basic = {
+export let basic: Formly = {
   form: new FormGroup({}),
   fields: [],
   model: {},
   options: {}
 };
 
-export let article = {
+export let article: Formly = {
   ...basic, //todo: is this method cause that the same form controls (i.e basic.form) to be used with every form?
   fields: [
     {
@@ -183,7 +183,7 @@ export let article = {
     }
   ]
 };
-export let register = { ...basic, fields: [] };
+export let register: Formly = { ...basic, fields: [] };
 
 /*
 to add static text:

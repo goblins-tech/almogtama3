@@ -200,6 +200,7 @@ app.use((req, res, next) => {
 });
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(cors());
 
 /*
@@ -252,8 +253,8 @@ app.use(
   })
 );*/
 
-app.post("/api/:type", (req, res) => {
-  //console.log("server post", { body: req.body });
+app.post("/api/:type", (<any>req, res) => {
+  console.log("server post", { body: req.body,files: req.files });
   //handle base64 data
   if (req.body && req.body.content) {
     let data = new Date();
