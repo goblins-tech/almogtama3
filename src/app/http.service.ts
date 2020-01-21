@@ -6,6 +6,7 @@ import {
   HttpResponse
 } from "@angular/common/http";
 import { Observable, Subject } from "rxjs";
+import { production } from "../environments/environment";
 
 export interface Obj {
   [key: string]: any;
@@ -21,7 +22,7 @@ export class HttpService {
   }
 
   post(type: string, data: Obj, options: Obj = {}) {
-    console.log("httpService post", { type, data });
+    if (!production) console.log("httpService post", { type, data });
     options = options || {};
     if (options.formData !== false) data = this.toFormData(data); //typescript 3.2 dosen't support null safe operator i.e: options?.formData
     delete options.formData;
@@ -33,17 +34,42 @@ export class HttpService {
     return new HttpRequest(method, `/api/${type}`, data, options);
   }
 
-  toFormData(data): FormData {
-    console.log("toFormData:", data);
+  /**
+   * [toFormData description]
+   * @method toFormData
+   * @param  data           [description]
+   * @param  singleElements append the element as a single entry i.e: JSON.stringify(el)
+   * @return [description]
+   */
+  toFormData(data, singleElements?: string[]): FormData {
+    if (!production) console.log("toFormData:", data);
     if (data instanceof FormData) return data;
     let formData = new FormData();
+
     for (let key in data) {
       if (data.hasOwnProperty(key)) {
-        if (data[key] == null) data[key] = ""; //formData converts null to "null" , FormData can contain only strings or blobs
-        formData.append(key, data[key]);
+        let el = data[key];
+        if (
+          (el instanceof Array || el instanceof FileList) &&
+          (!singleElements || !singleElements.includes(key))
+        ) {
+          //if (!key.endsWith("[]")) key += "[]";
+          //FileList.forEach() is not a function
+          for (let i = 0; i < el.length; i++) formData.append(key, el[i]);
+        } else {
+          if (el == null) el = "";
+          //formData converts null to "null" , FormData can contain only strings or blobs
+          else if (el instanceof Array) el = JSON.stringify(el);
+          formData.append(key, el);
+        }
       }
     }
-    console.log({ formData });
+    if (!production)
+      console.log({
+        formData,
+        cover: formData.getAll("cover"),
+        "cover[]": formData.getAll("cover[]")
+      });
     return formData;
   }
 

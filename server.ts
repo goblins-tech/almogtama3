@@ -12,6 +12,7 @@ import parseDomain from "parse-domain";
 import { cache } from "./eldeeb/fs";
 
 console.clear();
+const dev = process.env.NODE_ENV === "development";
 
 export interface Obj {
   [key: string]: any;
@@ -124,7 +125,7 @@ function connect() {
       "Xx159753@@"
     )}@almogtama3-gbdqa.gcp.mongodb.net/${dbName}?retryWrites=true&w=majority`;
 
-    if (process.env.NODE_ENV) console.log({ url });
+    if (dev) console.log({ url });
     db = mongoose.connect(url, {
       useNewUrlParser: true,
       useUnifiedTopology: true
@@ -200,7 +201,7 @@ app.use((req, res, next) => {
 });
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
 /*
@@ -217,31 +218,30 @@ app.use(cors());
 //multer hanles multipart/form-data ONLY, make sure to add enctype="multipart/form-data" to <form>
 //todo: add multer to specific urls: app.post(url,multer,(req,res)=>{})
 //todo: if(error)res.json(error)
-app.use(
-  multer({
-    limits: {
-      fileSize: 5 * 1024 * 1024,
-      fieldSize: 10 * 1024 * 1024, //form total size; formData[content] contains some images (base64 encoded)
-      files: 20
+//todo: fn upload(options){return merge(options,defaultOptions)}
+let upload = multer({
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+    fieldSize: 10 * 1024 * 1024, //form total size; formData[content] contains some images (base64 encoded)
+    files: 20
+  },
+  fileFilter: function(req, file, cb) {
+    if (dev) console.log("multer fileFilter", { req, file, cb });
+    cb(null, true); //to reject this file cb(null,false) or cb(new error(..))
+  },
+  storage: multer.diskStorage({
+    destination: function(req, file, cb) {
+      if (dev) console.log("multer destination", { req, file, cb });
+      let dir = `${MEDIA}/uploads/${req.params.type}`;
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      cb(null, dir);
     },
-    fileFilter: function(req, file, cb) {
-      console.log("multer fileFilter", { req, file, cb });
-      cb(null, true); //to reject this file cb(null,false) or cb(new error(..))
-    },
-    storage: multer.diskStorage({
-      destination: function(req, file, cb) {
-        console.log("multer destination", { req, file, cb });
-        let dir = `${MEDIA}/uploads/${req.params.type}`;
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        cb(null, dir);
-      },
-      filename: function(req, file, cb) {
-        console.log("multer filename", { req, file, cb });
-        cb(null, Date.now() + Path.extname(file.originalname)); //todo: $id-$img-alt|post-title-timestamp.$ext
-      }
-    })
-  }).any()
-);
+    filename: function(req, file, cb) {
+      if (dev) console.log("multer filename", { req, file, cb });
+      cb(null, Date.now() + Path.extname(file.originalname)); //todo: $id-$img-alt|post-title-timestamp.$ext
+    }
+  })
+});
 
 /*app.use(
   formidableMiddleware({
@@ -254,8 +254,14 @@ app.use(
 );*/
 
 //todo: typescript: add files[] to `req` definition
-app.post("/api/:type", (req: any, res) => {
-  console.log("server post", { body: req.body, files: req.files });
+//todo: cover= only one img -> upload.single()
+app.post("/api/:type", upload.array("cover"), (req: any, res) => {
+  if (dev)
+    console.log("server post", {
+      body: req.body,
+      files: req.files,
+      cover: req.body.cover //should be moved to files[] via multer
+    });
   //handle base64 data
   if (!req.body || !req.body.content)
     res.send({ ok: false, err: "no data posted" });
@@ -288,7 +294,7 @@ app.post("/api/:type", (req: any, res) => {
 app.get("/api/:type/:id?", (req, res, next) => {
   let type = req.params.type,
     id = req.params.id;
-  console.log("app.get", { type, id });
+  if (dev) console.log("app.get", { type, id });
   getData(req.params)
     .then(
       payload => res.json({ type: id ? "item" : "list", payload }),
