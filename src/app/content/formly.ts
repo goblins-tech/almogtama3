@@ -1,6 +1,15 @@
-import { Component, ViewChild, Input, OnInit } from "@angular/core";
-import { FormGroup, FormArray } from "@angular/forms";
-import { FormlyFieldConfig, FormlyFormOptions } from "@ngx-formly/core";
+import { Component, Directive, ViewChild, Input, OnInit } from "@angular/core";
+import {
+  FormGroup,
+  FormArray,
+  NG_VALUE_ACCESSOR,
+  ControlValueAccessor
+} from "@angular/forms";
+import {
+  FormlyFieldConfig,
+  FormlyFormOptions,
+  FieldArrayType
+} from "@ngx-formly/core";
 import { FieldType } from "@ngx-formly/material";
 /*
 the following properties are available from node_modules/@ngx-formly/core/lib/templates/fileType.d.ts
@@ -105,6 +114,33 @@ export class FormlyFieldFile extends FieldType implements OnInit {
 
   remove(file) {
     this.files.delete(file);
+  }
+}
+
+//ControlValueAccessor for 'file' input
+//https://formly.dev/examples/other/input-file
+//https://github.com/angular/angular/issues/7341
+@Directive({
+  selector: "input[type=file]",
+  host: {
+    "(change)": "onChange($event.target.files)",
+    "(blur)": "onTouched()"
+  },
+  providers: [
+    { provide: NG_VALUE_ACCESSOR, useExisting: FileValueAccessor, multi: true }
+  ]
+})
+export class FileValueAccessor implements ControlValueAccessor {
+  value: any;
+  onChange = _ => {};
+  onTouched = () => {};
+
+  writeValue(value) {}
+  registerOnChange(fn: any) {
+    this.onChange = fn;
+  }
+  registerOnTouched(fn: any) {
+    this.onTouched = fn;
   }
 }
 

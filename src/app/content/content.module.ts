@@ -21,7 +21,7 @@ import {
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { FormlyModule } from "@ngx-formly/core";
 import { FormlyMaterialModule } from "@ngx-formly/material";
-import { FormlyFieldFile, FormlyFieldQuill } from "./formly";
+import { FormlyFieldFile, FileValueAccessor, FormlyFieldQuill } from "./formly";
 import { MetaService } from "./meta.service";
 import { HighlightModule } from "ngx-highlightjs";
 import {
@@ -145,6 +145,7 @@ export const fileTypeModule = FileTypeModule.forRoot();
     LengthPipe,
     SummaryPipe,
     FormlyFieldFile,
+    FileValueAccessor,
     FormlyFieldQuill
   ],
   exports: [RouterModule],
@@ -153,11 +154,11 @@ export const fileTypeModule = FileTypeModule.forRoot();
     RouterModule.forChild(routes),
     FormsModule,
     ReactiveFormsModule,
-    fileTypeModule, //https://github.com/ng-packagr/ng-packagr/issues/1127#issuecomment-437351093 , https://github.com/alEX860111/ngx-formly-material-file/issues/1
+    //fileTypeModule, //todo: error: unction calls are not supported in decorators but 'FileTypeModule' was called https://github.com/ng-packagr/ng-packagr/issues/1127#issuecomment-437351093 , https://github.com/alEX860111/ngx-formly-material-file/issues/1
     FormlyModule.forRoot({
       types: [
-        //{ name: "file", component: FormlyFieldFile, wrappers: ["form-field"] }, //todo: add to component instead of module
-        { name: "file", component: FileTypeComponent }, //from ngx-formly-material-file
+        { name: "file", component: FormlyFieldFile, wrappers: ["form-field"] }, //todo: add to component instead of module
+        //  { name: "file", component: FileTypeComponent }, //from ngx-formly-material-file,
         { name: "quill", component: FormlyFieldQuill, wrappers: ["form-field"] }
       ]
       //validationMessages: new FileTypeValidationMessages(APP_LOCALE_ID).validationMessages
