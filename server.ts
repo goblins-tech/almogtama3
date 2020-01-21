@@ -200,7 +200,7 @@ app.use((req, res, next) => {
 });
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 
 /*
@@ -253,35 +253,36 @@ app.use(
   })
 );*/
 
-app.post("/api/:type", (<any>req, res) => {
-  console.log("server post", { body: req.body,files: req.files });
+//todo: typescript: add files[] to `req` definition
+app.post("/api/:type", (req: any, res) => {
+  console.log("server post", { body: req.body, files: req.files });
   //handle base64 data
-  if (req.body && req.body.content) {
-    let data = new Date();
-    req.body.content = req.body.content.replace(
-      /<img src="data:image\/(.+?);base64,(.+?)==">/g,
-      (match, group1, group2, position, fullString) => {
-        let dir = `${MEDIA}/${req.params.type}`, //todo: send to firebase bucket
-          file = `${data.getTime()}-${req.body.title}.${group1}`; //todo: slug(title,limit=50)
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        fs.writeFileSync(`${dir}/${file}`, group2, "base64");
+  if (!req.body || !req.body.content)
+    res.send({ ok: false, err: "no data posted" });
+  let data = new Date();
+  req.body.content = req.body.content.replace(
+    /<img src="data:image\/(.+?);base64,(.+?)==">/g,
+    (match, group1, group2, position, fullString) => {
+      let dir = `${MEDIA}/${req.params.type}`, //todo: send to firebase bucket
+        file = `${data.getTime()}-${req.body.title}.${group1}`; //todo: slug(title,limit=50)
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(`${dir}/${file}`, group2, "base64");
 
-        return `<img src="${req.params.type}/${file}" alt="${req.body.title}" />`;
-      }
-    );
+      return `<img src="${req.params.type}/${file}" alt="${req.body.title}" />`;
+    }
+  );
 
-    saveData(req.params.type, req.body).then(
-      data => {
-        //todo: delete cache index & item (if __id)
-        cache(`./temp/${req.params.type}/index.json`, ":purge:");
-        if (req.params._id)
-          cache(`./temp/${req.params.type}/${req.params._id}.json`, ":purge:");
-        if (data && data._id) res.send({ ok: true, data });
-        else res.send({ ok: false, err: "no data" });
-      },
-      err => res.send({ ok: false, err })
-    );
-  } else res.send({ ok: false, err: "no data" });
+  saveData(req.params.type, req.body).then(
+    data => {
+      //todo: delete cache index & item (if __id)
+      cache(`./temp/${req.params.type}/index.json`, ":purge:");
+      if (req.params._id)
+        cache(`./temp/${req.params.type}/${req.params._id}.json`, ":purge:");
+      if (data && data._id) res.send({ ok: true, data });
+      else res.send({ ok: false, error: "no data" });
+    },
+    err => res.send({ ok: false, error: "error while saving data", err })
+  );
 });
 
 app.get("/api/:type/:id?", (req, res, next) => {
