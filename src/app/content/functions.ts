@@ -73,3 +73,29 @@ export function keepHtml(value: ContentValue, sanitizer?): string {
   //  return sanitizer.bypassSecurityTrustHtml(content);
   return content;
 }
+
+/*
+//or extends ProgressEvent; https://stackoverflow.com/a/35790786
+interface FileReaderEventTarget extends EventTarget {
+  result: string;
+}
+
+export interface FileReaderEvent extends Event {
+  target: FileReaderEventTarget;
+  getMessage(): string;
+}
+
+//usage: $("#img").attr("src", imgPreview(form.files[0]));
+//http://jsfiddle.net/LvsYc/638/
+//todo: return Observable
+export function imgPreview(file: FileReaderEvent) {
+  //todo: file:blob not FileReaderEvent
+  if (file) {
+    let reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function(e) {
+      return e.target.result;
+    };
+  }
+}
+*/
