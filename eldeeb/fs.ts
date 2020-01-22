@@ -4,6 +4,9 @@ import fs from "fs";
 import Path from "path";
 import { objectType, isEmpty, now, exportAll } from "./general";
 
+export * from "fs";
+export * from "path";
+
 export namespace types {
   export enum moveOptionsExisting {
     "replace",
@@ -23,8 +26,8 @@ export namespace types {
   // = string | Buffer | URL, but URL here refers to typescript/URL not node/URL
 }
 
-exportAll(fs);
-exportAll(Path); // todo: check if there is any conflict betweet fs & path methods
+//exportAll(fs);
+//exportAll(Path); // todo: check if there is any conflict betweet fs & path methods
 // todo: const fs=Fs(root): auto add root to all paths
 
 /**

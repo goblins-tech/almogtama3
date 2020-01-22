@@ -1,15 +1,20 @@
 import "zone.js/dist/zone-node";
 import express from "express";
-import { join } from "path";
-import * as fs from "fs";
-import * as Path from "path";
 import * as bodyParser from "body-parser";
 import cors from "cors"; //To be able to access our API from an angular application
 //import formidable from "formidable"; //to handle the uploaded files https://flaviocopes.com/express-forms-files/
 import multer from "multer";
 import mongoose from "mongoose";
 import parseDomain from "parse-domain";
-import { cache, mdir, ext } from "./eldeeb/fs";
+import {
+  cache,
+  mdir,
+  ext,
+  renameSync,
+  readFileSync,
+  writeFileSync,
+  join
+} from "./eldeeb/fs";
 import { slug } from "./src/app/content/functions";
 import shortId from "shortid";
 
@@ -95,7 +100,7 @@ const json = {
   get(type: string, id?: string | Number) {
     let file = `./temp/${type}/${id || "index"}.json`;
     try {
-      return JSON.parse(fs.readFileSync(file).toString() || null);
+      return JSON.parse(readFileSync(file).toString() || null);
     } catch (e) {
       console.warn(`json.get(${type},${id}) failed`, e);
     }
@@ -103,11 +108,11 @@ const json = {
   save(type: string, data) {
     if (data) {
       let dir = `./temp/${type}`;
-      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      mdir(dir);
       if (data instanceof Array)
-        fs.writeFileSync(`${dir}/index.json`, JSON.stringify(data));
+        writeFileSync(`${dir}/index.json`, JSON.stringify(data));
       else
-        fs.writeFileSync(
+        writeFileSync(
           `${dir}/${data.shortId || data._id}.json`,
           JSON.stringify(data)
         );
@@ -233,6 +238,7 @@ let upload = multer({
     if (dev) console.log("multer fileFilter", { result, req, file, cb });
     cb(null, result); //to reject this file cb(null,false) or cb(new error(..))
   },
+
   storage: multer.diskStorage({
     destination: function(req, file, cb) {
       let dir = `${MEDIA}/${req.params.type}`; //todo: media/$type/$shortId
@@ -265,6 +271,7 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
     console.log("server post", {
       body: req.body,
       files: req.files,
+      file: req.file,
       cover: req.body.cover //should be moved to files[] via multer
     });
   //handle base64 data
@@ -277,14 +284,14 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
     (match, group1, group2, position, fullString) => {
       let dir = `${MEDIA}/${req.params.type}`, //todo: send to firebase bucket
         file = `${slug(req.body.title)}-${date.getTime()}.${group1}`; //todo: slug(title,limit=50)
-      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(`${dir}/${file}`, group2, "base64");
+      mdir(dir);
+      writeFileSync(`${dir}/${file}`, group2, "base64");
 
       return `<img src="${req.params.type}/${file}" alt="${req.body.title}" />`;
     }
   );
 
-  //  req.body.content.shortId = shortId.generate();
+  req.body.content.shortId = shortId.generate();
 
   saveData(req.params.type, req.body).then(
     data => {
@@ -293,6 +300,7 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
       cache(`./temp/${req.params.type}/index.json`, ":purge:");
       if (req.params._id)
         cache(`./temp/${req.params.type}/${req.params._id}.json`, ":purge:");
+
       if (data && data._id) res.send({ ok: true, data });
       else res.send({ ok: false, msg: "no data" });
     },
