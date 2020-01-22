@@ -6,11 +6,12 @@ import {
   HttpResponse
 } from "@angular/common/http";
 import { Observable, Subject } from "rxjs";
-import { production } from "../environments/environment";
+import { environment } from "../environments/environment";
 
 export interface Obj {
   [key: string]: any;
 }
+const dev = !environment.production;
 
 @Injectable({
   providedIn: "root"
@@ -22,8 +23,9 @@ export class HttpService {
   }
 
   post(type: string, data: Obj, options: Obj = {}) {
-    if (!production) console.log("httpService post", { type, data });
+    if (dev) console.log("httpService post", { type, data });
     options = options || {};
+    //todo: sending data as FormData instead of Object causes that req.body=undefined
     if (options.formData !== false) data = this.toFormData(data); //typescript 3.2 dosen't support null safe operator i.e: options?.formData
     delete options.formData;
     return this.http.post<any>(`/api/${type}`, data, options);
@@ -35,15 +37,18 @@ export class HttpService {
   }
 
   /**
-   * [toFormData description]
+   * use formData when the form contains files (i.e: multipart), otherwise send the data as a json object
+   * note that body-parser doesn't handle multipart data which is what FormData is submitted as.
+   * instead use: busboy, formidable, multer, ..
+   * https://stackoverflow.com/questions/37630419/how-to-handle-formdata-from-express-4/37631882#37631882
    * @method toFormData
    * @param  data           [description]
    * @param  singleElements append the element as a single entry i.e: JSON.stringify(el)
-   * @return [description]
+   * @return FormData
    */
   toFormData(data, singleElements?: string[]): FormData {
-    if (!production) console.log("toFormData:", data);
     if (data instanceof FormData) return data;
+
     let formData = new FormData();
 
     for (let key in data) {
@@ -64,12 +69,7 @@ export class HttpService {
         }
       }
     }
-    if (!production)
-      console.log({
-        formData,
-        cover: formData.getAll("cover"),
-        "cover[]": formData.getAll("cover[]")
-      });
+    if (dev) console.log("toFormData()", { data, formData });
     return formData;
   }
 
