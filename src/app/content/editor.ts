@@ -136,8 +136,8 @@ export class ContentEditorComponent implements OnInit {
       //todo: send to articleForm.fields[type=file]
       else if (type == "response") {
         console.log("response", event.body);
-        this.submitting = false;
         this.response = event.body;
+        this.submitting = false;
         this.showSnackBar(
           event.body.ok ? "form submitted" : "Error " + event.body.msg || "",
           "close",
