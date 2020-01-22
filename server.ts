@@ -148,6 +148,7 @@ function connect() {
 function model(type) {
   //console.log("model: " +{ type, models: mongoose.models, modelNames: mongoose.modelNames() });
   if (mongoose.models[type]) return mongoose.models[type];
+  //todo: mongoose schemas
   var contentObj = {
     title: String,
     subtitle: String,
@@ -157,7 +158,7 @@ function model(type) {
   };
   if (type == "jobs")
     contentObj = { ...contentObj, contacts: String } as typeof contentObj; //https://stackoverflow.com/a/31816062/12577650 & https://github.com/microsoft/TypeScript/issues/18075
-  let contentSchema = new mongoose.Schema(contentObj);
+  let contentSchema = new mongoose.Schema(contentObj, { strict: false });
   let contentModel = mongoose.model(type, contentSchema);
   return contentModel;
 }
@@ -278,21 +279,23 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
       cover: req.body.cover //should be moved to files[] via multer
     });
 
-  //handle base64 data
   if (!req.body || !req.body.content)
     res.send({ ok: false, msg: "no data posted" });
-
-  let sid = shortId.generate();
-  req.body.shortId = sid;
-  let dir = `${MEDIA}/${req.params.type}/${sid}`; //todo: send to firebase bucket
-  mdir(dir);
 
   if (!req.body.slug || req.body.slug == "")
     req.body.slug = slug(req.body.title); //if slug changed, cover fileName must be changed
 
+  let sid = shortId.generate(),
+    dir = `${MEDIA}/${req.params.type}/${sid}`, //todo: send to firebase bucket
+    cover = `${req.body.slug}-cover.jpg`;
+  //let ext = "."+req.file.mimetype.replace("image/", ""); //or ext(req.file.originalname)
+  req.body.shortId = sid;
+  mdir(dir);
+
+  //handle base64 data
   let date = new Date();
   req.body.content = req.body.content.replace(
-    /<img src="data:image\/(.+?);base64,(.+?)==">/g,
+    /<img src="data:image\/(.+?);base64,(.+?)==">/g, //todo: handle other mimetypes
     (match, group1, group2, position, fullString) => {
       let file = `${req.body.slug}-${date.getTime()}.${group1}`; //todo: slug(title,limit=50)
       writeFileSync(`${dir}/${file}`, group2, "base64");
@@ -308,16 +311,10 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
       if (req.params._id)
         cache(`./temp/${req.params.type}/${req.params._id}.json`, ":purge:");
 
-      if (req.file) {
-        //let ext = "."+req.file.mimetype.replace("image/", ""); //or ext(req.file.originalname)
-        renameSync(
-          req.file.path,
-          `${dir}/${data.slug || slug(data.title)}-cover.jpg`
-        );
+      //todo: update data cover=$filename.$ext
+      if (req.file) renameSync(req.file.path, `${dir}/${cover}`);
 
-        //todo: update data cover=$filename.$ext
-      }
-
+      //todo: data.cover=..
       if (data && data._id) res.send({ ok: true, data });
       else res.send({ ok: false, msg: "no data" });
     },
@@ -333,6 +330,11 @@ app.get("/api/:type/:id?", (req, res, next) => {
     .then(
       payload => {
         let cover = `${type}/${payload.shortId}/${payload.slug}.jpg`;
+        console.log(
+          payload,
+          `${MEDIA}/${cover}`,
+          existsSync(`${MEDIA}/${cover}`)
+        );
         if (existsSync(`${MEDIA}/${cover}`)) payload.cover = cover;
         res.json({ type: id ? "item" : "list", payload });
       },
