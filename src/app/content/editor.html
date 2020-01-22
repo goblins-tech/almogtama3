@@ -6,7 +6,8 @@
 >
   <ng-container *ngIf="response.ok==true; else error">
     form submitted successfully<br />
-    <a href="/{{params.type}}/{{response.data._id}}-{{response.data | slug}}"
+    <a
+      href="/{{params.type}}/{{response.data._id}}-{{response.data | slug:200:':ar' }}"
       >{{response.data.title}}</a
     >
   </ng-container>

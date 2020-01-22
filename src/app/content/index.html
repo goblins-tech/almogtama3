@@ -19,7 +19,8 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
     <mat-card-header>
       <div mat-card-avatar><img src="assets/avatar-female.png" /></div>
       <mat-card-title dir="auto">
-        <a href="{{params.type}}/{{item.shortId || item._id}}-{{item | slug }}"
+        <a
+          href="{{params.type}}/{{item.shortId || item._id}}-{{item | slug:200:':ar' }}"
           >{{item.title | length:200}}</a
         ></mat-card-title
       >
@@ -62,7 +63,7 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
         <div mat-card-avatar><img src="assets/avatar-male.png" /></div>
         <mat-card-title dir="auto"
           ><a
-            href="{{params.type}}/{{item.shortId || item._id}}-{{item | slug}}"
+            href="{{params.type}}/{{item.shortId || item._id}}-{{item | slug:200:':ar' }}"
             >{{item.title}}</a
           ></mat-card-title
         >
@@ -92,7 +93,8 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
   <mat-list>
     <mat-list-item *ngFor="let item of data">
       <h4 mat-line dir="auto">
-        <a href="{{params.type}}/{{item.shortId || item._id}}-{{item | slug }}"
+        <a
+          href="{{params.type}}/{{item.shortId || item._id}}-{{item | slug:200:':ar'  }}"
           >{{item.title | length:200}}</a
         >
       </h4>

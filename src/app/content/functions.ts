@@ -16,15 +16,32 @@ export function getValue(value, keys?: string | string[]) {
   return value;
 }
 
-export function slug(value: ContentValue, lngth = 200) {
+/**
+ * [slug description]
+ * @method slug
+ * @param  value           [description]
+ * @param  lngth=200       [description]
+ * @param  allowedChars="" regex style ex: a-z0-9
+ * @return [description]
+ */
+export function slug(value: ContentValue, lngth = 200, allowedChars = "") {
+  let lang = {
+    ar: "أابتثجحخدذرزسشصضطظعغفقكلمنهويىآئءلألإإآة"
+  };
+
+  allowedChars = allowedChars
+    .split("|")
+    .map(el => (el.startsWith(":") ? lang[el.substr(1)] : ""))
+    .join("");
   let slug = getValue(value, ["slug", "title"])
     .trim() //remove trailing spaces
+    .replace(new RegExp(`[^a-z0-9-._~${allowedChars}]`, "gi"), "-") //remove unallowed charachters
     .replace(/\s+/g, "-") //replace inner spaces with '-'
-    .replace("/", "") //replace '/' with '-', to prevent changing the current route ex: url/slug1-slug2 instead of /slug1/slug2
+    //.replace("/", "") //replace '/' with '-', to prevent changing the current route ex: url/slug1-slug2 instead of /slug1/slug2
     .replace(/-{2,}/g, "-") //remove sequental slaches
     .replace(/^-+|-+$/g, ""); //remove trailing slashes, equivilant to php .trim('-'), starts or ends with one or more slashes
 
-  return length(slug, lngth);
+  return length(encodeURIComponent(slug), lngth);
   //todo: remove unwanted charachters & very short words}
 }
 export function content(value: ContentValue) {
