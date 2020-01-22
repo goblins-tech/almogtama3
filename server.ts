@@ -9,7 +9,8 @@ import cors from "cors"; //To be able to access our API from an angular applicat
 import multer from "multer";
 import mongoose from "mongoose";
 import parseDomain from "parse-domain";
-import { cache } from "./eldeeb/fs";
+import { cache, ext } from "./eldeeb/fs";
+import shortId from "shortid";
 
 console.clear();
 const dev = process.env.NODE_ENV === "development";
@@ -79,6 +80,7 @@ function saveData(type: string, data) {
     () => {
       if (data) {
         //console.log("connected");
+        //  data.shortId = shortId.generate();
         let contentModel = model(type);
         let content = new contentModel(data);
         return content.save();
@@ -232,13 +234,13 @@ let upload = multer({
   storage: multer.diskStorage({
     destination: function(req, file, cb) {
       if (dev) console.log("multer destination", { req, file, cb });
-      let dir = `${MEDIA}/uploads/${req.params.type}`;
+      let dir = `${MEDIA}/${req.params.type}`; //todo: media/$type/$shortId
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
       cb(null, dir);
     },
     filename: function(req, file, cb) {
       if (dev) console.log("multer filename", { req, file, cb });
-      cb(null, Date.now() + Path.extname(file.originalname)); //todo: $id-$img-alt|post-title-timestamp.$ext
+      cb(Date.now() + Path.extname(req.title + "." + ext(file.originalname)));
     }
   })
 });
@@ -264,13 +266,14 @@ app.post("/api/:type", upload.array("cover"), (req: any, res) => {
     });
   //handle base64 data
   if (!req.body || !req.body.content)
-    res.send({ ok: false, err: "no data posted" });
-  let data = new Date();
+    res.send({ ok: false, msg: "no data posted" });
+
+  let date = new Date();
   req.body.content = req.body.content.replace(
     /<img src="data:image\/(.+?);base64,(.+?)==">/g,
     (match, group1, group2, position, fullString) => {
       let dir = `${MEDIA}/${req.params.type}`, //todo: send to firebase bucket
-        file = `${data.getTime()}-${req.body.title}.${group1}`; //todo: slug(title,limit=50)
+        file = `${date.getTime()}-${req.body.title}.${group1}`; //todo: slug(title,limit=50)
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(`${dir}/${file}`, group2, "base64");
 
@@ -278,16 +281,19 @@ app.post("/api/:type", upload.array("cover"), (req: any, res) => {
     }
   );
 
+  //  req.body.content.shortId = shortId.generate();
+
   saveData(req.params.type, req.body).then(
     data => {
+      //  upload.array("cover");
       //todo: delete cache index & item (if __id)
       cache(`./temp/${req.params.type}/index.json`, ":purge:");
       if (req.params._id)
         cache(`./temp/${req.params.type}/${req.params._id}.json`, ":purge:");
       if (data && data._id) res.send({ ok: true, data });
-      else res.send({ ok: false, error: "no data" });
+      else res.send({ ok: false, msg: "no data" });
     },
-    err => res.send({ ok: false, error: "error while saving data", err })
+    err => res.send({ ok: false, msg: "error while saving data", err })
   );
 });
 
