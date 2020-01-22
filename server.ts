@@ -329,7 +329,7 @@ app.get("/api/:type/:id?", (req, res, next) => {
   getData(req.params)
     .then(
       payload => {
-        let cover = `${type}/${payload.shortId}/${payload.slug}.jpg`;
+        let cover = `${type}/${payload.shortId}/${payload.slug}-cover.jpg`;
         console.log(
           payload,
           `${MEDIA}/${cover}`,
