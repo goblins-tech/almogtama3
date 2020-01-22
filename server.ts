@@ -329,13 +329,15 @@ app.get("/api/:type/:id?", (req, res, next) => {
   getData(req.params)
     .then(
       payload => {
-        let cover = `${type}/${payload.shortId}/${payload.slug}-cover.jpg`;
-        console.log(
-          payload,
-          `${MEDIA}/${cover}`,
-          existsSync(`${MEDIA}/${cover}`)
-        );
-        if (existsSync(`${MEDIA}/${cover}`)) payload.cover = cover;
+        if (id) {
+          let cover = `${type}/${payload.shortId}/${payload.slug}-cover.jpg`;
+          if (existsSync(`${MEDIA}/${cover}`)) payload.cover = cover;
+        } else
+          payload.map(item => {
+            let cover = `${type}/${item.shortId}/${item.slug}-cover.jpg`;
+            if (existsSync(`${MEDIA}/${cover}`)) item.cover = cover;
+            return item;
+          });
         res.json({ type: id ? "item" : "list", payload });
       },
       error => ({ type: error, error }) //todo: content/index.html admin:show error
