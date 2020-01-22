@@ -13,7 +13,9 @@ import {
   renameSync,
   readFileSync,
   writeFileSync,
-  join
+  existsSync,
+  join,
+  resolve
 } from "./eldeeb/fs";
 import { slug } from "./src/app/content/functions";
 import shortId from "shortid";
@@ -234,22 +236,23 @@ let upload = multer({
     files: 20
   },
   fileFilter: function(req, file, cb) {
-    let result = true;
+    let result = file.mimetype.startsWith("image/");
     if (dev) console.log("multer fileFilter", { result, req, file, cb });
     cb(null, result); //to reject this file cb(null,false) or cb(new error(..))
   },
-
+  //multer uses memoryStorage by default
+  //diskStorage saves the uploaded file to the default temp dir,
+  //but rename(c:/oldPath, d:/newPath) not allowed,
+  //so we upload the file to a temporary dir inside the same partition
+  //https://stackoverflow.com/a/43206506/12577650
   storage: multer.diskStorage({
     destination: function(req, file, cb) {
-      let dir = `${MEDIA}/${req.params.type}`; //todo: media/$type/$shortId
+      let dir = "./temp/uploads";
       mdir(dir);
-      if (dev) console.log("multer destination", { dir, req, file, cb });
       cb(null, dir);
     },
     filename: function(req, file, cb) {
-      let fileName = slug(req.body.title) + ext(file.originalname);
-      if (dev) console.log("multer filename", { fileName, req, file, cb });
-      cb(null, fileName);
+      cb(null, `tmp${new Date().getTime()}.tmp`);
     }
   })
 });
@@ -274,24 +277,28 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
       file: req.file,
       cover: req.body.cover //should be moved to files[] via multer
     });
+
   //handle base64 data
   if (!req.body || !req.body.content)
     res.send({ ok: false, msg: "no data posted" });
+
+  let sid = shortId.generate();
+  req.body.shortId = sid;
+  let dir = `${MEDIA}/${req.params.type}/${sid}`; //todo: send to firebase bucket
+  mdir(dir);
+
+  if (!req.body.slug || req.body.slug == "")
+    req.body.slug = slug(req.body.title); //if slug changed, cover fileName must be changed
 
   let date = new Date();
   req.body.content = req.body.content.replace(
     /<img src="data:image\/(.+?);base64,(.+?)==">/g,
     (match, group1, group2, position, fullString) => {
-      let dir = `${MEDIA}/${req.params.type}`, //todo: send to firebase bucket
-        file = `${slug(req.body.title)}-${date.getTime()}.${group1}`; //todo: slug(title,limit=50)
-      mdir(dir);
+      let file = `${req.body.slug}-${date.getTime()}.${group1}`; //todo: slug(title,limit=50)
       writeFileSync(`${dir}/${file}`, group2, "base64");
-
-      return `<img src="${req.params.type}/${file}" alt="${req.body.title}" />`;
+      return `<img src="${req.params.type}/${sid}/${file}" alt="${req.body.title}" />`;
     }
   );
-
-  req.body.content.shortId = shortId.generate();
 
   saveData(req.params.type, req.body).then(
     data => {
@@ -300,6 +307,16 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
       cache(`./temp/${req.params.type}/index.json`, ":purge:");
       if (req.params._id)
         cache(`./temp/${req.params.type}/${req.params._id}.json`, ":purge:");
+
+      if (req.file) {
+        //let ext = "."+req.file.mimetype.replace("image/", ""); //or ext(req.file.originalname)
+        renameSync(
+          req.file.path,
+          `${dir}/${data.slug || slug(data.title)}-cover.jpg`
+        );
+
+        //todo: update data cover=$filename.$ext
+      }
 
       if (data && data._id) res.send({ ok: true, data });
       else res.send({ ok: false, msg: "no data" });
@@ -314,7 +331,11 @@ app.get("/api/:type/:id?", (req, res, next) => {
   if (dev) console.log("app.get", { type, id });
   getData(req.params)
     .then(
-      payload => res.json({ type: id ? "item" : "list", payload }),
+      payload => {
+        let cover = `${type}/${payload.shortId}/${payload.slug}.jpg`;
+        if (existsSync(`${MEDIA}/${cover}`)) payload.cover = cover;
+        res.json({ type: id ? "item" : "list", payload });
+      },
       error => ({ type: error, error }) //todo: content/index.html admin:show error
     )
     .catch(next); //https://expressjs.com/en/advanced/best-practice-performance.html#use-promises
