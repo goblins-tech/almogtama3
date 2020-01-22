@@ -46,10 +46,12 @@ the following properties are available from node_modules/@ngx-formly/core/lib/te
       #fileInput
       style="display: none"
       (change)="onFilesAdded()"
-      multiple
       [formControl]="formControl"
       [formlyAttributes]="field"
-      [name]="name"
+      [name]="to.name"
+      [multiple]="to.multiple"
+      [accept]="to.accept"
+      [attr.capture]="to.capture"
     />
     <button
       type="button"
@@ -84,6 +86,9 @@ export class FormlyFieldFile extends FieldType implements OnInit {
   @Input() progress: number = 0; //todo: progress:Observable & subscribe to it
   files: Set<File> = new Set();
   name = "";
+  multiple = false;
+  accept = ""; //file type : ex: images/*
+  capture = ""; //source ex: accept="user" -> device webcam & mic
 
   ngAfterViewInit() {
     console.log({
@@ -230,8 +235,9 @@ export let article: Formly = {
       type: "file", //or: component:FormlyFieldFile, wasn't tested
       templateOptions: {
         label: "Cover image", //todo: move this to attributes.label
-        formControl: basic.form,
-        formControl2: this.form
+        multiple: false,
+        accept: "image/*"
+
         //  change: "onFilesAdded()", //todo: error??
         //to add a header: attributes: {data-header:'say something'}
       }
