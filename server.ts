@@ -9,7 +9,8 @@ import cors from "cors"; //To be able to access our API from an angular applicat
 import multer from "multer";
 import mongoose from "mongoose";
 import parseDomain from "parse-domain";
-import { cache, ext } from "./eldeeb/fs";
+import { cache, mdir, ext } from "./eldeeb/fs";
+import { slug } from "./src/app/content/functions";
 import shortId from "shortid";
 
 console.clear();
@@ -228,19 +229,21 @@ let upload = multer({
     files: 20
   },
   fileFilter: function(req, file, cb) {
-    if (dev) console.log("multer fileFilter", { req, file, cb });
-    cb(null, true); //to reject this file cb(null,false) or cb(new error(..))
+    let result = true;
+    if (dev) console.log("multer fileFilter", { result, req, file, cb });
+    cb(null, result); //to reject this file cb(null,false) or cb(new error(..))
   },
   storage: multer.diskStorage({
     destination: function(req, file, cb) {
-      if (dev) console.log("multer destination", { req, file, cb });
       let dir = `${MEDIA}/${req.params.type}`; //todo: media/$type/$shortId
-      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      mdir(dir);
+      if (dev) console.log("multer destination", { dir, req, file, cb });
       cb(null, dir);
     },
     filename: function(req, file, cb) {
-      if (dev) console.log("multer filename", { req, file, cb });
-      cb(Date.now() + Path.extname(req.title + "." + ext(file.originalname)));
+      let fileName = slug(req.body.title) + ext(file.originalname);
+      if (dev) console.log("multer filename", { fileName, req, file, cb });
+      cb(null, fileName);
     }
   })
 });
@@ -257,7 +260,7 @@ let upload = multer({
 
 //todo: typescript: add files[] to `req` definition
 //todo: cover= only one img -> upload.single()
-app.post("/api/:type", upload.array("cover"), (req: any, res) => {
+app.post("/api/:type", upload.single("cover"), (req: any, res) => {
   if (dev)
     console.log("server post", {
       body: req.body,
@@ -273,7 +276,7 @@ app.post("/api/:type", upload.array("cover"), (req: any, res) => {
     /<img src="data:image\/(.+?);base64,(.+?)==">/g,
     (match, group1, group2, position, fullString) => {
       let dir = `${MEDIA}/${req.params.type}`, //todo: send to firebase bucket
-        file = `${date.getTime()}-${req.body.title}.${group1}`; //todo: slug(title,limit=50)
+        file = `${slug(req.body.title)}-${date.getTime()}.${group1}`; //todo: slug(title,limit=50)
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(`${dir}/${file}`, group2, "base64");
 
