@@ -19,7 +19,7 @@ export interface Obj {
   [key: string]: any;
 }
 export interface Params extends Obj {
-  type: string;
+  category: string;
   id?: string;
 }
 export interface Article extends Obj {
@@ -54,44 +54,46 @@ export class ContentComponent implements OnInit, AfterViewInit {
   ) {}
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
-      //  /jobs/1-title
-      var type = params.get("type"),
-        item = params.get("item") || "";
+      //ex:  /$ctg/$id-title
+      var category = (params.get("category") || "").trim(),
+        item = (params.get("item") || "").trim();
 
       this.params = {
-        type,
-        id: item.substring(0, item.indexOf("-")) || item //todo: parse as number
+        category,
+        id: item.substring(0, item.indexOf("-")) || item
       };
-      //if (this.params.type == "jobs") this.layout = "list";
+
+      console.log({ params, calculatedParamas: this.params });
+
       this.getData().subscribe(data => {
-        //here we can change the data
         if (typeof data == "string") data = JSON.parse(data); //ex: the url fetched via a ServiceWorker
 
-        //todo: import site meta tage from config
-        //todo: if(data.type==list)
-        if (data.type == "item" && data.payload) {
-          this.meta.setTags({
-            description: summary((data.payload as Article).content),
-            name: "almogtama3",
-            hashtag: "@almogtama3", //todo: @hashtag or #hashtag for twitter??
-            baseUrl: "https://www.almogtama3.com/",
-            ...data.payload
-          });
+        //todo: import site meta tags from config
+        let metaTags = {
+          name: "almogtama3",
+          hashtag: "@almogtama3", //todo: @hashtag or #hashtag for twitter??
+          baseUrl: "https://www.almogtama3.com/"
+        };
 
-          if (this.params.type == "jobs")
-            (data.payload as Article).content += `<div class='contacts'>${
-              (data.payload as Article).contacts
-            }</div>`;
+        if (data.payload) {
+          if (data.type == "item") {
+            this.meta.setTags({
+              ...metaTags,
+              description: summary((data.payload as Article).content),
+              ...data.payload
+            });
+
+            if (this.params.type == "jobs")
+              (data.payload as Article).content += `<div class='contacts'>${
+                (data.payload as Article).contacts
+              }</div>`;
+          } else if (data.type == "list") {
+            this.meta.setTags({ ...metaTags });
+            //todo: meta tags from category
+          }
         }
 
         this.data = data;
-
-        console.log({
-          params,
-          calculatedParamas: this.params,
-          "typeof data": typeof data
-          //data
-        });
       });
     });
   }
@@ -138,6 +140,6 @@ export class ContentComponent implements OnInit, AfterViewInit {
     } else console.warn("adsense disabled in dev mode.");
   }
   getData() {
-    return this.httpService.get<Data>(this.params.type, this.params.id);
+    return this.httpService.get<Data>(this.params.category, this.params.id);
   }
 }

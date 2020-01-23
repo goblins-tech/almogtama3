@@ -22,10 +22,7 @@ we need to load AppRutingModule first then routes defineded in ContentModule (co
 then appRoutes in the last (because it contains '**')
  */
 const routes: Routes = [{ path: "social", component: SocialComponent }];
-const appRoutes: Routes = [
-  { path: "", redirectTo: "", pathMatch: "full" },
-  { path: "**", component: ErrorComponent }
-];
+const appRoutes: Routes = [{ path: "**", component: ErrorComponent }];
 
 let enableTracing = false; //true to trace routing navigations in dev mode
 

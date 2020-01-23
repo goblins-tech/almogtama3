@@ -9,7 +9,7 @@ import { HighlightJS } from "ngx-highlightjs";
 import { keepHtml } from "./functions";
 
 export interface Params {
-  type: string;
+  type: string; //todo: movr to query i.e: editor/?type=jobs
   id?: string;
 }
 
@@ -40,11 +40,12 @@ export class ContentEditorComponent implements OnInit {
     //todo: if($_GET[id])getData(type,id)
     this.route.paramMap.subscribe(params => {
       this.params = {
-        type: params.get("type"),
+        type: params.get("type") || "",
         id: params.get("id") || ""
       };
 
-      if (this.params.id != "") this.data$ = this.getData();
+      //todo: fix getData()
+      //if (this.params.id != "") this.data$ = this.getData();
       console.log({ params, calculatedParamas: this.params });
 
       //change content.type from textarea to quill
@@ -70,6 +71,7 @@ export class ContentEditorComponent implements OnInit {
         //,syntax: true //->install highlight.js or ngx-highlight
       };
 
+      //todo: if(category.config.type=='jobs')
       if (this.params.type == "jobs") {
         //delete cover image since jobs.layout=="list" not grid
         //dont use delete article.fields(...)
@@ -131,6 +133,7 @@ export class ContentEditorComponent implements OnInit {
     console.log("content.ts onSubmit()", data);
     this.submitting = true;
     let files = this.articleForm.fields.filter(el => el.type == "file"); //todo: articleForm.form.get('cover').files?
+    //todo: app.post("/api/",data)
     this.httpService.upload(this.params.type, data, (type, event, value) => {
       if (type == "progress") this.progress = value;
       //todo: send to articleForm.fields[type=file]

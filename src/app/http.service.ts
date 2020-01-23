@@ -18,8 +18,13 @@ const dev = !environment.production;
 })
 export class HttpService {
   constructor(private http: HttpClient) {}
-  get<T>(type: string, id: string) {
-    return this.http.get<T>(`/api/${type}/${id}`);
+  get<T>(category: string, id: string) {
+    var url = "/api/";
+    if (category) {
+      url += encodeURIComponent(category);
+      if (id) url + `/${id}`;
+    }
+    return this.http.get<T>(url);
   }
 
   post(type: string, data: Obj, options: Obj = {}) {

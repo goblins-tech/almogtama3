@@ -20,7 +20,7 @@ import {
 import { slug } from "./src/app/content/functions";
 import shortId from "shortid";
 
-console.clear();
+//console.clear();
 const dev = process.env.NODE_ENV === "development";
 
 export interface Obj {
@@ -47,28 +47,79 @@ const {
 //todo: id (ObjectId | shortId) | limit (number)
 function getData(params) {
   //console.log("getData", { type, id });
+  var cacheFile = "./temp/articles/";
+  if (params.id) cacheFile += `/${params.id}`;
+  else if (params.category) cacheFile += `/${params.category}`;
+  else cacheFile += "index";
+
+  cacheFile += ".json";
+
   return cache(
-    `./temp/${params.type}/${params.id || "index"}.json`,
+    cacheFile,
     () =>
       connect()
         .then(() => {
-          let contentModel = model(params.type),
+          let contentModel = model("articles"),
             content;
           //  console.log("getData.cache()", { type, id });
-          if (params.id) {
-            if (params.id.length == 24)
-              content = contentModel.findById(params.id);
-            else
-              content = contentModel.find({ shortId: params.id }, null, {
-                limit: 1
-              }); //note that the returned result is an array, not object
+          if (!params.category)
+            content = contentModel.find({}, null, { limit: 50 });
+          else {
+            if (params.id) {
+              if (params.id.length == 24)
+                content = contentModel.findById(params.id);
+              else
+                content = contentModel.find({ shortId: params.id }, null, {
+                  limit: 1
+                }); //note that the returned result is an array, not object
+            } else {
+              content = Promise.all([
+                cache(
+                  `temp/articles/categories.json`,
+                  () => model("categories").find({}),
+                  3
+                ),
+                cache(
+                  `temp/articles/article_categories.json`,
+                  () => model("article_categories").find({}),
+                  1
+                )
+              ]).then(([categories, article_categories]) => {
+                console.log({ categories, article_categories });
+                //get category._id from category.slug
+                let category = categories.find(
+                  el => el.slug == params.category
+                );
+                if (dev) console.log("category", category);
+
+                if (category) {
+                  //get articles from article_categories where category=category._id
+                  let selectedArticles = [];
+
+                  article_categories.forEach(el => {
+                    if (el.category == category._id)
+                      selectedArticles.push(el.article);
+                  });
+
+                  if (dev) console.log({ selectedArticles });
+
+                  //get articles from 'articles' where _id in selectedArticles[]
+                  let articles = model("articles").find(
+                    { _id: { $in: selectedArticles } },
+                    null,
+                    {
+                      limit: params.limit || 50,
+                      sort: { _id: -1 }
+                    }
+                  );
+
+                  //  if (dev)  articles.then(result => console.log("articles", result));
+                  return articles;
+                }
+              });
+            }
           }
-          //todo:   //id: objectId or shortId
-          else
-            content = contentModel.find({}, null, {
-              limit: params.limit || 50,
-              sort: { _id: -1 }
-            });
+
           //console.log("content", content);
           return content;
         })
@@ -147,20 +198,34 @@ function connect() {
 
 function model(type) {
   //console.log("model: " +{ type, models: mongoose.models, modelNames: mongoose.modelNames() });
+  //todo: schemas/mongoose.ts
   if (mongoose.models[type]) return mongoose.models[type];
-  //todo: mongoose schemas
-  var contentObj = {
-    title: String,
-    subtitle: String,
-    content: String,
-    keywoards: String,
-    date: { type: Date, default: Date.now }
+  let schemas = {
+    basic: {},
+    categories: {
+      title: String,
+      slug: String,
+      config: {}
+    },
+    article_categories: {},
+    articles: {
+      title: String,
+      subtitle: String,
+      content: String,
+      keywoards: String,
+      date: { type: Date, default: Date.now },
+      contacts: String //for jobs
+      //todo: other properties;
+    }
   };
-  if (type == "jobs")
-    contentObj = { ...contentObj, contacts: String } as typeof contentObj; //https://stackoverflow.com/a/31816062/12577650 & https://github.com/microsoft/TypeScript/issues/18075
-  let contentSchema = new mongoose.Schema(contentObj, { strict: false });
-  let contentModel = mongoose.model(type, contentSchema);
-  return contentModel;
+
+  let schemaObj = type in schemas ? schemas[type] : schemas["basic"];
+  let schema = new mongoose.Schema(schemaObj, { strict: false });
+  return mongoose.model(type, schema);
+  /*
+  jobsSchema = { ...schemas["article"], contacts: String } as typeof contentObj;
+  //https://stackoverflow.com/a/31816062/12577650 & https://github.com/microsoft/TypeScript/issues/18075
+ */
 }
 
 // Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
@@ -322,19 +387,22 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
   );
 });
 
-app.get("/api/:type/:id?", (req, res, next) => {
-  let type = req.params.type,
+app.get("/api/:category?/:id?", (req, res, next) => {
+  console.log(req.params);
+  let category = req.params.category,
     id = req.params.id;
-  if (dev) console.log("app.get", { type, id });
+  if (dev) console.log("app.get", { category, id });
   getData(req.params)
     .then(
       payload => {
+        if (dev) console.log({ payload });
+        if (typeof payload == "string") payload = JSON.parse(payload);
         if (id) {
-          let cover = `${type}/${payload.shortId}/${payload.slug}-cover.jpg`;
+          let cover = `${category}/${payload.shortId}/${payload.slug}-cover.jpg`;
           if (existsSync(`${MEDIA}/${cover}`)) payload.cover = cover;
-        } else
+        } else if (payload)
           payload.map(item => {
-            let cover = `${type}/${item.shortId}/${item.slug}-cover.jpg`;
+            let cover = `${category}/${item.shortId}/${item.slug}-cover.jpg`;
             if (existsSync(`${MEDIA}/${cover}`)) item.cover = cover;
             return item;
           });
