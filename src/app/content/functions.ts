@@ -74,8 +74,8 @@ options:
     .replace(/([\r\n]+ +)+/gm, ""); //remove leading spaces and repeated CR/LF
 }
 
-export function length(value: ContentValue, lngth = 0) {
-  return lngth ? getValue(value).slice(0, lngth) : value;
+export function length(value: string, lngth = 0) {
+  return lngth ? value.slice(0, lngth) : value;
 }
 
 export function nl2br(value: string) {
