@@ -7,11 +7,14 @@ import { Data } from "./index"; //todo: use tripple directive i.e: ///<reference
 import { article } from "./formly";
 import { HighlightJS } from "ngx-highlightjs";
 import { keepHtml } from "./functions";
+import { urlParams } from "../../../eldeeb/angular";
+import { environment as env } from "../../environments/environment";
 
 export interface Params {
   type: string; //todo: movr to query i.e: editor/?type=jobs
   id?: string;
 }
+const dev = !env.production;
 
 @Component({
   selector: "app-content",
@@ -38,15 +41,18 @@ export class ContentEditorComponent implements OnInit {
   ) {}
   ngOnInit() {
     //todo: if($_GET[id])getData(type,id)
-    this.route.paramMap.subscribe(params => {
+    //ex: /editor?type=jobs or /editor:id
+    urlParams(this.route).subscribe(([params, query]) => {
       this.params = {
-        type: params.get("type") || "",
-        id: params.get("id") || ""
+        id: params.get("id") || "",
+        type: query.get("type") || ""
       };
+
+      //todo: if(id)get this.params.type from getData().type
 
       //todo: fix getData()
       //if (this.params.id != "") this.data$ = this.getData();
-      console.log({ params, calculatedParamas: this.params });
+      if (dev) console.log({ params, query, calculatedParamas: this.params });
 
       //change content.type from textarea to quill
       let content =
@@ -71,7 +77,6 @@ export class ContentEditorComponent implements OnInit {
         //,syntax: true //->install highlight.js or ngx-highlight
       };
 
-      //todo: if(category.config.type=='jobs')
       if (this.params.type == "jobs") {
         //delete cover image since jobs.layout=="list" not grid
         //dont use delete article.fields(...)
@@ -115,6 +120,14 @@ export class ContentEditorComponent implements OnInit {
             }
           }
         );
+
+        //todo: add fields: required experience, salary,
+        // job type (ex: full time), location{}, company{}, required skills,
+        //application deadline (date), ..
+
+        //todo: categories = sub of jobs, main category = jobs
+
+        //todo: if(form.content contains contacts)error -> email, mobile, link
       }
       this.articleForm = article;
       console.log({ articleForm: article });

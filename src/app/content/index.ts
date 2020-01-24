@@ -1,3 +1,11 @@
+/*
+todo:
+ - if(!job.open | article.expire)show warning & disable apply btn (for jobs)
+ - if(job) add fields (ex: contacts, salary, ..), add apply btn
+ - add copy btn to each post
+ - add copy-all btn to inde (or category) page (*ngIf=data.type=list){show ctg.title; add copy-all btn}
+ */
+
 import {
   Component,
   OnInit,
@@ -14,6 +22,7 @@ import { HighlightJS } from "ngx-highlightjs";
 import { QuillViewComponent } from "ngx-quill"; //todo: enable sanitizing https://www.npmjs.com/package/ngx-quill#security-hint
 import { environment as env } from "../../environments/environment";
 import { summary } from "./functions";
+import { urlParams } from "../../../eldeeb/angular";
 
 export interface Obj {
   [key: string]: any;
@@ -34,6 +43,8 @@ export interface Data {
   payload: Article | Article[];
 }
 
+const dev = !env.production;
+
 @Component({
   selector: "app-content",
   templateUrl: "./index.html",
@@ -53,9 +64,9 @@ export class ContentComponent implements OnInit, AfterViewInit {
     private comp: ElementRef
   ) {}
   ngOnInit() {
-    this.route.paramMap.subscribe(params => {
+    urlParams(this.route).subscribe(([params, query]) => {
       //ex:  /$ctg/$id-title
-      var category = (params.get("category") || "").trim(),
+      let category = (params.get("category") || "").trim(),
         item = (params.get("item") || "").trim();
 
       this.params = {
@@ -63,7 +74,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
         id: item.substring(0, item.indexOf("-")) || item
       };
 
-      console.log({ params, calculatedParamas: this.params });
+      if (dev) console.log({ params, query, calculatedParamas: this.params });
 
       this.getData().subscribe(data => {
         if (typeof data == "string") data = JSON.parse(data); //ex: the url fetched via a ServiceWorker
@@ -129,7 +140,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
     });
 
     //activate adsense
-    if (env.production) {
+    if (dev) {
       let adsense = document.getElementById("adsense");
       if (adsense) {
         //adsense.setAttribute("data-ad-client", "ca-pub-8421502147716920"); //todo: ad sharing
