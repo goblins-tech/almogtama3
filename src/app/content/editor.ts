@@ -48,7 +48,15 @@ export class ContentEditorComponent implements OnInit {
         type: query.get("type") || ""
       };
 
-      //todo: if(id)get this.params.type from getData().type
+      //set the default type
+      if (!this.params.id && !this.params.type) this.params.type = "articles";
+
+      /*
+    todo: if(id){
+            - getData()
+            - get this.params.type from getData().type
+          }
+     */
 
       //todo: fix getData()
       //if (this.params.id != "") this.data$ = this.getData();
