@@ -14,7 +14,8 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Build
-        run: npm run build && npm run firebase:build
+        #cp: copy files in linux (in windows use COPY)
+        run: npm run build && npm run firebase:build && cp firebase/package.json dist/package.json && cd dist && npm i
       - name: Archive Production Artifact
         uses: actions/upload-artifact@master
         with:

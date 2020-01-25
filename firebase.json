@@ -8,7 +8,7 @@
   },
   "functions": {
     "predeploy": "",
-    "source": "."
+    "source": "dist"
   },
   "hosting": {
     "public": "dist/browser",

@@ -1,0 +1,20 @@
+{
+  "name": "almogtama3-firebase",
+  "version": "1.0.0",
+  "engines": {
+    "node": "10",
+    "npm": "6.9.0"
+  },
+  "main": "firebase/index.js",
+  "private": false,
+  "dependencies": {
+    "firebase": "^7.7.0",
+    "firebase-admin": "^8.9.1",
+    "firebase-functions": "^3.3.0",
+    "firebase-tools": "^7.12.1",
+    "tslib": "^1.10.0",
+    "zone.js": "~0.9.1",
+    "@angular/core": "~8.2.9"
+  },
+  "devDependencies": {}
+}
