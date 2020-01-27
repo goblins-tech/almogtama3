@@ -19,9 +19,30 @@ import {
 } from "./eldeeb/fs";
 import { slug } from "./src/app/content/functions";
 import shortId from "shortid";
+import * as admin from "firebase-admin";
 
 //console.clear();
 const dev = process.env.NODE_ENV === "development";
+
+//todo: use env:GOOGLE_APPLICATION_CREDENTIALS=Path.resolve("./firebase-almogtama3-eg.json")
+//then credential: admin.initializeApp({admin.credential.applicationDefault(), ..})
+const serviceAccount = require("./firebase-almogtama3-eg.json");
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  storageBucket: "gs://almogtama3-eg.appspot.com",
+  databaseURL: "https://almogtama3-eg.firebaseio.com"
+});
+
+/**
+ * upload to firebase storage
+ * @method upload
+ * @param  file   file path ex: ./file.txt
+ * @return Promise
+ */
+function upload(file) {
+  let bucket = admin.storage().bucket();
+  return bucket.upload(file);
+}
 
 export interface Obj {
   [key: string]: any;
