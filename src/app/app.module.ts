@@ -26,6 +26,8 @@ const appRoutes: Routes = [{ path: "**", component: ErrorComponent }];
 
 let enableTracing = false; //true to trace routing navigations in dev mode
 
+//todo:use env
+//todo: move to content.module
 const firebaseConfig = {
   apiKey: "AIzaSyAZ_fD4HflKU1rIb5zfi5IZ2_EMJSAT_Tk",
   authDomain: "almogtama3-eg.firebaseapp.com",

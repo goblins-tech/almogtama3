@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { HttpService } from "../http.service";
 import { Observable } from "rxjs";
+import { map } from "rxjs/operators/map";
 import { MatSnackBar } from "@angular/material";
 import { Data } from "./index"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
 import { article } from "./formly";
@@ -9,6 +10,11 @@ import { HighlightJS } from "ngx-highlightjs";
 import { keepHtml } from "./functions";
 import { urlParams } from "../../../eldeeb/angular";
 import { environment as env } from "../../environments/environment";
+import {
+  AngularFireStorage,
+  AngularFireStorageReference,
+  AngularFireUploadTask
+} from "@angular/fire/storage"; //todo: move to server.ts (how to inject AngularFireStorage?)
 
 export interface Params {
   type: string; //todo: movr to query i.e: editor/?type=jobs
@@ -33,11 +39,13 @@ export class ContentEditorComponent implements OnInit {
   response;
   submitting = false;
   articleForm;
+
   constructor(
     private route: ActivatedRoute,
     private httpService: HttpService,
     private snackBar: MatSnackBar,
-    private hljs: HighlightJS
+    private hljs: HighlightJS,
+    private storage: AngularFireStorage
   ) {}
   ngOnInit() {
     //todo: if($_GET[id])getData(type,id)
@@ -148,8 +156,8 @@ export class ContentEditorComponent implements OnInit {
 
   onSubmit(data) {
     //todo: data.files=this.upload() or: submit().subscribe(data=>upload())
-
     //todo: data.files= {cover: #cover.files.data}
+    //todo: send base64 data from data.content to firebase storage
 
     console.log("content.ts onSubmit()", data);
     this.submitting = true;
@@ -174,6 +182,26 @@ export class ContentEditorComponent implements OnInit {
         this.files = [];
       }
     });
+  }
+
+  upload(file) {
+    //file= base64 data or file from <input file>
+    //todo: file name ex: shortid/data.slug
+    let id = Math.random()
+      .toString(36)
+      .substring(2);
+    let storageRef: AngularFireStorageReference = this.afStorage.ref(id);
+    let storageTask: AngularFireUploadTask = this.ref.put(file);
+    let uploadProgress: Observable<number> = storageTask.percentageChanges();
+    let downloadURL: Observable<string> = storageTask.downloadURL();
+    let uploadState: Observable<string> = storageTask
+      .snapshotChanges()
+      .pipe(map(s => s.state));
+
+    //you can use storageTask.pause(), storageTask.cancel(), storageTask.resume()
+    //ex: <btn (click)=>storageTask.cancel() *ngIf="uploadState=='running' || uploadState=='paused'">
+    //todo: this.storageTask for each file upload
+    //todo: add progress bar under each image
   }
 
   isValid(field: string) {
