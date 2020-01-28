@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { HttpService } from "../http.service";
 import { Observable } from "rxjs";
-import { map } from "rxjs/operators/map";
+import { map } from "rxjs/operators";
 import { MatSnackBar } from "@angular/material";
 import { Data } from "./index"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
 import { article } from "./formly";
@@ -184,16 +184,16 @@ export class ContentEditorComponent implements OnInit {
     });
   }
 
-  upload(file) {
+  /*  upload(file) {
     //file= base64 data or file from <input file>
     //todo: file name ex: shortid/data.slug
     let id = Math.random()
       .toString(36)
       .substring(2);
-    let storageRef: AngularFireStorageReference = this.afStorage.ref(id);
-    let storageTask: AngularFireUploadTask = this.ref.put(file);
+    let storageRef: AngularFireStorageReference = this.storage.ref(id);
+    let storageTask: AngularFireUploadTask = storageRef.put(file);
     let uploadProgress: Observable<number> = storageTask.percentageChanges();
-    let downloadURL: Observable<string> = storageTask.downloadURL();
+    let downloadURL: Observable<string> = await storageTask.downloadURL();
     let uploadState: Observable<string> = storageTask
       .snapshotChanges()
       .pipe(map(s => s.state));
@@ -202,7 +202,7 @@ export class ContentEditorComponent implements OnInit {
     //ex: <btn (click)=>storageTask.cancel() *ngIf="uploadState=='running' || uploadState=='paused'">
     //todo: this.storageTask for each file upload
     //todo: add progress bar under each image
-  }
+  } */
 
   isValid(field: string) {
     return (

@@ -19,19 +19,29 @@ import {
 } from "./eldeeb/fs";
 import { slug } from "./src/app/content/functions";
 import shortId from "shortid";
+import { Firebase } from "./eldeeb/firebase-admin";
 import * as admin from "firebase-admin";
 
 //console.clear();
 const dev = process.env.NODE_ENV === "development";
 
 //todo: use env:GOOGLE_APPLICATION_CREDENTIALS=Path.resolve("./firebase-almogtama3-eg.json")
-//then credential: admin.initializeApp({admin.credential.applicationDefault(), ..})
-const serviceAccount = require("./firebase-almogtama3-eg.json");
+
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  storageBucket: "gs://almogtama3-eg.appspot.com",
-  databaseURL: "https://almogtama3-eg.firebaseio.com"
+  credential: admin.credential.cert(require("./firebase-almogtama3-eg.json")),
+  storageBucket: `gs://almogtama3-eg.appspot.com`
 });
+
+const bucket = new Firebase(/*{
+  project: "almogtama3-eg",
+  cert: require("./firebase-almogtama3-eg.json")
+}*/).storage();
+
+/*
+bucket
+  .upload(resolve("./notes.txt"))
+  .then(x => console.log("uploaded"), err => console.error(err));
+  /*
 
 /**
  * upload to firebase storage
@@ -39,10 +49,6 @@ admin.initializeApp({
  * @param  file   file path ex: ./file.txt
  * @return Promise
  */
-function upload(file) {
-  let bucket = admin.storage().bucket();
-  return bucket.upload(file);
-}
 
 export interface Obj {
   [key: string]: any;
@@ -398,7 +404,16 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
         cache(`./temp/${req.params.type}/${req.params._id}.json`, ":purge:");
 
       //todo: update data cover=$filename.$ext
-      if (req.file) renameSync(req.file.path, `${dir}/${cover}`);
+      if (req.file) {
+        renameSync(req.file.path, `${dir}/${cover}`);
+        bucket
+          .upload(`${dir}/${cover}`, `media/${req.params.type}/${sid}/${cover}`)
+          .then(file => {
+            console.log("file uploaded!");
+            //todo: save file metadata fs.writeFileSync('$file.meta.json',file[0])
+          })
+          .catch(err => console.log("uploading error:", err));
+      }
 
       //todo: data.cover=..
       if (data && data._id) res.send({ ok: true, data });
