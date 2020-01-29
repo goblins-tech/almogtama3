@@ -1,4 +1,4 @@
-import { app } from "./server";
+import { app } from "./index";
 
 // Start up the Node server
 //todo: check if app already listening.

@@ -1,7 +1,10 @@
 // todo: export default mongoose (instead of export every method separately) i.e import mongoose, not import * as mongoose ..
-import mongoose from 'mongoose';
-import { exportAll } from './general';
+import mongoose from "mongoose";
+export * from "mongoose";
 
+/*import { exportAll } from "./general";
+exportAll(mongoose);
+*/
 export namespace types {
   // todo: merge `namespace types` from ./index.d.ts
   export interface Object {
@@ -33,10 +36,9 @@ export namespace types {
 Object.keys(mongoose).forEach(key => {
   exports[key] = mongoose[key]; //todo: ES export i.e export key = mongoose[key]
 });*/
-exportAll(mongoose);
 
 export function connect(uri: types.uri, options?: types.ConnectionOptions) {
-  console.log('*** mongoose.connect() ***');
+  console.log("*** mongoose.connect() ***");
   const defaultOptions = {
     // todo: export static defaultConnectionOptions={..}
     useCreateIndex: true,
@@ -44,11 +46,12 @@ export function connect(uri: types.uri, options?: types.ConnectionOptions) {
     useFindAndModify: false,
     bufferCommands: false, // https://mongoosejs.com/docs/connections.html
     autoIndex: false,
-    retryWrites: true
+    retryWrites: true,
+    useUnifiedTopology: true
   };
 
   let srv = false;
-  if (typeof uri !== 'string') {
+  if (typeof uri !== "string") {
     if (uri instanceof Array) {
       uri = {
         auth: [uri[0], uri[1]],
@@ -60,27 +63,24 @@ export function connect(uri: types.uri, options?: types.ConnectionOptions) {
 
     srv = uri.srv;
     if (!uri.host) {
-      uri.host = 'localhost:27017';
+      uri.host = "localhost:27017";
     } else if (uri.host instanceof Array) {
-      uri.host = uri.host.join(',');
+      uri.host = uri.host.join(",");
     }
 
     uri = `${encode(uri.auth[0])}:${encode(uri.auth[1])}@${uri.host}/${uri.db}`;
   }
 
-  if ((uri as string).substr(0, 7) != 'mongodb') {
-    uri = 'mongodb' + (srv ? '+srv' : '') + '://' + uri;
+  if ((uri as string).substr(0, 7) != "mongodb") {
+    uri = "mongodb" + (srv ? "+srv" : "") + "://" + uri;
   }
-  console.log('uri: ', uri);
+  console.log("uri: ", uri);
 
   options = Object.assign(options || {}, defaultOptions);
-  console.log('options:', options);
+  console.log("options:", options);
 
   // todo: return Promise<this mongoose, not Mongoose>
-  return mongoose.connect(
-    uri as string,
-    options
-  );
+  return mongoose.connect(uri as string, options);
 }
 
 export function model(
@@ -89,18 +89,17 @@ export function model(
   options?: mongoose.SchemaOptions
 ) {
   // todo: merge schema's defaultOptions
+  if (mongoose.models[collection]) return mongoose.models[collection];
   let schema: mongoose.Schema;
   options.collection = collection;
-  if ('fields' in obj) {
-    schema = new mongoose.Schema(obj.fields, options);
-    // todo: add methods,virtuals,...
-  } else {
-    schema = new mongoose.Schema(obj, options);
-  }
+
+  if (!("fields" in obj)) obj = { fields: obj };
+  schema = new mongoose.Schema(obj.fields, options);
+  // todo: add methods,virtuals,...
 
   return { schema, model: mongoose.model(collection, schema) };
 }
 
 export function encode(str: string) {
-  return encodeURIComponent(str).replace(/%/g, '%25');
+  return encodeURIComponent(str).replace(/%/g, "%25");
 }
