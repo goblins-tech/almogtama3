@@ -10,12 +10,17 @@ import {
   cache,
   mdir,
   ext,
+  rename,
   renameSync,
   readFileSync,
   writeFileSync,
   existsSync,
+  unlink,
+  readdir,
   join,
-  resolve
+  resolve,
+  writeFile,
+  json
 } from "./eldeeb/fs";
 import { slug } from "./src/app/content/functions";
 import shortId from "shortid";
@@ -61,8 +66,8 @@ export interface Request extends Obj {}
 const app = express();
 
 const DIST = join(process.cwd(), "./dist/browser"); //process.cwd() dosen't include /dist
-const MEDIA = join(process.cwd(), "./data/media"); //don't save media files inside dist, as dist may be deleted at any time
-
+const MEDIA = join(process.cwd(), "./temp/media"); //don't save media files inside dist, as dist may be deleted at any time
+const BUCKET = "almogtama3.com/media"; //todo: $config.domain/media
 // * NOTE :: leave this as require() since this file is built Dynamically from webpack
 const {
   AppServerModuleNgFactory,
@@ -81,70 +86,70 @@ function getData(params) {
 
   cacheFile += ".json";
 
+  let idx = "_id shortId title slug cover content"; //todo: summary
+
   return cache(
     cacheFile,
     () =>
       connect()
         .then(() => {
-          let contentModel = model("articles"),
+          let contentModel = model("articles"), //todo: model(type)
             content;
           //  console.log("getData.cache()", { type, id });
+
+          if (params.id) {
+            if (params.id.length == 24)
+              content = contentModel.findById(params.id);
+            else
+              content = contentModel.find({ shortId: params.id }, null, {
+                limit: 1
+              }); //note that the returned result is an array, not object
+          }
           if (!params.category)
-            content = contentModel.find({}, null, { limit: 50 });
+            content = contentModel.find({}, idx, { limit: 50 });
           else {
-            if (params.id) {
-              if (params.id.length == 24)
-                content = contentModel.findById(params.id);
-              else
-                content = contentModel.find({ shortId: params.id }, null, {
-                  limit: 1
-                }); //note that the returned result is an array, not object
-            } else {
-              content = Promise.all([
-                cache(
-                  `temp/articles/categories.json`,
-                  () => model("categories").find({}),
-                  3
-                ),
-                cache(
-                  `temp/articles/article_categories.json`,
-                  () => model("article_categories").find({}),
-                  1
-                )
-              ]).then(([categories, article_categories]) => {
-                console.log({ categories, article_categories });
-                //get category._id from category.slug
-                let category = categories.find(
-                  el => el.slug == params.category
+            content = Promise.all([
+              cache(
+                `temp/articles/categories.json`,
+                () => model("categories").find({}),
+                3
+              ),
+              cache(
+                `temp/articles/article_categories.json`,
+                () => model("article_categories").find({}),
+                1
+              )
+            ]).then(([categories, article_categories]) => {
+              console.log({ categories, article_categories });
+              //get category._id from category.slug
+              let category = categories.find(el => el.slug == params.category);
+              if (dev) console.log("category", category);
+
+              if (category) {
+                //get articles from article_categories where category=category._id
+                let selectedArticles = [];
+
+                article_categories.forEach(el => {
+                  if (el.category == category._id)
+                    selectedArticles.push(el.article);
+                });
+
+                if (dev) console.log({ selectedArticles });
+
+                //get articles from 'articles' where _id in selectedArticles[]
+                let articles = model("articles").find(
+                  { _id: { $in: selectedArticles } },
+                  idx, //todo: {shortid,title,slug,summary|content}
+                  {
+                    limit: params.limit || 50,
+                    sort: { _id: -1 }
+                  }
                 );
-                if (dev) console.log("category", category);
 
-                if (category) {
-                  //get articles from article_categories where category=category._id
-                  let selectedArticles = [];
-
-                  article_categories.forEach(el => {
-                    if (el.category == category._id)
-                      selectedArticles.push(el.article);
-                  });
-
-                  if (dev) console.log({ selectedArticles });
-
-                  //get articles from 'articles' where _id in selectedArticles[]
-                  let articles = model("articles").find(
-                    { _id: { $in: selectedArticles } },
-                    null,
-                    {
-                      limit: params.limit || 50,
-                      sort: { _id: -1 }
-                    }
-                  );
-
-                  //  if (dev)  articles.then(result => console.log("articles", result));
-                  return articles;
-                }
-              });
-            }
+                //  if (dev)  articles.then(result => console.log("articles", result));
+                return articles;
+              }
+            });
           }
 
           //console.log("content", content);
@@ -159,43 +164,38 @@ function getData(params) {
   );
 }
 
-function saveData(type: string, data) {
-  //console.log("saveData", data);
-
+function insertData(data) {
+  console.log("insertData", data);
+  let type = data.type || "article";
   return connect().then(
     () => {
+      console.log("connected");
       if (data) {
-        //console.log("connected");
         //  data.shortId = shortId.generate();
         let contentModel = model(type);
         let content = new contentModel(data);
         return content.save();
       }
     },
-    err => console.error({ err })
+    err => console.error("connection failed", { err })
   );
 }
 
-const json = {
+const jsonData = {
   get(type: string, id?: string | Number) {
     let file = `./temp/${type}/${id || "index"}.json`;
     try {
-      return JSON.parse(readFileSync(file).toString() || null);
+      return json.read(file);
     } catch (e) {
-      console.warn(`json.get(${type},${id}) failed`, e);
+      console.warn(`jsonData.get(${type},${id}) failed`, e);
     }
   },
   save(type: string, data) {
     if (data) {
       let dir = `./temp/${type}`;
       mdir(dir);
-      if (data instanceof Array)
-        writeFileSync(`${dir}/index.json`, JSON.stringify(data));
-      else
-        writeFileSync(
-          `${dir}/${data.shortId || data._id}.json`,
-          JSON.stringify(data)
-        );
+      if (data instanceof Array) json.write(`${dir}/index.json`, data);
+      else json.write(`${dir}/${data.shortId || data._id}.json`, data);
     }
   }
 };
@@ -350,6 +350,112 @@ let upload = multer({
   })
 });
 
+function saveData(sid, data?) {
+  if (dev) console.log("====saveData====");
+  let dataDir = `./data/queue/${sid}`,
+    dataFile = `${dataDir}/data.json`;
+
+  if (!data) {
+    if (!existsSync(dataFile)) {
+      console.error("data file not found");
+      return;
+    }
+    data = json.read(dataFile);
+  }
+
+  //adjust data
+  let dir = `${data.type}/${sid}`;
+  if (!data.shortId) {
+    data.shortId = sid;
+    if (!data.slug || data.slug == "") data.slug = slug(data.title); //if slug changed, cover fileName must be changed
+
+    // handle base64-encoded data
+    mdir(`${dataDir}/files`);
+    let date = new Date();
+    data.content = data.content.replace(
+      /<img src="data:image\/(.+?);base64,(.+?)==">/g, //todo: handle other mimetypes
+      (match, group1, group2, position, fullString) => {
+        let file = `${data.slug}-${date.getTime()}.${group1}`; //todo: slug(title,limit=50)
+        writeFileSync(`${dataDir}/files/${file}`, group2, "base64");
+
+        //todo: then return <img ..>  https://stackoverflow.com/q/59962305/12577650
+        //or queue.upload.$file=false
+
+        return `<img src="${dir}/${file}" alt="${data.title}" />`;
+      }
+    );
+
+    //todo: data.summary=summary(data.content)
+    json.write(dataFile, data);
+  }
+
+  //uploading files:
+
+  let mediaDir = `${MEDIA}/${dir}`,
+    bucketDir = `${BUCKET}/${dir}`;
+  mdir(mediaDir);
+
+  if (existsSync(`${dataDir}/cover`)) {
+    //ext = "."+req.file.mimetype.replace("image/", ""); //or ext(req.file.originalname)
+    if (dev) console.log("uploading cover ...");
+    data.cover = `${data.slug}${ext(data.tmp.cover.originalname)}`;
+    bucket
+      .upload(`${dataDir}/cover`, `${bucketDir}/${data.cover}`)
+      .then(() => {
+        rename(`${dataDir}/cover`, `${mediaDir}/${data.cover}`, e => {});
+        if (dev) console.log("cover uploaded");
+      })
+      .catch(e => console.log("uploading cover failed", e));
+  }
+
+  readdir(`${dataDir}/files`, (err, files) => {
+    if (!err) {
+      files.forEach(file => {
+        if (dev) console.log(`uploading file: ${file}`);
+        bucket
+          .upload(`${dataDir}/files/${file}`, `${bucketDir}/${file}`)
+          .then(
+            () => {
+              rename(
+                `${dataDir}/files/${file}`,
+                `${mediaDir}/${file}`,
+                e => {}
+              );
+              if (dev) console.log(`file uploaded: ${file}`);
+            },
+            e => {}
+          )
+          .catch(err => console.error(`uploading faild for ${file}`, err));
+      });
+    }
+  });
+
+  //insert data to db
+  //todo: if(all previous seps completed)
+  //i.e if !exists(cover) && no file exists in /files
+
+  delete data.tmp;
+  insertData(data)
+    .then(data => {
+      if (dev) console.log("data inserted", data);
+      unlink(dataFile, e => {}); //todo: remove dataDir
+      //create cache
+      json.write(`./temp/${data.type}/${data.shortId}.json`, data);
+      let indexCache = `./temp/${data.type}/index.json`;
+      if (existsSync(indexCache)) {
+        let { _id, shortId, slug, cover } = data; //todo:,summary
+        json.write(
+          indexCache,
+          json.read(indexCache).unshift({ _id, shortId, slug, cover })
+        );
+        //or: cache(indexCache, ":purge:");
+      }
+    })
+    .catch(error => console.log("Error @insertData()", error));
+
+  //when done: remove queue/sid.json
+}
+
 /*app.use(
   formidableMiddleware({
     //  uploadDir: './data/uploads/$type',
@@ -372,55 +478,25 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
     });
 
   if (!req.body || !req.body.content)
-    res.send({ ok: false, msg: "no data posted" });
+    return res.send({ ok: false, msg: "no data posted" });
 
-  if (!req.body.slug || req.body.slug == "")
-    req.body.slug = slug(req.body.title); //if slug changed, cover fileName must be changed
-
+  //we can resume this process at any time
+  //todo: a process to check if there is any item in the queue
   let sid = shortId.generate(),
-    dir = `${MEDIA}/${req.params.type}/${sid}`, //todo: send to firebase bucket
-    cover = `${req.body.slug}-cover.jpg`;
-  //let ext = "."+req.file.mimetype.replace("image/", ""); //or ext(req.file.originalname)
-  req.body.shortId = sid;
+    dir = `./data/queue/${sid}`;
+  req.body.type = req.params.type;
+
   mdir(dir);
+  json.write(`${dir}/data.json`, req.body);
+  if (req.file) {
+    renameSync(req.file.path, `${dir}/cover`);
+    req.body.tmp = { cover: req.file };
+  }
 
-  //handle base64 data
-  let date = new Date();
-  req.body.content = req.body.content.replace(
-    /<img src="data:image\/(.+?);base64,(.+?)==">/g, //todo: handle other mimetypes
-    (match, group1, group2, position, fullString) => {
-      let file = `${req.body.slug}-${date.getTime()}.${group1}`; //todo: slug(title,limit=50)
-      writeFileSync(`${dir}/${file}`, group2, "base64");
-      return `<img src="${req.params.type}/${sid}/${file}" alt="${req.body.title}" />`;
-    }
-  );
+  saveData(sid, req.body);
+  res.send({ ok: true, shortId: sid }); //todo: navigate to /s/shortId -> redirect to full link
 
-  saveData(req.params.type, req.body).then(
-    data => {
-      //  upload.array("cover");
-      //todo: delete cache index & item (if __id)
-      cache(`./temp/${req.params.type}/index.json`, ":purge:");
-      if (req.params._id)
-        cache(`./temp/${req.params.type}/${req.params._id}.json`, ":purge:");
-
-      //todo: update data cover=$filename.$ext
-      if (req.file) {
-        renameSync(req.file.path, `${dir}/${cover}`);
-        bucket
-          .upload(`${dir}/${cover}`, `media/${req.params.type}/${sid}/${cover}`)
-          .then(file => {
-            console.log("file uploaded!");
-            //todo: save file metadata fs.writeFileSync('$file.meta.json',file[0])
-          })
-          .catch(err => console.log("uploading error:", err));
-      }
-
-      //todo: data.cover=..
-      if (data && data._id) res.send({ ok: true, data });
-      else res.send({ ok: false, msg: "no data" });
-    },
-    err => res.send({ ok: false, msg: "error while saving data", err })
-  );
+  //the content will be available after the process completed (uploading files, inserting to db, ..)
 });
 
 app.get("/api/:category?/:id?", (req, res, next) => {

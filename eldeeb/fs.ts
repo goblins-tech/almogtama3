@@ -249,9 +249,8 @@ export function mdir(path: string | string[], file = false) {
 export let json = {
   read(file: string) {
     if (!file) return null;
-    var data = fs.readFileSync(file);
-    if (data) data = JSON.parse(data.toString());
-    return data;
+    var data = fs.readFileSync(file).toString();
+    return JSON.parse(data || null);
   },
   write(file: string, data: any) {
     if (data) {
