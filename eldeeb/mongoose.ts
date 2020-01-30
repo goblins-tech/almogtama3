@@ -47,7 +47,9 @@ export function connect(uri: types.uri, options?: types.ConnectionOptions) {
     bufferCommands: false, // https://mongoosejs.com/docs/connections.html
     autoIndex: false,
     retryWrites: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    retryWrites: true,
+    w: "majority"
   };
 
   let srv = false;
@@ -101,5 +103,5 @@ export function model(
 }
 
 export function encode(str: string) {
-  return encodeURIComponent(str).replace(/%/g, "%25");
+  return encodeURIComponent(str); //.replace(/%/g, "%25");
 }
