@@ -142,25 +142,22 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
   //the content will be available after the process completed (uploading files, inserting to db, ..)
 });
 
-app.get("/api/:category?/:id?", (req, res, next) => {
+app.get("/api/:item?", (req, res, next) => {
   console.log(req.params);
-  let category = req.params.category,
-    id = req.params.id;
-  if (dev) console.log("app.get", { category, id });
-  getData(req.params)
+
+  var item = req.params.item,
+    id,
+    category;
+  if (item && item.startsWith("id-")) id = item.slice(3);
+  else category = item;
+
+  if (dev) console.log("app.get", { id, category });
+
+  getData({ id, category })
     .then(
       payload => {
         if (dev) console.log({ payload });
         if (typeof payload == "string") payload = JSON.parse(payload);
-        if (id) {
-          let cover = `${category}/${payload.shortId}/${payload.slug}-cover.jpg`;
-          if (existsSync(`${MEDIA}/${cover}`)) payload.cover = cover;
-        } else if (payload)
-          payload.map(item => {
-            let cover = `${category}/${item.shortId}/${item.slug}-cover.jpg`;
-            if (existsSync(`${MEDIA}/${cover}`)) item.cover = cover;
-            return item;
-          });
         res.json({ type: id ? "item" : "list", payload });
       },
       error => ({ type: error, error }) //todo: content/index.html admin:show error

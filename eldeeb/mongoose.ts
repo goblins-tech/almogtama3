@@ -46,7 +46,6 @@ export function connect(uri: types.uri, options?: types.ConnectionOptions) {
     useFindAndModify: false,
     bufferCommands: false, // https://mongoosejs.com/docs/connections.html
     autoIndex: false,
-    retryWrites: true,
     useUnifiedTopology: true,
     retryWrites: true,
     w: "majority"

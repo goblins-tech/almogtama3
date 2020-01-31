@@ -5,6 +5,7 @@ import { AppComponent } from "./app.component";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { ErrorComponent } from "./error";
 import { AngularFireModule } from "@angular/fire";
+import { AngularFireStorageModule } from "@angular/fire/storage";
 import { AngularFireAuthModule } from "@angular/fire/auth";
 import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { HttpService } from "./http.service";
@@ -55,6 +56,7 @@ export class AppRoutingModule {}
     BrowserModule.withServerTransition({ appId: "serverApp" }),
     BrowserAnimationsModule,
     AngularFireModule.initializeApp(firebaseConfig),
+    AngularFireStorageModule,
     AngularFireAuthModule,
     HttpClientModule,
     AppRoutingModule, //Modules will process before RouterModule.forRoot() https://blogs.msmvps.com/deborahk/angular-route-ordering/

@@ -51,6 +51,7 @@ import { fas } from "@fortawesome/free-solid-svg-icons";
 const routes: Routes = [
   { path: "editor", component: ContentEditorComponent }, // ex: /editor?type=jobs
   { path: "editor/:id", component: ContentEditorComponent },
+  { path: "id/:id", component: ContentComponent },
   { path: ":category", component: ContentComponent },
   { path: ":category/manage", component: ContentManageComponent },
   { path: ":category/:item", component: ContentComponent }

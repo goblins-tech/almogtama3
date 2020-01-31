@@ -67,11 +67,12 @@ export class ContentComponent implements OnInit, AfterViewInit {
     urlParams(this.route).subscribe(([params, query]) => {
       //ex:  /$ctg/$id-title
       let category = (params.get("category") || "").trim(),
-        item = (params.get("item") || "").trim();
+        item = (params.get("item") || "").trim(),
+        id = params.get("id");
 
       this.params = {
         category,
-        id: item.substring(0, item.indexOf("-")) || item
+        id: id || item.substring(0, item.indexOf("-")) || item
       };
 
       if (dev) console.log({ params, query, calculatedParamas: this.params });
@@ -151,6 +152,9 @@ export class ContentComponent implements OnInit, AfterViewInit {
     } else console.warn("adsense disabled in dev mode.");
   }
   getData() {
-    return this.httpService.get<Data>(this.params.category, this.params.id);
+    return this.httpService.get<Data>({
+      id: this.params.id,
+      category: this.params.category
+    });
   }
 }

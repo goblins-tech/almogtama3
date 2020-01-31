@@ -151,7 +151,9 @@ export class ContentEditorComponent implements OnInit {
   }
 
   getData() {
-    return this.httpService.get<Data>(this.params.type, this.params.id);
+    return this.httpService.get<Data>({
+      id: this.params.id
+    });
   }
 
   onSubmit(data) {

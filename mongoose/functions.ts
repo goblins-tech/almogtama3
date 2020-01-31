@@ -1,6 +1,5 @@
 import * as mongoose from "../eldeeb/mongoose";
 import * as schemas from "./models";
-import _mongoose from "mongoose";
 
 const dev = process.env.NODE_ENV === "development";
 function encode(str: string) {
@@ -13,13 +12,6 @@ export function connect() {
   let url = `mongodb+srv://${encode("xxyyzz2050")}:${encode(
     "Xx159753@@"
   )}@almogtama3-gbdqa.gcp.mongodb.net/test?retryWrites=true&w=majority`;
-
-  _mongoose
-    .connect(url, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
-    .then(() => console.log("CONNECTED!!!"));
 
   return mongoose.connect({
     auth: ["xxyyzz2050", "Xx159753@@"],
