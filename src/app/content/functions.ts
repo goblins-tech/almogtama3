@@ -144,7 +144,7 @@ export class Categories {
   }
 
   //get childs and childs of childs etc..
-  getBranches(id, ids = true) {
+  getBranches(ctg, ids = true) {
     if (typeof ctg != "string") ctg = ctg._id;
     let branches = [];
     let childs = this.getChilds(ctg, ids); //ids[] or els[]
@@ -208,7 +208,7 @@ export class ArticlesCategories {
   ctg;
   data;
   constructor(articlesCategories, categories) {
-    if (!categories instanceof Categories)
+    if (!(categories instanceof Categories))
       categories = new Categories(categories);
 
     this.ctg = categories;

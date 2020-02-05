@@ -43,6 +43,16 @@ export function resolve(...paths: types.PathLike[]): string {
   return Path.resolve(Path.normalize(Path.join(...stringPaths))); // if it null it will be the current working dir (of the working script)
 }
 
+export function parsePath(path) {
+  let extension = ext(path);
+  return {
+    dir: Path.dirname(path),
+    file: Path.basename(path, extension),
+    extension,
+    type: isDir(path) ? "dir" : "file"
+  };
+}
+
 /**
  * get file extension
  * @method ext
@@ -86,7 +96,7 @@ export function size(file?: types.PathLike, unit?: "kb" | "mb" | "gb"): number {
  * @return [description]
  */
 export function isDir(path: types.PathLike): boolean {
-  return true; // todo:
+  return fs.lstatSync(path).isDirectory(); // todo:
 }
 
 // todo: overload: move([ ...[from,to,options] ], globalOptions)

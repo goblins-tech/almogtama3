@@ -3,6 +3,7 @@ import {
   cache,
   mdir,
   ext,
+  parsePath,
   rename,
   renameSync,
   writeFileSync,
@@ -12,12 +13,14 @@ import {
   join,
   resolve,
   writeFile,
-  json
+  json,
+  statSync
 } from "../eldeeb/fs";
 import { Firebase } from "../eldeeb/firebase-admin";
 import * as admin from "firebase-admin";
 import multer from "multer";
 import { slug } from "../src/app/content/functions";
+import { resize as _resize, sharp } from "../eldeeb/graphics";
 
 export const dev = process.env.NODE_ENV === "development";
 export const DIST = join(process.cwd(), "./dist/browser"); //process.cwd() dosen't include /dist
@@ -144,11 +147,19 @@ export function saveData(sid, data?) {
 
     // handle base64-encoded data
     mdir(`${dataDir}/files`);
+
+    //data.images[]: an array contains all images pathes inside the article
+    //to be downloaded when this article requested in case of the site moved to
+    //a new server.
+    //it contain all available sizes includes 'opt' (optimized version) but doesn't contain 'orig' (the original file)
+    if (!data.images) data.images = [];
     let date = new Date();
     data.content = data.content.replace(
       /<img src="data:image\/(.+?);base64,(.+?)==">/g, //todo: handle other mimetypes
       (match, group1, group2, position, fullString) => {
         let file = `${data.slug}-${date.getTime()}.${group1}`; //todo: slug(title,limit=50)
+        data.images.push(file); //don't upload resized versions of the image.
+
         writeFileSync(`${dataDir}/files/${file}`, group2, "base64");
 
         //todo: then return <img ..>  https://stackoverflow.com/q/59962305/12577650
@@ -279,3 +290,41 @@ export let upload = multer({
     }
   })
 });
+
+/**
+ * create resized version of an image
+ * @method resize
+ * @param  img    image path or Buffer
+ * @return Promise<{size:path}>
+ */
+export function resize(img) {
+  let originalSize = statSync(img).size; //todo: get size of Buffer img
+  //todo: if(parts.type=="dir")size all images inside this dir
+  //todo: add meta tag sized=true, original=file
+  //todo: create an optimized version (same width as the original image)
+  return sharp(img)
+    .metadata()
+    .then(meta => {
+      Promise.all(
+        [400, 600, 800, 1000].map(
+          //todo: && !existsSync(img_width.ext)
+          width => {
+            if (width < meta.width) return _resize(img, [width, null]);
+            //todo: else Promise.reject("larger")
+          }
+        )
+      )
+        .then(images =>
+          images
+            .filter(image => image && image.size < originalSize) //ignore images larger than the original one
+            //.map(el => [el.width, el.file])
+            .reduce((total, current) => {
+              //convert from array[ {width,file, ..} ] into {width:file}
+              total[current.width] = current.file;
+              return total; //accumulator
+            }, {})
+        )
+        .then(data => console.log(data))
+        .catch(err => console.error(err));
+    });
+}
