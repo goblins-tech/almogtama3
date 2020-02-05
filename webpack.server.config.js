@@ -37,6 +37,13 @@ module.exports = {
         // Removing this will cause deprecation warnings to appear.
         test: /(\\|\/)@angular(\\|\/)core(\\|\/).+\.js$/,
         parser: { system: true }
+      },
+      {
+        //load .node files
+        //ex: ./node_modules/sharp/build/Release/sharp.node
+        // https://github.com/lovell/sharp/issues/794#issuecomment-307188099
+        test: /\.node$/,
+        use: "node-loader"
       }
     ]
   },
