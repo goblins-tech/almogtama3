@@ -185,7 +185,11 @@ export function saveData(sid, data?) {
       .upload(`${dataDir}/cover`, `${bucketDir}/${data.cover}`)
       .then(() => {
         rename(`${dataDir}/cover`, `${mediaDir}/${data.cover}`, err => {
-          if (!err) resize(`${mediaDir}/${data.cover}`);
+          if (!err)
+            resize(`${mediaDir}/${data.cover}`, {
+              type: data.type,
+              shortId: sid
+            });
         });
         if (dev) console.log("cover uploaded");
       })
@@ -200,7 +204,11 @@ export function saveData(sid, data?) {
           .upload(`${dataDir}/files/${file}`, `${bucketDir}/${file}`)
           .then(() => {
             rename(`${dataDir}/files/${file}`, `${mediaDir}/${file}`, err => {
-              if (!err) resize(`${mediaDir}/${file}`);
+              if (!err)
+                resize(`${mediaDir}/${file}`, {
+                  type: data.type,
+                  shortId: sid
+                });
             });
             if (dev) console.log(`file uploaded: ${file}`);
           })
@@ -292,7 +300,7 @@ export let upload = multer({
  * @param  img    image path or Buffer
  * @return Promise<{size:path}>
  */
-export function resize(img) {
+export function resize(img, info) {
   let originalSize = statSync(img).size; //todo: get size of Buffer img
   //todo: if(parts.type=="dir")size all images inside this dir
   //todo: add meta tag sized=true, original=file
@@ -315,7 +323,11 @@ export function resize(img) {
             //.map(el => [el.width, el.file])
             .reduce((total, current) => {
               //convert from array[ {width,file, ..} ] into {width:file}
-              total[current.width] = current.file;
+              let file = current.file.replace(
+                MEDIA,
+                `${info.type}/${info.shortId}`
+              );
+              total[current.width] = file; //todo: remove D:/**,
               return total; //accumulator
             }, {})
         )
