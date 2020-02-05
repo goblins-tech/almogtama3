@@ -128,7 +128,7 @@ export function getData(params) {
 
 export function saveData(sid, data?) {
   if (dev) console.log("====saveData====");
-  let dataDir = `./data/queue/${sid}`,
+  let dataDir = `./temp/queue/${sid}`,
     dataFile = `${dataDir}/data.json`;
 
   if (!data) {
@@ -141,37 +141,32 @@ export function saveData(sid, data?) {
 
   //adjust data
   let dir = `${data.type}/${sid}`;
-  if (!data.shortId) {
-    data.shortId = sid;
-    if (!data.slug || data.slug == "") data.slug = slug(data.title); //if slug changed, cover fileName must be changed
 
-    // handle base64-encoded data
-    mdir(`${dataDir}/files`);
+  data.shortId = sid;
+  if (!data.slug || data.slug == "") data.slug = slug(data.title); //if slug changed, cover fileName must be changed
 
-    //data.images[]: an array contains all images pathes inside the article
-    //to be downloaded when this article requested in case of the site moved to
-    //a new server.
-    //it contain all available sizes includes 'opt' (optimized version) but doesn't contain 'orig' (the original file)
-    if (!data.images) data.images = [];
-    let date = new Date();
-    data.content = data.content.replace(
-      /<img src="data:image\/(.+?);base64,(.+?)==">/g, //todo: handle other mimetypes
-      (match, group1, group2, position, fullString) => {
-        let file = `${data.slug}-${date.getTime()}.${group1}`; //todo: slug(title,limit=50)
-        data.images.push(file); //don't upload resized versions of the image.
+  // handle base64-encoded data
+  mdir(`${dataDir}/files`);
 
-        writeFileSync(`${dataDir}/files/${file}`, group2, "base64");
+  //data.images[]: an array contains all images pathes inside the article
+  //to be downloaded when this article requested in case of the site moved to
+  //a new server.
+  //it contain all available sizes includes 'opt' (optimized version) but doesn't contain 'orig' (the original file)
+  if (!data.images) data.images = [];
+  let date = new Date();
+  data.content = data.content.replace(
+    /<img src="data:image\/(.+?);base64,(.+?)={0,2}">/g, //todo: handle other mimetypes
+    (match, group1, group2, position, fullString) => {
+      let file = `${data.slug}-${date.getTime()}.${group1}`; //todo: slug(title,limit=50)
+      data.images.push(file);
+      writeFileSync(`${dataDir}/files/${file}`, group2, "base64");
+      //todo: then return <img ..>  https://stackoverflow.com/q/59962305/12577650
+      //or queue.upload.$file=false
+      return `<img src="${dir}/${file}" alt="${data.title}" />`; //todo: data-srcSet
+    }
+  );
 
-        //todo: then return <img ..>  https://stackoverflow.com/q/59962305/12577650
-        //or queue.upload.$file=false
-
-        return `<img src="${dir}/${file}" alt="${data.title}" />`;
-      }
-    );
-
-    //todo: data.summary=summary(data.content)
-    json.write(dataFile, data);
-  }
+  //todo: data.summary=summary(data.content)
 
   //uploading files:
 
@@ -179,14 +174,19 @@ export function saveData(sid, data?) {
     bucketDir = `${BUCKET}/${dir}`;
   mdir(mediaDir);
 
+  //todo: Promise.all([upload.cover, upload all files]).then(db.insert);
+
   if (existsSync(`${dataDir}/cover`)) {
     //ext = "."+req.file.mimetype.replace("image/", ""); //or ext(req.file.originalname)
     if (dev) console.log("uploading cover ...");
     data.cover = `${data.slug}${ext(data.tmp.cover.originalname)}`;
+    //don't upload resized versions of the image.
     bucket
       .upload(`${dataDir}/cover`, `${bucketDir}/${data.cover}`)
       .then(() => {
-        rename(`${dataDir}/cover`, `${mediaDir}/${data.cover}`, e => {});
+        rename(`${dataDir}/cover`, `${mediaDir}/${data.cover}`, err => {
+          if (!err) resize(`${mediaDir}/${data.cover}`);
+        });
         if (dev) console.log("cover uploaded");
       })
       .catch(e => console.log("uploading cover failed", e));
@@ -198,17 +198,12 @@ export function saveData(sid, data?) {
         if (dev) console.log(`uploading file: ${file}`);
         bucket
           .upload(`${dataDir}/files/${file}`, `${bucketDir}/${file}`)
-          .then(
-            () => {
-              rename(
-                `${dataDir}/files/${file}`,
-                `${mediaDir}/${file}`,
-                e => {}
-              );
-              if (dev) console.log(`file uploaded: ${file}`);
-            },
-            e => {}
-          )
+          .then(() => {
+            rename(`${dataDir}/files/${file}`, `${mediaDir}/${file}`, err => {
+              if (!err) resize(`${mediaDir}/${file}`);
+            });
+            if (dev) console.log(`file uploaded: ${file}`);
+          })
           .catch(err => console.error(`uploading faild for ${file}`, err));
       });
     }

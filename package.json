@@ -18,6 +18,7 @@
     "build:dev": "npx cross-env NODE_ENV=development npm run build:all:dev",
     "serve:ng": "ng serve -o",
     "serve": "node dist/server-start.js",
+    "serve:inspect": "node --inspect dist/server-start.js",
     "serve:dev": "nodemon --inspect dist/server-start.js",
     "start": "npm run build && npm run serve",
     "start:dev": "npm run build:dev && npm run serve:dev",

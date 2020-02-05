@@ -126,7 +126,7 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
   //we can resume this process at any time
   //todo: a process to check if there is any item in the queue
   let sid = shortId.generate(),
-    dir = `./data/queue/${sid}`;
+    dir = `./temp/queue/${sid}`;
   req.body.type = req.params.type;
 
   mdir(dir);
