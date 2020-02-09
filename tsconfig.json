@@ -35,7 +35,8 @@
     "mapRoot": "",
     "emitDecoratorMetadata": true,
     "locale": "en",
-    "watch": false
+    "watch": false,
+    "resolveJsonModule": true
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
