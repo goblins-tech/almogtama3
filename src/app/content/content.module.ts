@@ -47,6 +47,7 @@ import {
 
 import { fab } from "@fortawesome/free-brands-svg-icons";
 import { fas } from "@fortawesome/free-solid-svg-icons";
+import { LazyLoadImageModule } from "ng-lazyload-image";
 
 const routes: Routes = [
   { path: "editor", component: ContentEditorComponent }, // ex: /editor?type=jobs
@@ -105,7 +106,8 @@ export const fileTypeModule = FileTypeModule.forRoot();
     ShareButtonsModule,
     FontAwesomeModule,
     QuillModule.forRoot(),
-    HighlightModule //todo: import common languages only https://ngx-highlight.netlify.com/
+    HighlightModule, //todo: import common languages only https://ngx-highlight.netlify.com/
+    LazyLoadImageModule
   ],
   providers: [MetaService, { provide: LOCALE_ID, useValue: APP_LOCALE_ID }],
   bootstrap: []

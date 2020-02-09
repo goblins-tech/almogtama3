@@ -31,7 +31,7 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
     <img
       mat-card-image
       *ngIf="item.cover"
-      src="{{item.type}}/{{item.shortId}}/{{item.cover}}"
+      lazyLoad="{{item.type}}/{{item.shortId}}/{{item.cover}}"
       alt="{{item.title}}"
     />
 
@@ -73,7 +73,7 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
       <img
         mat-card-image
         *ngIf="item.cover"
-        src="{{item.type}}/{{item.shortId}}/{{item.cover}}"
+        lazyLoad="{{item.type}}/{{item.shortId}}/{{item.cover}}"
         alt="{{item.title}}"
       />
       <mat-card-content
