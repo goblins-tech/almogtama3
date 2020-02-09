@@ -235,8 +235,12 @@ export function saveData(data) {
       delete data.tmp;
       delete data.file;
       if (dev) console.log("inserting data", data);
-      insertData(data)
-        .then(data => {
+      //we return the inner promise to catch it's thrown error
+      //ex: promise.then(()=>{ return promise2.then(()=>{throw 'error'})} ).catch(e=>{/*inner error catched*/})
+      //https://stackoverflow.com/a/39212325
+      return insertData(data)
+        .then(_data => {
+          data = _data;
           if (dev) console.log("data inserted");
           unlink(dataFile, e => {}); //todo: remove dataDir
           //create cache
