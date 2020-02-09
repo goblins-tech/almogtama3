@@ -120,6 +120,10 @@ export class FormlyFieldFile extends FieldType implements OnInit {
   remove(file) {
     this.files.delete(file);
   }
+
+  clear() {
+    this.files.clear();
+  }
 }
 
 //ControlValueAccessor for 'file' input

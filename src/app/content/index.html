@@ -32,6 +32,7 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
       mat-card-image
       *ngIf="item.cover"
       src="{{item.type}}/{{item.shortId}}/{{item.cover}}"
+      alt="{{item.title}}"
     />
 
     <!-- it is recommended to render the contet that was generated via <quill-editor> inside <quill-view>
@@ -73,6 +74,7 @@ https://stackoverflow.com/questions/59432362/angular-ngif-data-async-as-data-dat
         mat-card-image
         *ngIf="item.cover"
         src="{{item.type}}/{{item.shortId}}/{{item.cover}}"
+        alt="{{item.title}}"
       />
       <mat-card-content
         dir="auto"

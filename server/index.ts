@@ -125,19 +125,21 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
 
   //we can resume this process at any time
   //todo: a process to check if there is any item in the queue
-  let sid = shortId.generate(),
-    dir = `./temp/queue/${sid}`;
+  let sid;
+  if (!req.body.shortId) {
+    sid = shortId.generate();
+    req.body.shortId = sid;
+  }
+  let dir = `./temp/queue/${sid}`;
   req.body.type = req.params.type;
-
+  req.body.file = req.file;
   mdir(dir);
   json.write(`${dir}/data.json`, req.body);
-  if (req.file) {
-    renameSync(req.file.path, `${dir}/cover`);
-    req.body.tmp = { cover: req.file };
-  }
 
-  saveData(sid, req.body);
-  res.send({ ok: true, shortId: sid }); //todo: navigate to /s/shortId -> redirect to full link
+  if (dev) console.log("req.body:", req.body);
+  saveData(req.body)
+    .then(data => res.send({ ok: true, data, shortId: sid }))
+    .catch(error => res.send({ ok: false, error }));
 
   //the content will be available after the process completed (uploading files, inserting to db, ..)
 });

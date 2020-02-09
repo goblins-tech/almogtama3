@@ -24,7 +24,12 @@ export function getValue(value, keys?: string | string[]) {
  * @param  allowedChars="" regex style ex: a-z0-9
  * @return [description]
  */
-export function slug(value: ContentValue, lngth = 200, allowedChars = "") {
+export function slug(
+  value: ContentValue,
+  lngth = 200,
+  allowedChars = "",
+  encode = true
+) {
   let lang = {
     ar: "أابتثجحخدذرزسشصضطظعغفقكلمنهويىآئءلألإإآة"
   };
@@ -37,11 +42,11 @@ export function slug(value: ContentValue, lngth = 200, allowedChars = "") {
     .trim() //remove trailing spaces
     .replace(new RegExp(`[^a-z0-9-._~${allowedChars}]`, "gi"), "-") //remove unallowed charachters
     .replace(/\s+/g, "-") //replace inner spaces with '-'
-    //.replace("/", "") //replace '/' with '-', to prevent changing the current route ex: url/slug1-slug2 instead of /slug1/slug2
+    .replace("/", "") //replace '/' with '-', to prevent changing the current route ex: url/slug1-slug2 instead of /slug1/slug2 (in case of encode=false)
     .replace(/-{2,}/g, "-") //remove sequental slaches
     .replace(/^-+|-+$/g, ""); //remove trailing slashes, equivilant to php .trim('-'), starts or ends with one or more slashes
 
-  return length(encodeURIComponent(slug), lngth);
+  return length(encode ? encodeURIComponent(slug) : slug, lngth);
   //todo: remove unwanted charachters & very short words}
 }
 export function content(value: ContentValue) {

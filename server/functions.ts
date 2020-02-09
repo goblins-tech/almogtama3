@@ -15,7 +15,9 @@ import {
   writeFile,
   json,
   statSync
+  //promises //todo: promises.writeFile as writeFilePromise
 } from "../eldeeb/fs";
+import { replaceAsync } from "../eldeeb/string";
 import { Firebase } from "../eldeeb/firebase-admin";
 import * as admin from "firebase-admin";
 import multer from "multer";
@@ -126,24 +128,21 @@ export function getData(params) {
   );
 }
 
-export function saveData(sid, data?) {
-  if (dev) console.log("====saveData====");
+export function saveData(data) {
+  /*
+  1- handle base46 data, then: upload images to firebase, then resize
+  2- insert data to db
+  3- upload cover image then resize it
+   */
+  if (dev) console.log("====saveData====", data);
+
+  let sid = data.shortId;
   let dataDir = `./temp/queue/${sid}`,
-    dataFile = `${dataDir}/data.json`;
+    dataFile = `${dataDir}/data.json`,
+    dir = `${data.type}/${sid}`;
 
-  if (!data) {
-    if (!existsSync(dataFile)) {
-      console.error("data file not found");
-      return;
-    }
-    data = json.read(dataFile);
-  }
-
-  //adjust data
-  let dir = `${data.type}/${sid}`;
-
-  data.shortId = sid;
-  if (!data.slug || data.slug == "") data.slug = slug(data.title); //if slug changed, cover fileName must be changed
+  if (!data.slug || data.slug == "")
+    data.slug = slug(data.title, 200, ":ar", false); //if slug changed, cover fileName must be changed
 
   // handle base64-encoded data
   mdir(`${dataDir}/files`);
@@ -154,91 +153,117 @@ export function saveData(sid, data?) {
   //it contain all available sizes includes 'opt' (optimized version) but doesn't contain 'orig' (the original file)
   if (!data.images) data.images = [];
   let date = new Date();
-  data.content = data.content.replace(
-    /<img src="data:image\/(.+?);base64,(.+?)={0,2}">/g, //todo: handle other mimetypes
-    (match, group1, group2, position, fullString) => {
-      let file = `${data.slug}-${date.getTime()}.${group1}`; //todo: slug(title,limit=50)
-      data.images.push(file);
-      writeFileSync(`${dataDir}/files/${file}`, group2, "base64");
-      //todo: then return <img ..>  https://stackoverflow.com/q/59962305/12577650
-      //or queue.upload.$file=false
-      return `<img src="${dir}/${file}" alt="${data.title}" />`; //todo: data-srcSet
-    }
-  );
-
-  //todo: data.summary=summary(data.content)
-
-  //uploading files:
 
   let mediaDir = `${MEDIA}/${dir}`,
     bucketDir = `${BUCKET}/${dir}`;
   mdir(mediaDir);
 
-  //todo: Promise.all([upload.cover, upload all files]).then(db.insert);
+  return replaceAsync(
+    data.content,
+    /<img src="data:image\/(.+?);base64,(.+?)={0,2}">/g, //todo: handle other mimetypes
+    (match, group1, group2, position, fullString) => {
+      let file = `${data.slug}-${date.getTime()}.${group1}`; //todo: slug(title,limit=50)
+      data.images.push(file);
+      let tmp = `${mediaDir}/${file}`;
 
-  if (existsSync(`${dataDir}/cover`)) {
-    //ext = "."+req.file.mimetype.replace("image/", ""); //or ext(req.file.originalname)
-    if (dev) console.log("uploading cover ...");
-    data.cover = `${data.slug}${ext(data.tmp.cover.originalname)}`;
-    //don't upload resized versions of the image.
-    bucket
-      .upload(`${dataDir}/cover`, `${bucketDir}/${data.cover}`)
-      .then(() => {
-        rename(`${dataDir}/cover`, `${mediaDir}/${data.cover}`, err => {
-          if (!err)
-            resize(`${mediaDir}/${data.cover}`, {
+      if (dev) console.log(`uploading file: ${file}`);
+
+      //or promises.writeFile().then() //expremental
+      //or util.promisify(fs.writeFile()).then()
+      return new Promise((r, j) => {
+        writeFile(tmp, group2, "base64", err => {
+          if (err) j(err);
+          else r(tmp);
+        });
+      })
+        .then(() => bucket.upload(tmp, `${bucketDir}/${file}`))
+        .then(() =>
+          resize(tmp, {
+            type: data.type,
+            shortId: sid
+          }).then(imgs => {
+            if (dev) console.log(`file ${file} uploaded & resized`, imgs);
+
+            //imgs={width:path}
+            let srcset, sizes; //todo:
+            return `<img data-src="${dir}/${file}" data-srcset="${srcset}" sizes="${sizes}" alt="${data.title}" />`;
+          })
+        )
+
+        .catch(err => {
+          throw new Error(`Error @file: ${file}, ${err.message}`);
+        });
+    }
+  )
+    .then(content => {
+      data.content = content;
+
+      if (data.file && existsSync(data.file.path)) {
+        if (dev) console.log("uploading cover ...");
+
+        if (!data.cover)
+          data.cover = {
+            src: `${data.slug}${ext(data.file.originalname)}`
+          };
+        //todo: await until cover uploaded, then insert data
+
+        return bucket
+          .upload(data.file.path, `${bucketDir}/${data.cover.src}`)
+          .then(() => {
+            let coverDir = `${mediaDir}/${data.cover.src}`;
+            renameSync(data.file.path, coverDir);
+            return coverDir;
+          })
+          .then(coverDir =>
+            resize(coverDir, {
               type: data.type,
               shortId: sid
-            });
+            })
+              .then(imgs => {
+                if (dev) console.log("cover uploaded & resized", imgs);
+                //todo: convert imgs to scrSet (i.e: img.jpg 400w,...)
+                data.cover.srcSet = imgs;
+              })
+              .catch(err => console.error({ err }))
+          )
+          .catch(err => {
+            throw new Error(`Error: uploading cover failed, ${err.message}`);
+          });
+      }
+    })
+    .then(() => {
+      delete data.tmp;
+      delete data.file;
+      if (dev) console.log("inserting data", data);
+      insertData(data)
+        .then(data => {
+          if (dev) console.log("data inserted");
+          unlink(dataFile, e => {}); //todo: remove dataDir
+          //create cache
+          json.write(`./temp/${data.type}/${data.shortId}.json`, data);
+          let indexCache = `./temp/${data.type}/index.json`;
+          if (existsSync(indexCache)) {
+            let { _id, shortId, slug, cover } = data; //todo:,summary
+            json.write(
+              indexCache,
+              json.read(indexCache).unshift({ _id, shortId, slug, cover })
+            );
+            //or: cache(indexCache, ":purge:");
+          }
+        })
+        .catch(err => {
+          throw new Error(`Error @insertData(), ${err.message}`);
         });
-        if (dev) console.log("cover uploaded");
-      })
-      .catch(e => console.log("uploading cover failed", e));
-  }
+    })
+    .then(() => data);
 
-  readdir(`${dataDir}/files`, (err, files) => {
-    if (!err) {
-      files.forEach(file => {
-        if (dev) console.log(`uploading file: ${file}`);
-        bucket
-          .upload(`${dataDir}/files/${file}`, `${bucketDir}/${file}`)
-          .then(() => {
-            rename(`${dataDir}/files/${file}`, `${mediaDir}/${file}`, err => {
-              if (!err)
-                resize(`${mediaDir}/${file}`, {
-                  type: data.type,
-                  shortId: sid
-                });
-            });
-            if (dev) console.log(`file uploaded: ${file}`);
-          })
-          .catch(err => console.error(`uploading faild for ${file}`, err));
-      });
-    }
-  });
+  //todo: data.summary=summary(data.content)
+
+  //todo: Promise.all([upload.cover, upload all files]).then(db.insert);
 
   //insert data to db
   //todo: if(all previous seps completed)
   //i.e if !exists(cover) && no file exists in /files
-
-  delete data.tmp;
-  insertData(data)
-    .then(data => {
-      if (dev) console.log("data inserted", data);
-      unlink(dataFile, e => {}); //todo: remove dataDir
-      //create cache
-      json.write(`./temp/${data.type}/${data.shortId}.json`, data);
-      let indexCache = `./temp/${data.type}/index.json`;
-      if (existsSync(indexCache)) {
-        let { _id, shortId, slug, cover } = data; //todo:,summary
-        json.write(
-          indexCache,
-          json.read(indexCache).unshift({ _id, shortId, slug, cover })
-        );
-        //or: cache(indexCache, ":purge:");
-      }
-    })
-    .catch(error => console.log("Error @insertData()", error));
 
   //when done: remove queue/sid.json
 }
@@ -308,7 +333,7 @@ export function resize(img, info) {
   return sharp(img)
     .metadata()
     .then(meta => {
-      Promise.all(
+      return Promise.all(
         [400, 600, 800, 1000].map(
           //todo: && !existsSync(img_width.ext)
           width => {
@@ -331,7 +356,6 @@ export function resize(img, info) {
               return total; //accumulator
             }, {})
         )
-        .then(data => console.log(data))
         .catch(err => console.error(err));
     });
 }
