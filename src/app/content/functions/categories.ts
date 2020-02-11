@@ -90,7 +90,7 @@ export class Categories {
     var inputs = c.createInputs(null, "", ["5ac348980d63be4aa0e967a2"]);
     fs.writeFileSync("./inputs.html", inputs);
    */
-  createInputs(ctg, tab = "", execlude = []) {
+  createInputs(ctg?, tab = "", execlude = []) {
     if (!ctg) ctg = this.getMain(false);
     let output = "";
     if (ctg instanceof Array) {

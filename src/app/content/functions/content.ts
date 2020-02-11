@@ -1,4 +1,4 @@
-import { objectType } from "../../../eldeeb/general";
+import { objectType } from "../../../../eldeeb/general";
 import { DomSanitizer, ɵDomSanitizerImpl } from "@angular/platform-browser";
 
 export type ContentValue = any; //todo: article{} | string

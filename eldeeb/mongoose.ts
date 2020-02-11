@@ -98,7 +98,8 @@ export function model(
   schema = new mongoose.Schema(obj.fields, options);
   // todo: add methods,virtuals,...
 
-  return { schema, model: mongoose.model(collection, schema) };
+  //to get schema: model.schema
+  return mongoose.model(collection, schema);
 }
 
 export function encode(str: string) {

@@ -22,6 +22,7 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { FormlyModule } from "@ngx-formly/core";
 import { FormlyMaterialModule } from "@ngx-formly/material";
 import { FormlyFieldFile, FileValueAccessor, FormlyFieldQuill } from "./formly";
+import { FormlyFieldCategories } from "./editor";
 import { MetaService } from "./meta.service";
 import { HighlightModule } from "ngx-highlightjs";
 import {
@@ -73,6 +74,7 @@ export const fileTypeModule = FileTypeModule.forRoot();
     LengthPipe,
     SummaryPipe,
     FormlyFieldFile,
+    FormlyFieldCategories,
     FileValueAccessor,
     FormlyFieldQuill
   ],
@@ -86,6 +88,11 @@ export const fileTypeModule = FileTypeModule.forRoot();
     FormlyModule.forRoot({
       types: [
         { name: "file", component: FormlyFieldFile, wrappers: ["form-field"] }, //todo: add to component instead of module
+        {
+          name: "categories",
+          component: FormlyFieldCategories,
+          wrappers: ["form-field"]
+        },
         //  { name: "file", component: FileTypeComponent }, //from ngx-formly-material-file,
         { name: "quill", component: FormlyFieldQuill, wrappers: ["form-field"] }
       ]

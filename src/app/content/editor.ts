@@ -7,7 +7,7 @@ import { MatSnackBar } from "@angular/material";
 import { Data } from "./index"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
 import { article } from "./formly";
 import { HighlightJS } from "ngx-highlightjs";
-import { keepHtml } from "./functions";
+import { keepHtml, Categories } from "./functions";
 import { urlParams } from "../../../eldeeb/angular";
 import { environment as env } from "../../environments/environment";
 import {
@@ -15,6 +15,8 @@ import {
   AngularFireStorageReference,
   AngularFireUploadTask
 } from "@angular/fire/storage"; //todo: move to server.ts (how to inject AngularFireStorage?)
+import { DomSanitizer } from "@angular/platform-browser";
+import { FieldType } from "@ngx-formly/material";
 
 export interface Params {
   type: string; //todo: movr to query i.e: editor/?type=jobs
@@ -45,9 +47,15 @@ export class ContentEditorComponent implements OnInit {
     private httpService: HttpService,
     private snackBar: MatSnackBar,
     private hljs: HighlightJS,
-    private storage: AngularFireStorage
+    private storage: AngularFireStorage,
+    private sanitizer: DomSanitizer
   ) {}
   ngOnInit() {
+    this.getCategories().subscribe(ctg => {
+      if (typeof ctg.data == "string") ctg.data = JSON.parse(ctg.data); //todo: why response: string
+      console.log({ ctg });
+    });
+
     //todo: if($_GET[id])getData(type,id)
     //ex: /editor?type=jobs or /editor:id
     urlParams(this.route).subscribe(([params, query]) => {
@@ -144,6 +152,18 @@ export class ContentEditorComponent implements OnInit {
         //todo: categories = sub of jobs, main category = jobs
 
         //todo: if(form.content contains contacts)error -> email, mobile, link
+      } else {
+        article.fields.push({
+          key: "test",
+          //https://github.com/ngx-formly/ngx-formly/issues/2039#issuecomment-583890544
+          //https://stackoverflow.com/a/53188651
+          template: this.sanitizer.bypassSecurityTrustHtml(`label: <input>`)[
+            "changingThisBreaksApplicationSecurity"
+          ],
+          templateOptions: {
+            label: "test"
+          }
+        });
       }
       this.articleForm = article;
       console.log({ articleForm: article });
@@ -154,6 +174,10 @@ export class ContentEditorComponent implements OnInit {
     return this.httpService.get<Data>({
       id: this.params.id
     });
+  }
+
+  getCategories() {
+    return this.httpService.get<any>("~categories");
   }
 
   onSubmit(data) {
@@ -225,5 +249,23 @@ export class ContentEditorComponent implements OnInit {
 
   showSnackBar(message: string, action: string, duration = 0) {
     this.snackBar.open(message, action, { duration });
+  }
+}
+
+//todo: use template:Categories.createInputs() instead of type=FormlyFieldCategories
+@Component({
+  selector: "formly-field-file",
+  template: ``
+})
+export class FormlyFieldCategories extends FieldType implements OnInit {
+  inputs;
+  ngOnInit() {
+    /*
+    if(jobs)ctg=''
+    this.http.get('~categories').subscribe(ctgs=>new Categories(ctgs).createInputs(ctg, "", execlude))
+     */
+  }
+  createInputs(ctg, execlude) {
+    //ContentEditorComponent.getCategories().then(data=>data.inputs)
   }
 }

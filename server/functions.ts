@@ -23,6 +23,10 @@ import * as admin from "firebase-admin";
 import multer from "multer";
 import { slug } from "../src/app/content/functions";
 import { resize as _resize, sharp } from "../eldeeb/graphics";
+import {
+  Categories,
+  ArticlesCategories
+} from "../src/app/content/functions/categories";
 
 export const dev = process.env.NODE_ENV === "development";
 export const DIST = join(process.cwd(), "./dist/browser"); //process.cwd() dosen't include /dist
@@ -39,6 +43,46 @@ export const bucket = new Firebase(/*{
   project: "almogtama3-eg",
   cert: require("./firebase-almogtama3-eg.json")
 }*/).storage();
+
+/**
+ * get adjusted categories (i.e: adding branches, top to each entry & add main categories)
+ * & adjusted articles_categories (i.e: article_categories & category_articles)
+ * & inputs (for forms)
+ * @method categories
+ * @return {categories, main, article_categories, category_articles, inputs}
+ */
+export function categories() {
+  console.log("==categories==");
+  let dir = "temp/articles/categories";
+  let result = {};
+
+  return cache(`${dir}/categories.json`, () =>
+    connect().then(
+      () =>
+        Promise.all([
+          model("categories")
+            .find({})
+            .lean(),
+          model("article_categories")
+            .find({})
+            .lean()
+        ])
+          .then(([categories, articles_categories]) => {
+            let ctg = new Categories(categories),
+              actg = new ArticlesCategories(articles_categories, ctg);
+            return {
+              ...ctg.adjust(),
+              inputs: ctg.createInputs(),
+              ...actg.adjust()
+            };
+          })
+          .catch(err => {
+            throw new Error(`Error @categories, ${err.message}`);
+          }),
+      1
+    )
+  );
+}
 
 //todo: id (ObjectId | shortId) | limit (number)
 export function getData(params) {

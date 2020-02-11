@@ -46,5 +46,5 @@ export function model(collection) {
 
   let schemaObj =
     collection in schemas ? schemas[collection] : schemas["basic"];
-  return mongoose.model(collection, schemaObj, { strict: false }).model;
+  return mongoose.model(collection, schemaObj, { strict: false });
 }

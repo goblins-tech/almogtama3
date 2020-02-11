@@ -13,7 +13,8 @@ import {
   DIST,
   MEDIA,
   BUCKET,
-  dev
+  dev,
+  categories
 } from "./functions";
 
 //console.clear();
@@ -138,7 +139,7 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
 
   if (dev) console.log("req.body:", req.body);
   saveData(req.body)
-    .then(data => res.send({ ok: true, data, shortId: sid }))
+    .then(data => res.send({ ok: true, data }))
     .catch(error => res.send({ ok: false, error }));
 
   //the content will be available after the process completed (uploading files, inserting to db, ..)
@@ -147,24 +148,31 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
 app.get("/api/:item?", (req, res, next) => {
   console.log(req.params);
 
-  var item = req.params.item,
-    id,
-    category;
-  if (item && item.startsWith("id-")) id = item.slice(3);
-  else category = item;
+  var item = req.params.item;
 
-  if (dev) console.log("app.get", { id, category });
+  //ex: ~categories
+  if (item.startsWith("~")) {
+    if (item == "~categories")
+      categories().then(data => res.send({ ok: true, data }));
+    else res.send({ ok: false, msg: `unknown param ${item}` });
+  } else {
+    var id, category;
+    if (item.startsWith("id-")) id = item.slice(3);
+    else category = item;
 
-  getData({ id, category })
-    .then(
-      payload => {
-        if (dev) console.log({ payload });
-        if (typeof payload == "string") payload = JSON.parse(payload);
-        res.json({ type: id ? "item" : "list", payload });
-      },
-      error => ({ type: error, error }) //todo: content/index.html admin:show error
-    )
-    .catch(next); //https://expressjs.com/en/advanced/best-practice-performance.html#use-promises
+    if (dev) console.log("app.get", { id, category });
+
+    getData({ id, category })
+      .then(
+        payload => {
+          if (dev) console.log({ payload });
+          if (typeof payload == "string") payload = JSON.parse(payload);
+          res.json({ ok: true, type: id ? "item" : "list", payload });
+        },
+        error => ({ ok: false, error }) //todo: content/index.html admin:show error
+      )
+      .catch(next); //https://expressjs.com/en/advanced/best-practice-performance.html#use-promises
+  }
 });
 
 // Serve static files; /file.ext will be served from /dist/browser/file.ext then /data/media/file.ext

@@ -205,9 +205,7 @@ export async function cache(
   file = resolve(file);
   if (data === ":purge:") return fs.unlink(file, () => {}); //purging the cache; not a promise
 
-  if (process.env.NODE_ENV == "development")
-    //console.log("cache():", { file, data });
-    mdir(file as string, true);
+  if (process.env.NODE_ENV == "development") mdir(file as string, true);
   if (ext(file) == ".json") json = true;
   if (
     !fs.existsSync(file) ||
@@ -216,30 +214,29 @@ export async function cache(
     expire != 0 && // if expire=0 never expires
       (mtime(file) as number) + expire * 60 * 60 * 1000 < now()) // todo: convert mimetime() to number or convert expire to bigInt??
   ) {
-    //console.log("cache: new data");
     function cache_save(data) {
-      //console.log("cache_save:", data);
       if (["array", "object"].includes(objectType(data)))
         data = JSON.stringify(data);
 
       if (allowEmpty || !isEmpty(data)) fs.writeFileSync(file, data);
       return data;
     }
+
     //todo: also support rxjs.Observable
     //no need to support Async functions, because it is nonsense if data() function returns another function. (func.constructor.name === "AsyncFunction")
     if (typeof data == "function") data = await data();
-    //console.log("cache data()", data);
+
     if (data && (data instanceof Promise || typeof data.then == "function"))
       return data.then(data => cache_save(data));
-    else return new Promise(r => r(cache_save(data)));
+    else return Promise.resolve(cache_save(data));
+    //else return new Promise(r => r(cache_save(data)));
 
     // todo: do we need to convert data to string? i.e: writeFileSync(file.toString()), try some different types of data
   } else {
-    //console.log("cache: old data", { json });
     // retrive data from file and return it as the required type
     data = fs.readFileSync(file, "utf8").toString(); // without encoding (i.e utf-8) will return a stream insteadof a string
     if (json) data = JSON.parse(data);
-    //console.log({ cach_data: data });
+
     return new Promise(r => r(data));
     // todo: elseif(type=="number") elseif ...
   }

@@ -20,8 +20,10 @@ export class HttpService {
   constructor(private http: HttpClient) {}
   get<T>(params) {
     var url = "/api/";
-    if (params.id) url += `id-${params.id}`;
-    else if (params.type) url += `type-${params.type}`;
+
+    //ex: ~categories
+    if (typeof params == "string") url += params;
+    else if (params.id) url += `id-${params.id}`;
     else if (params.category) url += encodeURIComponent(params.category);
     return this.http.get<T>(url);
   }
