@@ -90,6 +90,7 @@ export class FormlyFieldFile extends FieldType implements OnInit {
   accept = ""; //file type : ex: images/*
   capture = ""; //source ex: accept="user" -> device webcam & mic
 
+  //todo: implement , AfterViewInit?
   ngAfterViewInit() {
     console.log({
       formControl: this.to.formControl,

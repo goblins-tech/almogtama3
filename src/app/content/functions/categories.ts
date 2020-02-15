@@ -89,14 +89,20 @@ export class Categories {
   ex:
     var inputs = c.createInputs(null, "", ["5ac348980d63be4aa0e967a2"]);
     fs.writeFileSync("./inputs.html", inputs);
+
+    todo: return array of categories & use <mat-tree>
    */
-  createInputs(ctg?, tab = "", execlude = []) {
+
+  createInputs(ctg?, tab = "", filter?: () => boolean | string[]) {
     if (!ctg) ctg = this.getMain(false);
     let output = "";
     if (ctg instanceof Array) {
-      ctg.forEach(el => {
-        if (!execlude.includes(el._id)) output += this.createInputs(el, tab);
-      });
+      if (filter) {
+        if (filter instanceof Array)
+          ctg = ctg.filter(el => filter.includes(el._id));
+        else ctg = ctg.filter(filter);
+      }
+      ctg.forEach(el => (output += this.createInputs(el, tab)));
     } else {
       ctg = this.getCtg(ctg);
       output =

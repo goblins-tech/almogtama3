@@ -51,11 +51,6 @@ export class ContentEditorComponent implements OnInit {
     private sanitizer: DomSanitizer
   ) {}
   ngOnInit() {
-    this.getCategories().subscribe(ctg => {
-      if (typeof ctg.data == "string") ctg.data = JSON.parse(ctg.data); //todo: why response: string
-      console.log({ ctg });
-    });
-
     //todo: if($_GET[id])getData(type,id)
     //ex: /editor?type=jobs or /editor:id
     urlParams(this.route).subscribe(([params, query]) => {
@@ -102,33 +97,13 @@ export class ContentEditorComponent implements OnInit {
       };
 
       if (this.params.type == "jobs") {
+        /*
         //delete cover image since jobs.layout=="list" not grid
         //dont use delete article.fields(...)
         article.fields.splice(
           article.fields.findIndex(el => el.type == "file"),
           1
-        );
-
-        article.fields.push(
-          {
-            key: "pictures",
-            type: "file",
-            templateOptions: {
-              label: "Pictures",
-              description: "Upload some nice pictures",
-              required: true
-            }
-          },
-          {
-            key: "test",
-            template: keepHtml(`test: <input type="text" />`),
-            templateOptions: {
-              label: "test",
-              description: "test using keepHtml",
-              required: true
-            }
-          }
-        );
+        );*/
 
         //add field:contacts after content
         article.fields.splice(
@@ -153,7 +128,7 @@ export class ContentEditorComponent implements OnInit {
 
         //todo: if(form.content contains contacts)error -> email, mobile, link
       } else {
-        article.fields.push({
+        /*  article.fields.push({
           key: "test",
           //https://github.com/ngx-formly/ngx-formly/issues/2039#issuecomment-583890544
           //https://stackoverflow.com/a/53188651
@@ -163,10 +138,27 @@ export class ContentEditorComponent implements OnInit {
           templateOptions: {
             label: "test"
           }
-        });
+        });*/
       }
+
+      article.fields.push({
+        key: "categories",
+        type: "categories",
+        templateOptions: { categories: this.getCategories("articles") }
+      });
+
       this.articleForm = article;
       console.log({ articleForm: article });
+
+      /*this.getCategories("articles").subscribe(ctg => {
+        console.log({ ctg });
+
+        if (typeof ctg.data == "string") ctg.data = JSON.parse(ctg.data); //todo: why response: string
+        console.log({ ctg });
+        this.articleForm.form.get("title").setValue("test");
+        //or: this.articleForm.fields.find(el => el.key == "title").formControl.setValue("test2");
+
+      });*/
     });
   }
 
@@ -176,8 +168,8 @@ export class ContentEditorComponent implements OnInit {
     });
   }
 
-  getCategories() {
-    return this.httpService.get<any>("~categories");
+  getCategories(type: string) {
+    return this.httpService.get<any>("~categories"); //todo: ~categories/:type
   }
 
   onSubmit(data) {
@@ -255,17 +247,20 @@ export class ContentEditorComponent implements OnInit {
 //todo: use template:Categories.createInputs() instead of type=FormlyFieldCategories
 @Component({
   selector: "formly-field-file",
-  template: ``
+  template: `
+    {{ categories }}
+  `
 })
 export class FormlyFieldCategories extends FieldType implements OnInit {
-  inputs;
+  categories;
   ngOnInit() {
-    /*
-    if(jobs)ctg=''
-    this.http.get('~categories').subscribe(ctgs=>new Categories(ctgs).createInputs(ctg, "", execlude))
-     */
-  }
-  createInputs(ctg, execlude) {
-    //ContentEditorComponent.getCategories().then(data=>data.inputs)
+    this.to.categories.subscribe(data => {
+      if (data.ok) this.categories = data.inputes; //todo: else
+    });
   }
 }
+/*
+createInputs(ctg, execlude) {
+  //ContentEditorComponent.getCategories().then(data=>data.inputs)
+}
+ */

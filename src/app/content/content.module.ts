@@ -89,12 +89,16 @@ export const fileTypeModule = FileTypeModule.forRoot();
       types: [
         { name: "file", component: FormlyFieldFile, wrappers: ["form-field"] }, //todo: add to component instead of module
         {
+          name: "quill",
+          component: FormlyFieldQuill,
+          wrappers: ["form-field"]
+        },
+        {
           name: "categories",
           component: FormlyFieldCategories,
           wrappers: ["form-field"]
-        },
+        }
         //  { name: "file", component: FileTypeComponent }, //from ngx-formly-material-file,
-        { name: "quill", component: FormlyFieldQuill, wrappers: ["form-field"] }
       ]
       //validationMessages: new FileTypeValidationMessages(APP_LOCALE_ID).validationMessages
     }),
