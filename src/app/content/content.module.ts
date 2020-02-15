@@ -43,7 +43,8 @@ import {
   MatIconModule,
   MatListModule,
   MatProgressBarModule,
-  MatSnackBarModule
+  MatSnackBarModule,
+  MatCheckboxModule
 } from "@angular/material";
 
 import { fab } from "@fortawesome/free-brands-svg-icons";
@@ -114,6 +115,7 @@ export const fileTypeModule = FileTypeModule.forRoot();
     MatListModule,
     MatProgressBarModule,
     MatSnackBarModule,
+    MatCheckboxModule,
     ShareButtonsModule,
     FontAwesomeModule,
     QuillModule.forRoot(),

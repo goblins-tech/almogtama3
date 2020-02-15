@@ -1,5 +1,6 @@
 import { Pipe, PipeTransform } from "@angular/core";
 import * as fn from "./functions";
+import { DomSanitizer } from "@angular/platform-browser";
 
 @Pipe({
   name: "slug"
@@ -58,7 +59,7 @@ export class Nl2brPipe implements PipeTransform {
 
 @Pipe({ name: "keepHtml", pure: false })
 export class KeepHtmlPipe implements PipeTransform {
-  constructor(/*private sanitizer: DomSanitizer*/) {}
+  constructor(private sanitizer: DomSanitizer) {}
   /**
   Display HTML without sanitizing
   don't do: <p>{{content | keepHtml}}</p> -> error: SafeValue must use [property]=binding
@@ -70,7 +71,7 @@ export class KeepHtmlPipe implements PipeTransform {
  * @param  content   [description]
  * @return [description]
  */
-  transform(value, ...args) {
-    return fn.keepHtml(value, ...args /*, this.sanitizer*/);
+  transform(value) {
+    return fn.keepHtml(value, this.sanitizer);
   }
 }

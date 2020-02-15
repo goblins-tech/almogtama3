@@ -248,14 +248,22 @@ export class ContentEditorComponent implements OnInit {
 @Component({
   selector: "formly-field-file",
   template: `
-    {{ categories }}
+    <div [innerHTML]="categories | keepHtml"></div>
   `
 })
 export class FormlyFieldCategories extends FieldType implements OnInit {
   categories;
   ngOnInit() {
     this.to.categories.subscribe(data => {
-      if (data.ok) this.categories = data.inputes; //todo: else
+      console.log({ categories: data });
+      if (data.ok && data.data && data.data.categories) {
+        let ctg = new Categories(data.data.categories);
+        console.log({ ctg: data.data.categories });
+        this.categories =
+          ctg.createInputs(null, el => el._id != "5ac348980d63be4aa0e967cb") +
+          "<mat-checkbox>test3</mat-checkbox>";
+      }
+      //todo: else
     });
   }
 }

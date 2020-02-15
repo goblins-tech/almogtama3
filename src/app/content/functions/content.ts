@@ -90,10 +90,9 @@ export function nl2br(value: string) {
 //prevent Angular from sanitizing DOM, https://angular.io/guide/security#xss
 export function keepHtml(value: ContentValue, sanitizer?): string {
   let content = getValue(value, "content");
-  //  if (!sanitizer) sanitizer = new DomSanitizer(); //todo: error TS2511: Cannot create an instance of an abstract class.
-  //also ɵDomSanitizerImpl();needs 1 argument constructor(_doc)
-  //  return sanitizer.bypassSecurityTrustHtml(content);
-  return content;
+  //todo:  if (!sanitizer) sanitizer = new DomSanitizer(); //todo: error TS2511: Cannot create an instance of an abstract class.
+  //also ɵDomSanitizerImpl();needs 1 argument: constructor(_doc)
+  return sanitizer.bypassSecurityTrustHtml(content);
 }
 
 /*

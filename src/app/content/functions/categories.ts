@@ -93,24 +93,26 @@ export class Categories {
     todo: return array of categories & use <mat-tree>
    */
 
-  createInputs(ctg?, tab = "", filter?: () => boolean | string[]) {
+  createInputs(ctg?, filter?: ((el: any) => boolean) | string[], tab = "") {
     if (!ctg) ctg = this.getMain(false);
     let output = "";
     if (ctg instanceof Array) {
       if (filter) {
         if (filter instanceof Array)
           ctg = ctg.filter(el => filter.includes(el._id));
+        //todo: el.startsWith("!")? !filter.includes(): filter.includes()
         else ctg = ctg.filter(filter);
       }
-      ctg.forEach(el => (output += this.createInputs(el, tab)));
+      ctg.forEach(el => (output += this.createInputs(el, null, tab)));
     } else {
       ctg = this.getCtg(ctg);
       output =
         tab +
-        `<input type="checkbox" name="groups" value="${ctg._id}">${ctg.title}<br />`;
+        //`<input type="checkbox" name="groups" value="${ctg._id}">${ctg.title}<br />`;
+        `<mat-checkbox name="groups" value="${ctg._id}">${ctg.title}</mat-checkbox><br />`;
       let childs = this.getChilds(ctg, true);
       if (childs.length > 0)
-        output += this.createInputs(childs, tab + "&nbsp;".repeat(5));
+        output += this.createInputs(childs, null, tab + "&nbsp;".repeat(5));
     }
 
     return output;

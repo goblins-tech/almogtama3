@@ -72,8 +72,8 @@ export function categories() {
               actg = new ArticlesCategories(articles_categories, ctg);
             return {
               ...ctg.adjust(),
-              inputs: ctg.createInputs(),
               ...actg.adjust()
+              //inputs: ctg.createInputs(), or: inputs_articles, inputs_jobs
             };
           })
           .catch(err => {
