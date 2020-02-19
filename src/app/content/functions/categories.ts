@@ -90,7 +90,11 @@ export class Categories {
     var inputs = c.createInputs(null, "", ["5ac348980d63be4aa0e967a2"]);
     fs.writeFileSync("./inputs.html", inputs);
 
-    todo: return array of categories & use <mat-tree>
+    todo:
+    - return array of categories & use <mat-tree>
+    - use <mat-checkbox>, components must be dynamically loaded, Angular dosen't support
+      injecting components into [innerHTML]
+    - add btn to open a dialog to select categories  
    */
 
   createInputs(ctg?, filter?: ((el: any) => boolean) | string[], tab = "") {
@@ -108,8 +112,8 @@ export class Categories {
       ctg = this.getCtg(ctg);
       output =
         tab +
-        //`<input type="checkbox" name="groups" value="${ctg._id}">${ctg.title}<br />`;
-        `<mat-checkbox name="groups" value="${ctg._id}">${ctg.title}</mat-checkbox><br />`;
+        `<input type="checkbox" name="groups" value="${ctg._id}">${ctg.title}<br />`;
+      //`<mat-checkbox name="groups" value="${ctg._id}">${ctg.title}</mat-checkbox><br />`;
       let childs = this.getChilds(ctg, true);
       if (childs.length > 0)
         output += this.createInputs(childs, null, tab + "&nbsp;".repeat(5));

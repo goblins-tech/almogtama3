@@ -18,6 +18,16 @@ import {
 import { DomSanitizer } from "@angular/platform-browser";
 import { FieldType } from "@ngx-formly/material";
 
+/*
+//for FormlyFieldCategories; https://stackoverflow.com/a/60267178/12577650
+import {
+  ComponentFactoryResolver,
+  Renderer2,
+  ViewContainerRef
+} from "@angular/core";
+import { MatCheckbox } from "@angular/material";
+*/
+
 export interface Params {
   type: string; //todo: movr to query i.e: editor/?type=jobs
   id?: string;
@@ -41,6 +51,7 @@ export class ContentEditorComponent implements OnInit {
   response;
   submitting = false;
   articleForm;
+  categories;
 
   constructor(
     private route: ActivatedRoute,
@@ -51,6 +62,19 @@ export class ContentEditorComponent implements OnInit {
     private sanitizer: DomSanitizer
   ) {}
   ngOnInit() {
+    this.getCategories("articles").subscribe(data => {
+      console.log({ categories: data });
+      if (data.ok && data.data && data.data.categories) {
+        let ctg = new Categories(data.data.categories);
+        console.log({ ctg: data.data.categories });
+        this.categories = ctg.createInputs(
+          null,
+          el => el._id != "5ac348980d63be4aa0e967cb"
+        );
+      }
+      //todo: else
+    });
+
     //todo: if($_GET[id])getData(type,id)
     //ex: /editor?type=jobs or /editor:id
     urlParams(this.route).subscribe(([params, query]) => {
@@ -127,18 +151,6 @@ export class ContentEditorComponent implements OnInit {
         //todo: categories = sub of jobs, main category = jobs
 
         //todo: if(form.content contains contacts)error -> email, mobile, link
-      } else {
-        /*  article.fields.push({
-          key: "test",
-          //https://github.com/ngx-formly/ngx-formly/issues/2039#issuecomment-583890544
-          //https://stackoverflow.com/a/53188651
-          template: this.sanitizer.bypassSecurityTrustHtml(`label: <input>`)[
-            "changingThisBreaksApplicationSecurity"
-          ],
-          templateOptions: {
-            label: "test"
-          }
-        });*/
       }
 
       article.fields.push({
@@ -202,26 +214,6 @@ export class ContentEditorComponent implements OnInit {
     });
   }
 
-  /*  upload(file) {
-    //file= base64 data or file from <input file>
-    //todo: file name ex: shortid/data.slug
-    let id = Math.random()
-      .toString(36)
-      .substring(2);
-    let storageRef: AngularFireStorageReference = this.storage.ref(id);
-    let storageTask: AngularFireUploadTask = storageRef.put(file);
-    let uploadProgress: Observable<number> = storageTask.percentageChanges();
-    let downloadURL: Observable<string> = await storageTask.downloadURL();
-    let uploadState: Observable<string> = storageTask
-      .snapshotChanges()
-      .pipe(map(s => s.state));
-
-    //you can use storageTask.pause(), storageTask.cancel(), storageTask.resume()
-    //ex: <btn (click)=>storageTask.cancel() *ngIf="uploadState=='running' || uploadState=='paused'">
-    //todo: this.storageTask for each file upload
-    //todo: add progress bar under each image
-  } */
-
   isValid(field: string) {
     return (
       !this.articleForm.get(field).touched ||
@@ -248,27 +240,30 @@ export class ContentEditorComponent implements OnInit {
 @Component({
   selector: "formly-field-file",
   template: `
-    <div [innerHTML]="categories | keepHtml"></div>
+    <div [innerHTML]="categories"></div>
   `
 })
 export class FormlyFieldCategories extends FieldType implements OnInit {
   categories;
+
+  constructor(private sanitizer: DomSanitizer) {
+    super();
+  }
+
   ngOnInit() {
+    //  this.createComponent();
+
     this.to.categories.subscribe(data => {
       console.log({ categories: data });
       if (data.ok && data.data && data.data.categories) {
         let ctg = new Categories(data.data.categories);
-        console.log({ ctg: data.data.categories });
-        this.categories =
+        let inputs =
           ctg.createInputs(null, el => el._id != "5ac348980d63be4aa0e967cb") +
           "<mat-checkbox>test3</mat-checkbox>";
+        this.categories = this.sanitizer.bypassSecurityTrustHtml(inputs);
+        //todo: using "| keepHtml" makes all checkboxes disabled
       }
       //todo: else
     });
   }
 }
-/*
-createInputs(ctg, execlude) {
-  //ContentEditorComponent.getCategories().then(data=>data.inputs)
-}
- */

@@ -44,7 +44,8 @@ import {
   MatListModule,
   MatProgressBarModule,
   MatSnackBarModule,
-  MatCheckboxModule
+  MatCheckboxModule,
+  MatCheckbox
 } from "@angular/material";
 
 import { fab } from "@fortawesome/free-brands-svg-icons";
@@ -123,7 +124,8 @@ export const fileTypeModule = FileTypeModule.forRoot();
     LazyLoadImageModule
   ],
   providers: [MetaService, { provide: LOCALE_ID, useValue: APP_LOCALE_ID }],
-  bootstrap: []
+  bootstrap: [],
+  entryComponents: [MatCheckbox] //https://stackoverflow.com/a/60267178/12577650
 })
 export class ContentModule {
   constructor(faIconLibrary: FaIconLibrary) {
