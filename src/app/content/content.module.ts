@@ -22,7 +22,7 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { FormlyModule } from "@ngx-formly/core";
 import { FormlyMaterialModule } from "@ngx-formly/material";
 import { FormlyFieldFile, FileValueAccessor, FormlyFieldQuill } from "./formly";
-import { FormlyFieldCategories } from "./editor";
+import { FormlyFieldCategories, FormlyFieldCategoriesHelper } from "./editor";
 import { MetaService } from "./meta.service";
 import { HighlightModule } from "ngx-highlightjs";
 import {
@@ -51,6 +51,7 @@ import {
 import { fab } from "@fortawesome/free-brands-svg-icons";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { LazyLoadImageModule } from "ng-lazyload-image";
+import { DynamicLoadService } from "../../../eldeeb/ng/dynamic-load.service";
 
 const routes: Routes = [
   { path: "editor", component: ContentEditorComponent }, // ex: /editor?type=jobs
@@ -77,6 +78,7 @@ export const fileTypeModule = FileTypeModule.forRoot();
     SummaryPipe,
     FormlyFieldFile,
     FormlyFieldCategories,
+    FormlyFieldCategoriesHelper,
     FileValueAccessor,
     FormlyFieldQuill
   ],
@@ -123,7 +125,11 @@ export const fileTypeModule = FileTypeModule.forRoot();
     HighlightModule, //todo: import common languages only https://ngx-highlight.netlify.com/
     LazyLoadImageModule
   ],
-  providers: [MetaService, { provide: LOCALE_ID, useValue: APP_LOCALE_ID }],
+  providers: [
+    MetaService,
+    { provide: LOCALE_ID, useValue: APP_LOCALE_ID },
+    DynamicLoadService
+  ],
   bootstrap: [],
   entryComponents: [MatCheckbox] //https://stackoverflow.com/a/60267178/12577650
 })

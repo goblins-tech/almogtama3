@@ -1,4 +1,10 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ViewContainerRef,
+  Input
+} from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { HttpService } from "../http.service";
 import { Observable } from "rxjs";
@@ -17,6 +23,7 @@ import {
 } from "@angular/fire/storage"; //todo: move to server.ts (how to inject AngularFireStorage?)
 import { DomSanitizer } from "@angular/platform-browser";
 import { FieldType } from "@ngx-formly/material";
+import { DynamicLoadService } from "../../../eldeeb/ng/dynamic-load.service";
 
 /*
 //for FormlyFieldCategories; https://stackoverflow.com/a/60267178/12577650
@@ -59,7 +66,8 @@ export class ContentEditorComponent implements OnInit {
     private snackBar: MatSnackBar,
     private hljs: HighlightJS,
     private storage: AngularFireStorage,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private dynamic: DynamicLoadService
   ) {}
   ngOnInit() {
     this.getCategories("articles").subscribe(data => {
@@ -238,32 +246,63 @@ export class ContentEditorComponent implements OnInit {
 
 //todo: use template:Categories.createInputs() instead of type=FormlyFieldCategories
 @Component({
-  selector: "formly-field-file",
+  selector: "formly-field-categories",
   template: `
     <div [innerHTML]="categories"></div>
+    <ng-template #ref> </ng-template>
   `
 })
 export class FormlyFieldCategories extends FieldType implements OnInit {
   categories;
+  @ViewChild("ref", { read: ViewContainerRef, static: true })
+  ref: ViewContainerRef;
 
-  constructor(private sanitizer: DomSanitizer) {
+  constructor(
+    private sanitizer: DomSanitizer,
+    private dynamic: DynamicLoadService
+  ) {
     super();
   }
 
   ngOnInit() {
     //  this.createComponent();
-
-    this.to.categories.subscribe(data => {
-      console.log({ categories: data });
-      if (data.ok && data.data && data.data.categories) {
-        let ctg = new Categories(data.data.categories);
-        let inputs =
-          ctg.createInputs(null, el => el._id != "5ac348980d63be4aa0e967cb") +
-          "<mat-checkbox>test3</mat-checkbox>";
-        this.categories = this.sanitizer.bypassSecurityTrustHtml(inputs);
-        //todo: using "| keepHtml" makes all checkboxes disabled
-      }
-      //todo: else
+    let data = this.to.categories;
+    //todo: load <mat-checkbox> inputs directly without a helper class
+    this.dynamic.load(FormlyFieldCategoriesHelper, this.ref, {
+      data,
+      categories: data.subscribe(data => {
+        console.log({ categories: data });
+        if (data.ok && data.data && data.data.categories) {
+          let ctg = new Categories(data.data.categories);
+          let inputs =
+            ctg.createInputs(null, el => el._id != "5ac348980d63be4aa0e967cb") +
+            "<mat-checkbox>test3</mat-checkbox>";
+          this.categories = this.sanitizer.bypassSecurityTrustHtml(inputs);
+          //todo: using "| keepHtml" makes all checkboxes disabled
+        }
+        //todo: else
+      })
     });
+  }
+}
+
+@Component({
+  selector: "formly-field-categories-helper",
+  template: `
+    {{ categories }}
+    <hr />
+    <div [innerHTML]="categories"></div>
+    <hr />
+    <ng-template *ngFor="let ctg of dataObj"
+      ><mat-checkbox>{{ ctg.title }}</mat-checkbox>
+    </ng-template>
+  `
+})
+export class FormlyFieldCategoriesHelper implements OnInit {
+  @Input() categories: any;
+  @Input() data: any;
+  dataObj;
+  ngOnInit() {
+    this.data.subscribe(r => (this.dataObj = r));
   }
 }

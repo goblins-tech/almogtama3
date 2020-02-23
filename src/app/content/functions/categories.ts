@@ -94,7 +94,7 @@ export class Categories {
     - return array of categories & use <mat-tree>
     - use <mat-checkbox>, components must be dynamically loaded, Angular dosen't support
       injecting components into [innerHTML]
-    - add btn to open a dialog to select categories  
+    - add btn to open a dialog to select categories
    */
 
   createInputs(ctg?, filter?: ((el: any) => boolean) | string[], tab = "") {
@@ -112,7 +112,7 @@ export class Categories {
       ctg = this.getCtg(ctg);
       output =
         tab +
-        `<input type="checkbox" name="groups" value="${ctg._id}">${ctg.title}<br />`;
+        `<input type="checkbox" name="groups" value="${ctg._id}" [formControl]="formControl" [formlyAttributes]="field" />${ctg.title}<br />`;
       //`<mat-checkbox name="groups" value="${ctg._id}">${ctg.title}</mat-checkbox><br />`;
       let childs = this.getChilds(ctg, true);
       if (childs.length > 0)
