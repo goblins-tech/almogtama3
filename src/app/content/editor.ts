@@ -248,7 +248,6 @@ export class ContentEditorComponent implements OnInit {
 @Component({
   selector: "formly-field-categories",
   template: `
-    <div [innerHTML]="categories"></div>
     <ng-template #ref> </ng-template>
   `
 })
@@ -257,10 +256,7 @@ export class FormlyFieldCategories extends FieldType implements OnInit {
   @ViewChild("ref", { read: ViewContainerRef, static: true })
   ref: ViewContainerRef;
 
-  constructor(
-    private sanitizer: DomSanitizer,
-    private dynamic: DynamicLoadService
-  ) {
+  constructor(private dynamic: DynamicLoadService) {
     super();
   }
 
@@ -270,18 +266,9 @@ export class FormlyFieldCategories extends FieldType implements OnInit {
     //todo: load <mat-checkbox> inputs directly without a helper class
     this.dynamic.load(FormlyFieldCategoriesHelper, this.ref, {
       data,
-      categories: data.subscribe(data => {
-        console.log({ categories: data });
-        if (data.ok && data.data && data.data.categories) {
-          let ctg = new Categories(data.data.categories);
-          let inputs =
-            ctg.createInputs(null, el => el._id != "5ac348980d63be4aa0e967cb") +
-            "<mat-checkbox>test3</mat-checkbox>";
-          this.categories = this.sanitizer.bypassSecurityTrustHtml(inputs);
-          //todo: using "| keepHtml" makes all checkboxes disabled
-        }
-        //todo: else
-      })
+      to: this.to,
+      formControl: this.formControl,
+      fielf: this.field
     });
   }
 }
@@ -289,20 +276,43 @@ export class FormlyFieldCategories extends FieldType implements OnInit {
 @Component({
   selector: "formly-field-categories-helper",
   template: `
-    {{ categories }}
-    <hr />
     <div [innerHTML]="categories"></div>
-    <hr />
-    <ng-template *ngFor="let ctg of dataObj"
-      ><mat-checkbox>{{ ctg.title }}</mat-checkbox>
-    </ng-template>
   `
 })
+/*
+notes:
+ - didn't work:
+     <ng-template *ngFor="let ctg of dataObj"
+       ><mat-checkbox>{{ ctg.title }}</mat-checkbox>
+     </ng-template>
+
+todo:
+ - add checked inputs to form value
+
+ */
 export class FormlyFieldCategoriesHelper implements OnInit {
-  @Input() categories: any;
   @Input() data: any;
+  @Input() to: any;
+  @Input() formControl: any; //https://github.com/aitboudad/ngx-formly/blob/28bf56ab63ad158a7418ea6d7f2377165252a3e3/src/material/checkbox/src/checkbox.type.ts
+  @Input() field: any;
   dataObj;
+  categories;
+  constructor(private sanitizer: DomSanitizer) {}
   ngOnInit() {
-    this.data.subscribe(r => (this.dataObj = r));
+    console.log({ formControl: this.formControl, field: this.field });
+    this.data.subscribe(data => {
+      console.log("FormlyFieldCategoriesHelper", data);
+      if (typeof data == "string") data = JSON.parse(data);
+      if (data.ok && data.data && data.data.categories) {
+        this.dataObj = data.data.categories;
+        let ctg = new Categories(data.data.categories);
+        let inputs =
+          ctg.createInputs(null, el => el._id != "5ac348980d63be4aa0e967cb") +
+          `<mat-checkbox [formControl]="formControl" [formlyAttributes]="field">test3</mat-checkbox>`;
+        this.categories = this.sanitizer.bypassSecurityTrustHtml(inputs);
+        //todo: using "| keepHtml" makes all checkboxes disabled
+      }
+      //todo: else
+    });
   }
 }

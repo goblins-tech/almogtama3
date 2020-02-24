@@ -1,14 +1,19 @@
-import { Injectable, ComponentFactoryResolver, Renderer2 , RendererFactory2 } from "@angular/core";
+import {
+  Injectable,
+  ComponentFactoryResolver,
+  Renderer2,
+  RendererFactory2
+} from "@angular/core";
 
-private renderer: Renderer2;
 @Injectable()
 export class DynamicLoadService {
+  renderer: Renderer2;
   constructor(
     private resolver: ComponentFactoryResolver,
-    private rendererFactory: RendererFactory2    
+    private rendererFactory: RendererFactory2
   ) {
-     this.renderer = rendererFactory.createRenderer(null, null); //fix: No provider for Renderer2   https://stackoverflow.com/a/47925259
-    }
+    this.renderer = rendererFactory.createRenderer(null, null); //fix: No provider for Renderer2   https://stackoverflow.com/a/47925259
+  }
 
   /**
    * dynamically load Angular components

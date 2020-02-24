@@ -131,7 +131,7 @@ export const fileTypeModule = FileTypeModule.forRoot();
     DynamicLoadService
   ],
   bootstrap: [],
-  entryComponents: [MatCheckbox] //https://stackoverflow.com/a/60267178/12577650
+  entryComponents: [FormlyFieldCategoriesHelper] //https://stackoverflow.com/a/60267178/12577650
 })
 export class ContentModule {
   constructor(faIconLibrary: FaIconLibrary) {
