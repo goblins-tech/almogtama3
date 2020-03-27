@@ -14,7 +14,8 @@ module.exports = {
     "./dist/server/main": 'require("./server/main")'
   },
   target: "node",
-  resolve: { extensions: [".ts", ".js"] },
+  //https://github.com/googleapis/gax-nodejs/issues/719#issuecomment-605250814
+  resolve: { extensions: [".ts", ".js", ".json"] },
   optimization: {
     minimize: false
   },

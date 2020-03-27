@@ -268,7 +268,7 @@ export class FormlyFieldCategories extends FieldType implements OnInit {
       data,
       to: this.to,
       formControl: this.formControl,
-      fielf: this.field
+      field: this.field
     });
   }
 }
@@ -308,7 +308,8 @@ export class FormlyFieldCategoriesHelper implements OnInit {
         let ctg = new Categories(data.data.categories);
         let inputs =
           ctg.createInputs(null, el => el._id != "5ac348980d63be4aa0e967cb") +
-          `<mat-checkbox [formControl]="formControl" [formlyAttributes]="field">test3</mat-checkbox>`;
+          `<mat-checkbox [formControl]="formControl" [formlyAttributes]="field">test</mat-checkbox>` +
+          `<input type="checkbox" name="categories" value="5ac348980d63be4aa0e96846" [formcontrol]="formControl" [formlyattributes]="field"> test2`;
         this.categories = this.sanitizer.bypassSecurityTrustHtml(inputs);
         //todo: using "| keepHtml" makes all checkboxes disabled
       }
