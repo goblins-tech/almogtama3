@@ -1,6 +1,7 @@
 import {
   Component,
   OnInit,
+  AfterViewInit,
   ViewChild,
   ViewContainerRef,
   Input
@@ -290,7 +291,7 @@ todo:
  - add checked inputs to form value
 
  */
-export class FormlyFieldCategoriesHelper implements OnInit {
+export class FormlyFieldCategoriesHelper implements OnInit /*, AfterViewInit*/ {
   @Input() data: any;
   @Input() to: any;
   @Input() formControl: any; //https://github.com/aitboudad/ngx-formly/blob/28bf56ab63ad158a7418ea6d7f2377165252a3e3/src/material/checkbox/src/checkbox.type.ts
@@ -315,5 +316,22 @@ export class FormlyFieldCategoriesHelper implements OnInit {
       }
       //todo: else
     });
+  }
+
+  //https://stackoverflow.com/a/58906176
+  ngAfterViewInit() {
+    alert("ngAfterViewInit");
+    //todo: use ref.nativeElement https://stackoverflow.com/a/55774120
+    alert(document.querySelectorAll('[name="groups"]').length);
+    document.querySelectorAll('[name="groups"]').forEach(el =>
+      el.addEventListener("change", () => {
+        //  alert("change" + el);
+        this.onChange(el);
+      })
+    );
+  }
+
+  onChange(el) {
+    console.log("onChange", el);
   }
 }
