@@ -2,6 +2,7 @@ import {
   Component,
   OnInit,
   AfterViewInit,
+  AfterViewChecked,
   ViewChild,
   ViewContainerRef,
   Input
@@ -287,11 +288,17 @@ notes:
        ><mat-checkbox>{{ ctg.title }}</mat-checkbox>
      </ng-template>
 
+- ngAfterViewChecked: runs multiple times
+- ngAfterViewInit, needs `setTimeout` so the code may be run before the DOM has been completely created and checked.
+
 todo:
  - add checked inputs to form value
+ - use ref.nativeElement instead of document.* https://stackoverflow.com/a/55774120
+
 
  */
-export class FormlyFieldCategoriesHelper implements OnInit /*, AfterViewInit*/ {
+export class FormlyFieldCategoriesHelper
+  implements OnInit, AfterViewInit, AfterViewChecked {
   @Input() data: any;
   @Input() to: any;
   @Input() formControl: any; //https://github.com/aitboudad/ngx-formly/blob/28bf56ab63ad158a7418ea6d7f2377165252a3e3/src/material/checkbox/src/checkbox.type.ts
@@ -320,14 +327,29 @@ export class FormlyFieldCategoriesHelper implements OnInit /*, AfterViewInit*/ {
 
   //https://stackoverflow.com/a/58906176
   ngAfterViewInit() {
-    alert("ngAfterViewInit");
-    //todo: use ref.nativeElement https://stackoverflow.com/a/55774120
-    alert(document.querySelectorAll('[name="groups"]').length);
+    console.log(
+      "ngAfterViewInit",
+      document.querySelectorAll('[name="groups"]').length
+    );
+
+    setTimeout(() => {
+      console.log(
+        "ngAfterViewInit",
+        document.querySelectorAll('[name="groups"]').length
+      );
+    }, 5000);
     document.querySelectorAll('[name="groups"]').forEach(el =>
       el.addEventListener("change", () => {
         //  alert("change" + el);
         this.onChange(el);
       })
+    );
+  }
+
+  ngAfterViewChecked() {
+    console.log(
+      "ngAfterViewChecked",
+      document.querySelectorAll('[name="groups"]').length
     );
   }
 
