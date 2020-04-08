@@ -11,7 +11,8 @@ module.exports = {
     "server-start": "./server/start.ts"
   },
   externals: {
-    "./dist/server/main": 'require("./server/main")'
+    "./dist/server/main": 'require("./server/main")',
+    sharp: "commonjs sharp" //https://github.com/lovell/sharp/issues/794#issuecomment-306555683
   },
   target: "node",
   //https://github.com/googleapis/gax-nodejs/issues/719#issuecomment-605250814
