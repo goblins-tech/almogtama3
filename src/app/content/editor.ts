@@ -337,13 +337,15 @@ export class FormlyFieldCategoriesHelper
         "ngAfterViewInit",
         document.querySelectorAll('[name="groups"]').length
       );
+
+      document.querySelectorAll('[name="groups"]').forEach(el =>
+        el.addEventListener("change", () => {
+          //  alert("change" + el);
+          console.log("changed");
+          this.onChange(el);
+        })
+      );
     }, 5000);
-    document.querySelectorAll('[name="groups"]').forEach(el =>
-      el.addEventListener("change", () => {
-        //  alert("change" + el);
-        this.onChange(el);
-      })
-    );
   }
 
   ngAfterViewChecked() {
@@ -354,6 +356,7 @@ export class FormlyFieldCategoriesHelper
   }
 
   onChange(el) {
+    //todo: add el to formControl
     console.log("onChange", el);
   }
 }
