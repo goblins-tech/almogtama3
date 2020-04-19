@@ -26,7 +26,7 @@ import { resize as _resize, sharp } from "../eldeeb/graphics";
 import {
   Categories,
   ArticlesCategories
-} from "../src/app/content/functions/categories";
+} from "../packages/ngx-formly/categories-material/functions";
 
 export const dev = process.env.NODE_ENV === "development";
 export const DIST = join(process.cwd(), "./dist/browser"); //process.cwd() dosen't include /dist

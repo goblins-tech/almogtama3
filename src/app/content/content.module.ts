@@ -6,7 +6,7 @@ import { ContentEditorComponent } from "./editor";
 import { ContentManageComponent } from "./manage";
 
 //todo: add 'packages' to tsConfig
-import { ContentViewModule } from "../../../packages/ngx-content/view/module";
+import { ContentViewModule } from "../../../packages/ngx-content/view";
 
 import { ShareButtonsModule } from "@ngx-share/buttons";
 import {
@@ -17,9 +17,17 @@ import { QuillModule } from "ngx-quill";
 
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { FormlyModule } from "@ngx-formly/core";
+import {
+  FormlyFileModule,
+  FormlyFieldFile
+} from "../../../packages/ngx-formly/file-material";
 import { FormlyMaterialModule } from "@ngx-formly/material";
-import { FormlyFieldFile, FileValueAccessor, FormlyFieldQuill } from "./formly";
-import { FormlyFieldCategories, FormlyFieldCategoriesHelper } from "./editor";
+import { FormlyFieldQuill } from "../../../packages/ngx-formly/quill/component";
+import {
+  FormlyCategoriesModule,
+  FormlyFieldCategories,
+  FormlyFieldCategoriesHelper
+} from "../../../packages/ngx-formly/categories-material";
 import { HighlightModule } from "ngx-highlightjs";
 import {
   FileTypeComponent,
@@ -47,7 +55,7 @@ import {
 import { fab } from "@fortawesome/free-brands-svg-icons";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { LazyLoadImageModule } from "ng-lazyload-image";
-import { DynamicLoadService } from "../../../eldeeb/ng/dynamic-load.service";
+import { DynamicLoadService } from "../../../packages/ngx-tools/dynamic-load.service";
 
 const routes: Routes = [
   { path: "editor", component: ContentEditorComponent }, // ex: /editor?type=jobs
@@ -66,15 +74,13 @@ export const fileTypeModule = FileTypeModule.forRoot();
     ContentComponent,
     ContentEditorComponent,
     ContentManageComponent,
-    FormlyFieldFile,
-    FormlyFieldCategories,
-    FormlyFieldCategoriesHelper,
-    FileValueAccessor,
     FormlyFieldQuill
   ],
   exports: [RouterModule],
   imports: [
     ContentViewModule,
+    FormlyFileModule,
+    FormlyCategoriesModule,
     CommonModule,
     RouterModule.forChild(routes),
     FormsModule,

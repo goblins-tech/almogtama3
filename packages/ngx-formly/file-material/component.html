@@ -1,0 +1,33 @@
+<input
+  type="file"
+  #fileInput
+  style="display: none"
+  (change)="onFilesAdded()"
+  [formControl]="formControl"
+  [formlyAttributes]="field"
+  [name]="to.name"
+  [multiple]="to.multiple"
+  [accept]="to.accept"
+  [attr.capture]="to.capture"
+/>
+<button type="button" mat-raised-button color="primary" (click)="addFiles()">
+  Add Files</button
+><br />
+
+<!-- show files with progress -->
+<mat-progress-bar mode="determinate" [value]="progress"></mat-progress-bar>
+
+<mat-list>
+  <mat-list-item *ngFor="let file of files">
+    <p mat-line>
+      {{ file.name }}
+      <span
+        (click)="remove(file)"
+        style="cursor:pointer"
+        title="remove this file"
+      >
+        <mat-icon>delete_forever</mat-icon>
+      </span>
+    </p>
+  </mat-list-item>
+</mat-list>

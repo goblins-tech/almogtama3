@@ -1,2 +1,2 @@
 export * from "../../../../packages/ngx-content/view/functions";
-export * from "./categories";
+export * from "../../../../packages/ngx-formly/categories-material/functions";

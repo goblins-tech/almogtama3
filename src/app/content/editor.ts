@@ -1,19 +1,11 @@
-import {
-  Component,
-  OnInit,
-  AfterViewInit,
-  AfterViewChecked,
-  ViewChild,
-  ViewContainerRef,
-  Input
-} from "@angular/core";
+import { Component, OnInit, ViewChild, Input } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { HttpService } from "../http.service";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { MatSnackBar } from "@angular/material";
 import { Data } from "../../../packages/ngx-content/view/view"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
-import { article } from "./formly";
+import { article } from "../../../packages/ngx-formly/core/formly";
 import { HighlightJS } from "ngx-highlightjs";
 import { keepHtml, Categories } from "./functions";
 import { urlParams } from "../../../eldeeb/angular";
@@ -25,7 +17,6 @@ import {
 } from "@angular/fire/storage"; //todo: move to server.ts (how to inject AngularFireStorage?)
 import { DomSanitizer } from "@angular/platform-browser";
 import { FieldType } from "@ngx-formly/material";
-import { DynamicLoadService } from "../../../eldeeb/ng/dynamic-load.service";
 
 /*
 //for FormlyFieldCategories; https://stackoverflow.com/a/60267178/12577650
@@ -67,9 +58,7 @@ export class ContentEditorComponent implements OnInit {
     private httpService: HttpService,
     private snackBar: MatSnackBar,
     private hljs: HighlightJS,
-    private storage: AngularFireStorage,
-    private sanitizer: DomSanitizer,
-    private dynamic: DynamicLoadService
+    private storage: AngularFireStorage
   ) {}
   ngOnInit() {
     this.getCategories("articles").subscribe(data => {
@@ -243,120 +232,5 @@ export class ContentEditorComponent implements OnInit {
 
   showSnackBar(message: string, action: string, duration = 0) {
     this.snackBar.open(message, action, { duration });
-  }
-}
-
-//todo: use template:Categories.createInputs() instead of type=FormlyFieldCategories
-@Component({
-  selector: "formly-field-categories",
-  template: `
-    <ng-template #ref> </ng-template>
-  `
-})
-export class FormlyFieldCategories extends FieldType implements OnInit {
-  categories;
-  @ViewChild("ref", { read: ViewContainerRef, static: true })
-  ref: ViewContainerRef;
-
-  constructor(private dynamic: DynamicLoadService) {
-    super();
-  }
-
-  ngOnInit() {
-    //  this.createComponent();
-    let data = this.to.categories;
-    //todo: load <mat-checkbox> inputs directly without a helper class
-    this.dynamic.load(FormlyFieldCategoriesHelper, this.ref, {
-      data,
-      to: this.to,
-      formControl: this.formControl,
-      field: this.field
-    });
-  }
-}
-
-@Component({
-  selector: "formly-field-categories-helper",
-  template: `
-    <div [innerHTML]="categories"></div>
-  `
-})
-/*
-notes:
- - didn't work:
-     <ng-template *ngFor="let ctg of dataObj"
-       ><mat-checkbox>{{ ctg.title }}</mat-checkbox>
-     </ng-template>
-
-- ngAfterViewChecked: runs multiple times
-- ngAfterViewInit, needs `setTimeout` so the code may be run before the DOM has been completely created and checked.
-
-todo:
- - add checked inputs to form value
- - use ref.nativeElement instead of document.* https://stackoverflow.com/a/55774120
-
-
- */
-export class FormlyFieldCategoriesHelper
-  implements OnInit, AfterViewInit, AfterViewChecked {
-  @Input() data: any;
-  @Input() to: any;
-  @Input() formControl: any; //https://github.com/aitboudad/ngx-formly/blob/28bf56ab63ad158a7418ea6d7f2377165252a3e3/src/material/checkbox/src/checkbox.type.ts
-  @Input() field: any;
-  dataObj;
-  categories;
-  constructor(private sanitizer: DomSanitizer) {}
-  ngOnInit() {
-    console.log({ formControl: this.formControl, field: this.field });
-    this.data.subscribe(data => {
-      console.log("FormlyFieldCategoriesHelper", data);
-      if (typeof data == "string") data = JSON.parse(data);
-      if (data.ok && data.data && data.data.categories) {
-        this.dataObj = data.data.categories;
-        let ctg = new Categories(data.data.categories);
-        let inputs =
-          ctg.createInputs(null, el => el._id != "5ac348980d63be4aa0e967cb") +
-          `<mat-checkbox [formControl]="formControl" [formlyAttributes]="field">test</mat-checkbox>` +
-          `<input type="checkbox" name="categories" value="5ac348980d63be4aa0e96846" [formcontrol]="formControl" [formlyattributes]="field"> test2`;
-        this.categories = this.sanitizer.bypassSecurityTrustHtml(inputs);
-        //todo: using "| keepHtml" makes all checkboxes disabled
-      }
-      //todo: else
-    });
-  }
-
-  //https://stackoverflow.com/a/58906176
-  ngAfterViewInit() {
-    console.log(
-      "ngAfterViewInit",
-      document.querySelectorAll('[name="groups"]').length
-    );
-
-    setTimeout(() => {
-      console.log(
-        "ngAfterViewInit",
-        document.querySelectorAll('[name="groups"]').length
-      );
-
-      document.querySelectorAll('[name="groups"]').forEach(el =>
-        el.addEventListener("change", () => {
-          //  alert("change" + el);
-          console.log("changed");
-          this.onChange(el);
-        })
-      );
-    }, 5000);
-  }
-
-  ngAfterViewChecked() {
-    console.log(
-      "ngAfterViewChecked",
-      document.querySelectorAll('[name="groups"]').length
-    );
-  }
-
-  onChange(el) {
-    //todo: add el to formControl
-    console.log("onChange", el);
   }
 }

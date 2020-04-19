@@ -1,3 +1,4 @@
+//dynamically load a component into the template
 import {
   Injectable,
   ComponentFactoryResolver,
