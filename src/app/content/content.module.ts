@@ -4,26 +4,22 @@ import { Routes, RouterModule, UrlSegment } from "@angular/router";
 import { ContentComponent } from "./index";
 import { ContentEditorComponent } from "./editor";
 import { ContentManageComponent } from "./manage";
+
+//todo: add 'packages' to tsConfig
+import { ContentViewModule } from "../../../packages/ngx-content/view/module";
+
 import { ShareButtonsModule } from "@ngx-share/buttons";
 import {
   FontAwesomeModule,
   FaIconLibrary
 } from "@fortawesome/angular-fontawesome";
 import { QuillModule } from "ngx-quill";
-import {
-  SlugPipe,
-  Nl2brPipe,
-  KeepHtmlPipe,
-  ContentPipe,
-  LengthPipe,
-  SummaryPipe
-} from "./pipes";
+
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { FormlyModule } from "@ngx-formly/core";
 import { FormlyMaterialModule } from "@ngx-formly/material";
 import { FormlyFieldFile, FileValueAccessor, FormlyFieldQuill } from "./formly";
 import { FormlyFieldCategories, FormlyFieldCategoriesHelper } from "./editor";
-import { MetaService } from "./meta.service";
 import { HighlightModule } from "ngx-highlightjs";
 import {
   FileTypeComponent,
@@ -70,12 +66,6 @@ export const fileTypeModule = FileTypeModule.forRoot();
     ContentComponent,
     ContentEditorComponent,
     ContentManageComponent,
-    SlugPipe,
-    Nl2brPipe,
-    KeepHtmlPipe,
-    ContentPipe,
-    LengthPipe,
-    SummaryPipe,
     FormlyFieldFile,
     FormlyFieldCategories,
     FormlyFieldCategoriesHelper,
@@ -84,6 +74,7 @@ export const fileTypeModule = FileTypeModule.forRoot();
   ],
   exports: [RouterModule],
   imports: [
+    ContentViewModule,
     CommonModule,
     RouterModule.forChild(routes),
     FormsModule,
@@ -126,7 +117,6 @@ export const fileTypeModule = FileTypeModule.forRoot();
     LazyLoadImageModule
   ],
   providers: [
-    MetaService,
     { provide: LOCALE_ID, useValue: APP_LOCALE_ID },
     DynamicLoadService
   ],

@@ -12,7 +12,7 @@ import { HttpService } from "../http.service";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { MatSnackBar } from "@angular/material";
-import { Data } from "./index"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
+import { Data } from "../../../packages/ngx-content/view/view"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
 import { article } from "./formly";
 import { HighlightJS } from "ngx-highlightjs";
 import { keepHtml, Categories } from "./functions";

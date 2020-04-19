@@ -66,7 +66,6 @@ export class KeepHtmlPipe implements PipeTransform {
   do: <p [innerHTML]='content | keepHtml'></p>
   https://stackoverflow.com/a/58618481
   https://medium.com/@AAlakkad/angular-2-display-html-without-sanitizing-filtering-17499024b079
-
  * @method transform
  * @param  content   [description]
  * @return [description]

@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { MetaService } from "./content/meta.service";
+import { MetaService } from "../../packages/ngx-content/view/meta.service";
 
 @Component({
   selector: "app-social",

@@ -6,10 +6,15 @@
 >
   <ng-container *ngIf="response.ok==true; else error">
     form submitted successfully<br />
+
+    <!--
+      todo: pipes are registered in packages/ngx-content/view/module,
+            so you need to use this module (instead of the current ContentModule) to use them
+            don't regester pipes twice
     <a
       href="/{{params.type}}/{{response.data._id}}-{{response.data | slug:200:':ar' }}"
       >{{response.data.title}}</a
-    >
+    > -->
   </ng-container>
   <ng-template #error>Error: {{response.msg}}</ng-template>
 </div>

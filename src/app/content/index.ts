@@ -7,6 +7,13 @@ todo:
  */
 
 import {
+  ViewComponent,
+  Data,
+  Article
+} from "../../../packages/ngx-content/view/view";
+import { MetaService } from "../../../packages/ngx-content/view//meta.service";
+
+import {
   Component,
   OnInit,
   AfterViewInit,
@@ -15,32 +22,22 @@ import {
 } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { HttpService } from "../http.service";
-import { FormBuilder, Validators } from "@angular/forms";
 import { Observable } from "rxjs";
-import { MetaService } from "./meta.service";
+import { map, concatMap } from "rxjs/operators";
 import { HighlightJS } from "ngx-highlightjs";
-import { QuillViewComponent } from "ngx-quill"; //todo: enable sanitizing https://www.npmjs.com/package/ngx-quill#security-hint
 import { environment as env } from "../../environments/environment";
 import { summary } from "./functions";
 import { urlParams } from "../../../eldeeb/angular";
 
+//todo: import module & interfaces from packages/content/ngx-content-view/index.ts
+
 export interface Obj {
   [key: string]: any;
 }
+
 export interface Params extends Obj {
   category: string;
   id?: string;
-}
-export interface Article extends Obj {
-  title: string;
-  subtitle: string;
-  content: string;
-  keywords: string | string[];
-  cover: string;
-}
-export interface Data {
-  type: string; //item|index
-  payload: Article | Article[];
 }
 
 const dev = !env.production;
@@ -51,11 +48,10 @@ const dev = !env.production;
   styleUrls: ["./index.scss"]
 })
 export class ContentComponent implements OnInit, AfterViewInit {
-  data$: Observable<Data>;
-  data: Data;
-  params: Params;
-  layout = "grid";
   @ViewChild("quillView", { static: false }) quillView;
+  data$: Observable<Data>;
+  params: Params;
+  pref = { layout: "grid" };
   constructor(
     private route: ActivatedRoute,
     private httpService: HttpService,
@@ -64,20 +60,26 @@ export class ContentComponent implements OnInit, AfterViewInit {
     private comp: ElementRef
   ) {}
   ngOnInit() {
-    urlParams(this.route).subscribe(([params, query]) => {
-      //ex:  /$ctg/$id-title
-      let category = (params.get("category") || "").trim(),
-        item = (params.get("item") || "").trim(),
-        id = params.get("id");
+    this.data$ = urlParams(this.route).pipe(
+      map(([params, query]) => {
+        //ex:  /$ctg/$id-title
+        let category = (params.get("category") || "").trim(),
+          item = (params.get("item") || "").trim(),
+          id = params.get("id");
 
-      this.params = {
-        category,
-        id: id || item.substring(0, item.indexOf("-")) || item
-      };
+        this.params = {
+          category,
+          id: id || item.substring(0, item.indexOf("-")) || item
+        };
 
-      if (dev) console.log({ params, query, calculatedParamas: this.params });
-
-      this.getData().subscribe(data => {
+        if (dev) console.log({ params, query, calculatedParamas: this.params });
+        return this.params;
+      }),
+      //we use concatMap here instead of map because it immits Observable (this.getData())
+      // so we flatten the inner Obs. i.e: it subscribes to the inner Obs. (this.getData) instead of the outer one (urlParams())
+      //also we use concatMap and not mergeMap, to wait until the previous Obs. to be completed.
+      concatMap(params => this.getData()),
+      map(data => {
         if (typeof data == "string") data = JSON.parse(data); //ex: the url fetched via a ServiceWorker
 
         //todo: import site meta tags from config
@@ -88,7 +90,12 @@ export class ContentComponent implements OnInit, AfterViewInit {
         };
 
         if (data.payload) {
+          if (!data.type)
+            data.type = data.payload instanceof Array ? "list" : "item";
+
           if (data.type == "item") {
+            (data.payload as Article).id =
+              (data.payload as any).shortId || (data.payload as any)._id;
             this.meta.setTags({
               ...metaTags,
               description: summary((data.payload as Article).content),
@@ -99,15 +106,24 @@ export class ContentComponent implements OnInit, AfterViewInit {
               (data.payload as Article).content += `<div class='contacts'>${
                 (data.payload as Article).contacts
               }</div>`;
-          } else if (data.type == "list") {
-            this.meta.setTags({ ...metaTags });
-            //todo: meta tags from category
+          } else {
+            data.payload.map(item => {
+              item.id = item.shortId || item._id;
+              return item;
+            });
+
+            if (data.type == "list") {
+              this.meta.setTags({ ...metaTags });
+              //todo: meta tags from category
+            }
           }
         }
 
-        this.data = data;
-      });
-    });
+        return data;
+      })
+    );
+
+    //this.data$.subscribe(x => console.log("this.data:", x));
   }
   ngAfterViewInit() {
     //or this.hljs.initHighlighting().subscribe(); Applies highlighting to all <pre><code>..</code></pre> blocks on a page.
@@ -151,7 +167,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
       }
     } else console.warn("adsense disabled in dev mode.");
   }
-  getData() {
+  getData(): Observable<Data> {
     return this.httpService.get<Data>({
       id: this.params.id,
       category: this.params.category

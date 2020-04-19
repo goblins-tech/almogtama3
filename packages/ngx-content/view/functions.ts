@@ -1,5 +1,13 @@
-import { objectType } from "../../../../eldeeb/general";
 import { DomSanitizer, ɵDomSanitizerImpl } from "@angular/platform-browser";
+
+//todo: import from @dibo/general
+export function objectType(obj: any): string {
+  return Object.prototype.toString
+    .call(obj)
+    .replace("[object ", "")
+    .replace("]", "")
+    .toLowerCase();
+}
 
 export type ContentValue = any; //todo: article{} | string
 export interface Obj {
@@ -80,7 +88,7 @@ options:
 }
 
 export function length(value: string, lngth = 0) {
-  return lngth ? value.slice(0, lngth) : value;
+  return lngth && value ? value.slice(0, lngth) : value;
 }
 
 export function nl2br(value: string) {
@@ -100,12 +108,10 @@ export function keepHtml(value: ContentValue, sanitizer?): string {
 interface FileReaderEventTarget extends EventTarget {
   result: string;
 }
-
 export interface FileReaderEvent extends Event {
   target: FileReaderEventTarget;
   getMessage(): string;
 }
-
 //usage: $("#img").attr("src", imgPreview(form.files[0]));
 //http://jsfiddle.net/LvsYc/638/
 //todo: return Observable
