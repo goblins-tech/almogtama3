@@ -10,7 +10,7 @@ import {
   getData,
   upload,
   saveData,
-  DIST,
+  BROWSER,
   MEDIA,
   BUCKET,
   dev,
@@ -47,7 +47,7 @@ app.engine(
 );
 
 app.set("view engine", "html");
-app.set("views", DIST);
+app.set("views", BROWSER);
 
 //to use req.protocol in case of using a proxy in between (ex: cloudflare, heroku, ..), without it express may always returns req.protocole="https" even if GET/ https://***
 //https://stackoverflow.com/a/46475726
@@ -176,7 +176,7 @@ app.get("/api/:item?", (req, res, next) => {
 });
 
 // Serve static files; /file.ext will be served from /dist/browser/file.ext then /data/media/file.ext
-app.get("*.*", express.static(DIST, { maxAge: "1y" })); //static assets i.e: created at build time; may be deleted at any time and recreated at build time
+app.get("*.*", express.static(BROWSER, { maxAge: "1y" })); //static assets i.e: created at build time; may be deleted at any time and recreated at build time
 app.get("*.*", express.static(MEDIA, { maxAge: "1y" })); //data files i.e: created at runtime via API calls
 
 // All regular routes use the Universal engine
@@ -186,7 +186,7 @@ app.get("*", (req, res) => {
 
 //app.listen() moved to a separate file `server-start.ts`, because firebase will handle it automatically
 //when using this server without firebase, use `node dist/server-start`
-export { app }; //for firebase
+export { app, express }; //for firebase
 
 // Start up the Node server
 //firebase starts the server automatically, so we don't need to start it again (error)

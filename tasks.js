@@ -17,6 +17,9 @@ var tasks = {
         }
       }
     });
+  },
+  "firebase:copy": function(src = "./firebase", dist = "./dist") {
+    fs.copyFileSync(`${src}/package.json`, `${dist}/package.json`);
   }
 };
 

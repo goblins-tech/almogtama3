@@ -29,8 +29,25 @@ import {
 } from "../packages/ngx-formly/categories-material/functions";
 
 export const dev = process.env.NODE_ENV === "development";
-export const DIST = join(process.cwd(), "./dist/browser"); //process.cwd() dosen't include /dist
-export const MEDIA = join(process.cwd(), "./temp/media"); //don't save media files inside dist, as dist may be deleted at any time
+
+/*
+process.cwd() for firebase = functions.source (i.e: ./dist)
+whitch is different from here (i.e /)
+so using process.cwd() will give different values for
+`npm run start` and `npm run firebase:serve`
+
+process.env.INIT_CWD is the path where `npm run` runned, regardless of the current working directory
+you must run `npm start` or `npm firebase:serve` from the project's root dir.
+
+another solution is to replace process.cwd() with it's value when building this file with webpack
+to be a fixed value in both cases.
+
+or re-set the view dir in firebase/index to be relative to it's process.cwd() dir
+i.e functions.source (./dist)
+app.set("views", "./browser"); 
+*/
+export const BROWSER = join(process.env.INIT_CWD, "./dist/browser"); //process.cwd() dosen't include /dist
+export const MEDIA = join(process.env.INIT_CWD, "./temp/media"); //don't save media files inside dist, as dist may be deleted at any time
 export const BUCKET = "almogtama3.com/media"; //todo: $config.domain/media
 
 //todo: use env:GOOGLE_APPLICATION_CREDENTIALS=Path.resolve("./firebase-almogtama3-eg.json")

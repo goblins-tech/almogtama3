@@ -24,7 +24,7 @@
     "start:dev": "npm run build:dev && npm run serve:dev",
     "start:nodemon": "nodemon  src/ -e ts,html,scss --exec \"npm run start:dev\"",
     "firebase": "npm run firebase:build && npm run firebase:deploy",
-    "firebase:build": "tsc -p firebase/tsconfig.json",
+    "firebase:build": "tsc -p firebase/tsconfig.json && node tasks firebase:copy",
     "firebase:deploy": "firebase deploy --token 1//03o0ymiALXnyPCgYIARAAGAMSNwF-L9IrNSe7csFXkbFuGz1zgPc1SJzuohIvdneYBi-tlNJ6mARjWNLtwK9wpAzsCAx6r9hyYLY",
     "firebase:functions": "npm run firebase:build && npm run firebase:deploy -- --only functions",
     "firebase:serve": "firebase serve --port=4200 --token 1//03o0ymiALXnyPCgYIARAAGAMSNwF-L9IrNSe7csFXkbFuGz1zgPc1SJzuohIvdneYBi-tlNJ6mARjWNLtwK9wpAzsCAx6r9hyYLY",
