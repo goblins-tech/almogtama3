@@ -45,9 +45,11 @@ to be a fixed value in both cases.
 or re-set the view dir in firebase/index to be relative to it's process.cwd() dir
 i.e functions.source (./dist)
 app.set("views", "./browser");
+
+todo: process.env.INIT_CWD || ?? -> check if process.env.INIT_CWD is undefined
 */
-export const BROWSER = join(process.env.INIT_CWD, "./dist/browser"); //process.cwd() dosen't include /dist
-export const MEDIA = join(process.env.INIT_CWD, "./temp/media"); //don't save media files inside dist, as dist may be deleted at any time
+export const BROWSER = join(process.env.INIT_CWD || "", "./dist/browser"); //process.cwd() dosen't include /dist
+export const MEDIA = join(process.env.INIT_CWD || "", "./temp/media"); //don't save media files inside dist, as dist may be deleted at any time
 export const BUCKET = "almogtama3.com/media"; //todo: $config.domain/media
 
 //todo: use env:GOOGLE_APPLICATION_CREDENTIALS=Path.resolve("./firebase-almogtama3-eg.json")
