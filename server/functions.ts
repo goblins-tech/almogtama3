@@ -44,7 +44,7 @@ to be a fixed value in both cases.
 
 or re-set the view dir in firebase/index to be relative to it's process.cwd() dir
 i.e functions.source (./dist)
-app.set("views", "./browser"); 
+app.set("views", "./browser");
 */
 export const BROWSER = join(process.env.INIT_CWD, "./dist/browser"); //process.cwd() dosen't include /dist
 export const MEDIA = join(process.env.INIT_CWD, "./temp/media"); //don't save media files inside dist, as dist may be deleted at any time
@@ -195,7 +195,7 @@ export function saveData(data) {
   2- insert data to db
   3- upload cover image then resize it
    */
-  if (dev) console.log("====saveData====", data);
+  if (dev) console.log("server/saveData()", data);
 
   let sid = data.shortId;
   let dataDir = `./temp/queue/${sid}`,

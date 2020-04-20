@@ -48,7 +48,7 @@ export function resize(
         let parts = parsePath(img);
         name = `${parts.dir}/${parts.file}_${size[0]}${parts.extension}`;
       } else {
-        /*error, if input is Buffer, either provide options.name or use options.output='buffer'*/
+        /*todo: error, if input is Buffer, either provide options.name or use options.output='buffer'*/
       }
     }
     resizedImg = resizedImg.toFile(name);
