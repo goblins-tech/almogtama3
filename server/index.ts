@@ -187,3 +187,16 @@ app.get("*", (req, res) => {
 //app.listen() moved to a separate file `server-start.ts`, because firebase will handle it automatically
 //when using this server without firebase, use `node dist/server-start`
 export { app }; //for firebase
+
+// Start up the Node server
+//firebase starts the server automatically, so we don't need to start it again (error)
+//todo: onError, try port++
+
+if (process.argv[2] == "--start") {
+  let PORT = process.env.PORT || 4200;
+  app
+    .listen(PORT, () => {
+      console.log(`Node Express server listening on port:${PORT}`); //,{server}
+    })
+    .on("error", error => console.warn("express server error:", { error }));
+}

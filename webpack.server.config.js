@@ -7,8 +7,7 @@ module.exports = {
   mode: "none",
   entry: {
     // This is our Express server for Dynamic universal
-    server: "./server/index.ts",
-    "server-start": "./server/start.ts"
+    server: "./server/index.ts"
   },
   externals: {
     "./dist/server/main": 'require("./server/main")',
