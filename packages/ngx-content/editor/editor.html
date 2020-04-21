@@ -1,4 +1,4 @@
-<h3 *ngIf="pref?.title">{{pref.title}}</h3>
+<h3 *ngIf="$pref?.title">{{$pref.title}}</h3>
 <div
   *ngIf="response"
   class="alert"
@@ -27,7 +27,7 @@
     method="post"
     enctype="multipart/form-data"
   >
-    <div *ngIf="pref?.preForm" [innerHTML]="pref.preForm"></div>
+    <div *ngIf="$pref?.preForm" [innerHTML]="$pref.preForm"></div>
     <formly-form
       [form]="$formObj.form"
       [fields]="$formObj.fields"
@@ -47,7 +47,7 @@
     >
       Submit
     </button>
-    <div *ngIf="pref?.postForm" [innerHTML]="pref.postForm"></div>
+    <div *ngIf="$pref?.postForm" [innerHTML]="$pref.postForm"></div>
     <span *ngIf="submitting">Loading....</span>
   </form>
 </ng-container>

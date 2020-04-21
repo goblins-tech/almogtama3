@@ -40,7 +40,8 @@ export interface Response {
 export class NgxContentEditorComponent implements OnInit {
   @Input() formObj: Formly | Observable<Formly>;
   $formObj: Formly;
-  @Input() pref: Pref = {};
+  @Input() pref: Pref | Observable<Pref>;
+  $pref: Pref;
   @Input() response: Response;
   @Input() submitting: boolean;
   @Input() progress; //todo: show progress bar
@@ -57,10 +58,7 @@ export class NgxContentEditorComponent implements OnInit {
    */
   @Output() formChange = new EventEmitter<Formly>();
 
-  constructor(private sanitizer: DomSanitizer) {
-    this.pref.preForm = keepHtml(this.pref.preForm, this.sanitizer);
-    this.pref.postForm = keepHtml(this.pref.postForm, this.sanitizer);
-  }
+  constructor(private sanitizer: DomSanitizer) {}
 
   //todo: output: onSubmit
   //todo: onSubmit -> update response
@@ -71,6 +69,22 @@ export class NgxContentEditorComponent implements OnInit {
         this.$formObj = data;
       });
     else this.$formObj = this.formObj;
+
+    if (this.pref instanceof Observable)
+      this.pref.subscribe(data => {
+        this.$pref = data;
+        if (this.$pref) {
+          this.$pref.preForm = keepHtml(this.$pref.preForm, this.sanitizer);
+          this.$pref.postForm = keepHtml(this.$pref.postForm, this.sanitizer);
+        }
+      });
+    else {
+      this.$pref = this.pref;
+      if (this.$pref) {
+        this.$pref.preForm = keepHtml(this.$pref.preForm, this.sanitizer);
+        this.$pref.postForm = keepHtml(this.$pref.postForm, this.sanitizer);
+      }
+    }
   }
 
   onSubmit(formObj: Formly) {

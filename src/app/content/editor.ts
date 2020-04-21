@@ -47,7 +47,7 @@ const dev = !env.production;
 })
 export class ContentEditorComponent implements OnInit {
   params: Params;
-  pref: Pref;
+  pref$: Observable<Pref>;
   formObj: FormObj;
   formObj$: Observable<FormObj>;
   response: Response;
@@ -72,6 +72,36 @@ export class ContentEditorComponent implements OnInit {
     private storage: AngularFireStorage
   ) {}
   ngOnInit() {
+    /*
+    note
+    - don't change this.pref$ value after passing it to the child component
+      i.e: <content-editor [pref]="pref">
+      at this point this.pref=undefined.
+      so don't do this:
+      urlParams(..).map(v=>{this.pref={...}})
+      this will cause the error:
+      ```
+         ExpressionChangedAfterItHasBeenCheckedError:
+         Expression has changed after it was checked.
+         Previous value: 'pref: undefined'.
+        Current value: 'pref: [object Object]'
+      ```
+      solutions:
+       - make `pref` part of `data$`, i.e: data$={pref,...} <content-editor [data]="data$">
+       - or: make another subscription to urlParams() to get this.params.value, and use it
+         for this.pref$.
+   */
+    this.pref$ = urlParams(this.route).pipe(
+      map(([params, query]) => ({
+        title:
+          this.params.type && this.params.type !== ""
+            ? `Create a new ${this.params.type} `
+            : "",
+        preForm: "<h1>test: preForm</h1>",
+        postForm: "<h1>test: postForm</h1>"
+      }))
+    );
+
     this.formObj$ = urlParams(this.route).pipe(
       map(([params, query]) => {
         //todo: if($_GET[id])getData(type,id)
@@ -90,15 +120,6 @@ export class ContentEditorComponent implements OnInit {
               - get this.params.type from getData().type
             }
        */
-
-        this.pref = {
-          title:
-            this.params.type && this.params.type !== ""
-              ? `Create a new ${this.params.type} `
-              : "",
-          preForm: "<h1>test: preForm</h1>",
-          postForm: "<h1>test: postForm</h1>"
-        };
 
         //todo: this.formObj.model = this.getData()
         //todo: load categories
@@ -186,7 +207,7 @@ export class ContentEditorComponent implements OnInit {
             params,
             query,
             calculatedParamas: this.params,
-            pref: this.pref,
+            pref: this.pref$,
             articleForm: article,
             data: this.data$
           });
