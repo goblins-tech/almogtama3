@@ -39,7 +39,7 @@ export interface Pref extends Obj {
 export class ViewComponent implements OnInit {
   @Input("data") dataObj: Data | Observable<Data>;
   @Input() pref: Pref; //component prefrences
-  data;
+  data: Data;
 
   ngOnInit() {
     /*

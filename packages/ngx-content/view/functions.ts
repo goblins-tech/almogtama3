@@ -1,4 +1,9 @@
-import { DomSanitizer, ɵDomSanitizerImpl } from "@angular/platform-browser";
+//todo move functions, pipes to ngx-content/core; because this package (view) requires many peepDependencies
+import {
+  DomSanitizer,
+  ɵDomSanitizerImpl,
+  SafeHtml
+} from "@angular/platform-browser";
 
 //todo: import from @dibo/general
 export function objectType(obj: any): string {
@@ -95,11 +100,25 @@ export function nl2br(value: string) {
   return getValue(value).replace(/\r\n|\n\r|\r|\n/g, "<br />");
 }
 
-//prevent Angular from sanitizing DOM, https://angular.io/guide/security#xss
+/*
+todo:
+- if (!sanitizer) sanitizer = new DomSanitizer(); //todo: error TS2511: Cannot create an instance of an abstract class.
+  also ɵDomSanitizerImpl();needs 1 argument: constructor(_doc)
+
+-SafeHtml is type, so we cannot use it at runtime
+  return content instanceof SafeHtml
+    ? content
+    : sanitizer.bypassSecurityTrustHtml(content);
+  */
+/**
+ * prevent Angular from sanitizing DOM, https://angular.io/guide/security#xss
+ * @method keepHtml
+ * @param  value     the value to be bypassed
+ * @param  sanitizer DomSanitizer
+ * @return SafeHTML, the bypassed html value.
+ */
 export function keepHtml(value: ContentValue, sanitizer?): string {
   let content = getValue(value, "content");
-  //todo:  if (!sanitizer) sanitizer = new DomSanitizer(); //todo: error TS2511: Cannot create an instance of an abstract class.
-  //also ɵDomSanitizerImpl();needs 1 argument: constructor(_doc)
   return sanitizer.bypassSecurityTrustHtml(content);
 }
 

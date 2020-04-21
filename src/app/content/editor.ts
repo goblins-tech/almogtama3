@@ -8,7 +8,7 @@ import { Data } from "../../../packages/ngx-content/view/view"; //todo: use trip
 import { article } from "../../../packages/ngx-formly/core/formly";
 import { HighlightJS } from "ngx-highlightjs";
 import { keepHtml, Categories } from "./functions";
-import { urlParams } from "../../../eldeeb/angular";
+import { urlParams } from "../../../packages/ngx-tools/routes";
 import { environment as env } from "../../environments/environment";
 import {
   AngularFireStorage,
@@ -17,6 +17,12 @@ import {
 } from "@angular/fire/storage"; //todo: move to server.ts (how to inject AngularFireStorage?)
 import { DomSanitizer } from "@angular/platform-browser";
 import { FieldType } from "@ngx-formly/material";
+import {
+  Pref,
+  FormObj,
+  Response,
+  NgxContentEditorComponent
+} from "../../../packages/ngx-content/editor";
 
 /*
 //for FormlyFieldCategories; https://stackoverflow.com/a/60267178/12577650
@@ -41,16 +47,21 @@ const dev = !env.production;
 })
 export class ContentEditorComponent implements OnInit {
   params: Params;
-  data$: Observable<Object>;
+  pref: Pref;
+  formObj: FormObj;
+  formObj$: Observable<FormObj>;
+  response: Response;
+  data$: Observable<Object>; //todo: pass to formObj.model
 
   //uploading vars
   @ViewChild("file", { static: false }) file; //access #file DOM element
-  @ViewChild("formElement", { static: false }) formElement;
+
+  //access <content-editor> properties and methods
+  @ViewChild(NgxContentEditorComponent, { static: true })
+  private editor: NgxContentEditorComponent;
   files = []; //Set<File> = new Set();
   progress;
-  response;
   submitting = false;
-  articleForm;
   categories;
 
   constructor(
@@ -61,116 +72,138 @@ export class ContentEditorComponent implements OnInit {
     private storage: AngularFireStorage
   ) {}
   ngOnInit() {
-    this.getCategories("articles").subscribe(data => {
-      console.log({ categories: data });
-      if (data.ok && data.data && data.data.categories) {
-        let ctg = new Categories(data.data.categories);
-        console.log({ ctg: data.data.categories });
-        this.categories = ctg.createInputs(
-          null,
-          el => el._id != "5ac348980d63be4aa0e967cb"
-        );
-      }
-      //todo: else
-    });
+    this.formObj$ = urlParams(this.route).pipe(
+      map(([params, query]) => {
+        //todo: if($_GET[id])getData(type,id)
+        //ex: /editor?type=jobs or /editor:id
+        this.params = {
+          id: params.get("id") || "",
+          type: query.get("type")
+        };
 
-    //todo: if($_GET[id])getData(type,id)
-    //ex: /editor?type=jobs or /editor:id
-    urlParams(this.route).subscribe(([params, query]) => {
-      this.params = {
-        id: params.get("id") || "",
-        type: query.get("type") || ""
-      };
+        //set the default type
+        if (!this.params.id && !this.params.type) this.params.type = "articles";
 
-      //set the default type
-      if (!this.params.id && !this.params.type) this.params.type = "articles";
-
-      /*
-    todo: if(id){
-            - getData()
-            - get this.params.type from getData().type
-          }
-     */
-
-      //todo: fix getData()
-      //if (this.params.id != "") this.data$ = this.getData();
-      if (dev) console.log({ params, query, calculatedParamas: this.params });
-
-      //change content.type from textarea to quill
-      let content =
-        article.fields[article.fields.findIndex(el => el.key == "content")];
-      content.type = "quill";
-      if (!content.templateOptions)
-        content.templateOptions = { label: "content" };
-      content.templateOptions["modules"] = {
-        toolbar: [
-          ["bold", "italic", "underline", "strike"],
-          ["blockquote", "code-block"],
-          [{ header: [false, 2, 3, 4] }],
-          [{ list: "ordered" }, { list: "bullet" }],
-          [{ script: "sub" }, { script: "super" }],
-          [{ direction: ["rtl", "ltr"] }],
-          [{ size: ["small", false, "large"] }],
-          [{ color: [] }, { background: [] }],
-          [{ align: [] }],
-          ["link", "image", "video"],
-          ["clean"]
-        ]
-        //,syntax: true //->install highlight.js or ngx-highlight
-      };
-
-      if (this.params.type == "jobs") {
         /*
-        //delete cover image since jobs.layout=="list" not grid
-        //dont use delete article.fields(...)
-        article.fields.splice(
-          article.fields.findIndex(el => el.type == "file"),
-          1
-        );*/
-
-        //add field:contacts after content
-        article.fields.splice(
-          article.fields.findIndex(el => el.key == "content") + 1,
-          0,
-          {
-            key: "contacts",
-            type: "textarea",
-            templateOptions: {
-              label: "contacts",
-              required: false,
-              rows: 2
+      todo: if(id){
+              - getData()
+              - get this.params.type from getData().type
             }
+       */
+
+        this.pref = {
+          title:
+            this.params.type && this.params.type !== ""
+              ? `Create a new ${this.params.type} `
+              : "",
+          preForm: "<h1>test: preForm</h1>",
+          postForm: "<h1>test: postForm</h1>"
+        };
+
+        //todo: this.formObj.model = this.getData()
+        //todo: load categories
+        /*
+        this.getCategories("articles").subscribe(data => {
+          console.log({ categories: data });
+          if (data.ok && data.data && data.data.categories) {
+            let ctg = new Categories(data.data.categories);
+            console.log({ ctg: data.data.categories });
+            this.categories = ctg.createInputs(
+              null,
+              el => el._id != "5ac348980d63be4aa0e967cb"
+            );
           }
-        );
+          //todo: else
+        });
+         */
 
-        //todo: add fields: required experience, salary,
-        // job type (ex: full time), location{}, company{}, required skills,
-        //application deadline (date), ..
+        //create formObj:
 
-        //todo: categories = sub of jobs, main category = jobs
+        //change content.type from textarea to quill
+        let content =
+          article.fields[article.fields.findIndex(el => el.key == "content")];
+        content.type = "quill";
+        if (!content.templateOptions)
+          content.templateOptions = { label: "content" };
+        content.templateOptions["modules"] = {
+          toolbar: [
+            ["bold", "italic", "underline", "strike"],
+            ["blockquote", "code-block"],
+            [{ header: [false, 2, 3, 4] }],
+            [{ list: "ordered" }, { list: "bullet" }],
+            [{ script: "sub" }, { script: "super" }],
+            [{ direction: ["rtl", "ltr"] }],
+            [{ size: ["small", false, "large"] }],
+            [{ color: [] }, { background: [] }],
+            [{ align: [] }],
+            ["link", "image", "video"],
+            ["clean"]
+          ]
+          //,syntax: true //->install highlight.js or ngx-highlight
+        };
 
-        //todo: if(form.content contains contacts)error -> email, mobile, link
-      }
+        if (this.params.type == "jobs") {
+          /*
+              //delete cover image since jobs.layout=="list" not grid
+              //dont use delete article.fields(...)
+              article.fields.splice(
+                article.fields.findIndex(el => el.type == "file"),
+                1
+              );*/
 
-      article.fields.push({
-        key: "categories",
-        type: "categories",
-        templateOptions: { categories: this.getCategories("articles") }
-      });
+          //add field:contacts after content
+          article.fields.splice(
+            article.fields.findIndex(el => el.key == "content") + 1,
+            0,
+            {
+              key: "contacts",
+              type: "textarea",
+              templateOptions: {
+                label: "contacts",
+                required: false,
+                rows: 2
+              }
+            }
+          );
 
-      this.articleForm = article;
-      console.log({ articleForm: article });
+          //todo: add fields: required experience, salary,
+          // job type (ex: full time), location{}, company{}, required skills,
+          //application deadline (date), ..
 
-      /*this.getCategories("articles").subscribe(ctg => {
-        console.log({ ctg });
+          //todo: categories = sub of jobs, main category = jobs
 
-        if (typeof ctg.data == "string") ctg.data = JSON.parse(ctg.data); //todo: why response: string
-        console.log({ ctg });
-        this.articleForm.form.get("title").setValue("test");
-        //or: this.articleForm.fields.find(el => el.key == "title").formControl.setValue("test2");
+          //todo: if(form.content contains contacts)error -> email, mobile, link
+        }
 
-      });*/
-    });
+        article.fields.push({
+          key: "categories",
+          type: "categories",
+          templateOptions: { categories: this.getCategories("articles") }
+        });
+
+        if (dev)
+          console.log({
+            params,
+            query,
+            calculatedParamas: this.params,
+            pref: this.pref,
+            articleForm: article,
+            data: this.data$
+          });
+        //or: this formObj=article
+        return article;
+
+        /*this.getCategories("articles").subscribe(ctg => {
+              console.log({ ctg });
+
+              if (typeof ctg.data == "string") ctg.data = JSON.parse(ctg.data); //todo: why response: string
+              console.log({ ctg });
+              this.formObj$.form.get("title").setValue("test");
+              //or: this.formObj$.fields.find(el => el.key == "title").formControl.setValue("test2");
+
+            });*/
+      })
+    );
   }
 
   getData() {
@@ -183,51 +216,62 @@ export class ContentEditorComponent implements OnInit {
     return this.httpService.get<any>("~categories"); //todo: ~categories/:type
   }
 
-  onSubmit(data) {
+  onSubmit(formObj: FormObj) {
     //todo: data.files=this.upload() or: submit().subscribe(data=>upload())
     //todo: data.files= {cover: #cover.files.data}
     //todo: send base64 data from data.content to firebase storage
+    this.formObj = formObj;
+    let data = formObj.form.value;
 
-    console.log("content.ts onSubmit()", data);
+    console.log("content/submit.ts onSubmit()", data);
     this.submitting = true;
-    let files = this.articleForm.fields.filter(el => el.type == "file"); //todo: articleForm.form.get('cover').files?
+    let files = this.formObj.fields.filter(el => el.type == "file"); //todo: formObj$.form.get('cover').files?
     //todo: app.post("/api/",data)
     this.httpService.upload(this.params.type, data, (type, event, value) => {
       if (type == "progress") this.progress = value;
-      //todo: send to articleForm.fields[type=file]
+      //todo: send to formObj$.fields[type=file]
       else if (type == "response") {
         console.log("response", event.body);
         this.response = event.body;
         this.submitting = false;
+        //todo: reset progress value
         this.showSnackBar(
           event.body.ok ? "form submitted" : "Error " + event.body.msg || "",
           "close",
           3000
         );
         //this.uploadedFiles=event.body;
-        this.articleForm.form.reset();
-        this.formElement.reset(); //https://stackoverflow.com/a/49789012/12577650; also see create.html
+        this.formObj.form.reset();
+
+        //todo: reset the form:
+        this.editor.formElement.reset(); //https://stackoverflow.com/a/49789012/12577650; also see create.html
         //  this.files.clear();
         this.files = [];
       }
     });
   }
 
-  isValid(field: string) {
-    return (
-      !this.articleForm.get(field).touched ||
-      !this.articleForm.get(field).hasError("required")
-    );
+  //update this.formObj value every time the formObj has been changed.
+  //note: this value already sent with the event `submit`
+  onFormChange(formObj: FormObj) {
+    this.formObj = formObj;
   }
-  getErrorMessage(_field: string, name?: string) {
-    let field = this.articleForm.get(_field);
 
-    if (field.hasError("required")) {
+  isValid(field: string, form?) {
+    if (!form) form = this.formObj.form;
+    return !form.get(field).touched || !form.get(field).hasError("required");
+  }
+  getErrorMessage(field: string, name?: string, form?) {
+    //todo: move to packages/ngx-content/editor/editor.ts
+    if (!form) form = this.formObj.form;
+    let _field = form.get(field);
+
+    if (_field.hasError("required")) {
       if (name) return `${name} is required`;
       else return "You must enter a value";
     }
 
-    return field.hasError("email") ? "Invalid email" : "";
+    return _field.hasError("email") ? "Invalid email" : "";
   }
 
   showSnackBar(message: string, action: string, duration = 0) {

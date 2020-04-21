@@ -1,0 +1,103 @@
+<h3 *ngIf="pref?.title">{{pref.title}}</h3>
+<div
+  *ngIf="response"
+  class="alert"
+  [ngClass]="response.ok==true?'alert-ok':'alert-error'"
+>
+  <ng-container *ngIf="response.ok==true; else error">
+    form submitted successfully<br />
+    <ng-template *ngIf="response.msg">{{response.msg}}</ng-template>
+
+    <!--
+      todo: pipes are registered in packages/ngx-content/view/module,
+            so you need to use this module (instead of the current ContentModule) to use them
+            don't regester pipes twice
+    <a
+      href="/{{params.type}}/{{response.data._id}}-{{response.data | slug:200:':ar' }}"
+      >{{response.data.title}}</a
+    > -->
+  </ng-container>
+  <ng-template #error>Error: {{response.msg}}</ng-template>
+</div>
+
+<ng-container *ngIf="$formObj; else loading">
+  <form
+    #formElement
+    [formGroup]="$formObj.form"
+    method="post"
+    enctype="multipart/form-data"
+  >
+    <div *ngIf="pref?.preForm" [innerHTML]="pref.preForm"></div>
+    <formly-form
+      [form]="$formObj.form"
+      [fields]="$formObj.fields"
+      [model]="$formObj.model"
+    ></formly-form>
+
+    <!--
+  using (ngSubmit)="onSubmit(..)" causes the form to show errors after submitting
+  so we replaced it with (click)="onSubmit(..)", and  type="submit" with type="button"
+  https://stackoverflow.com/a/51003685/12577650 -->
+    <button
+      mat-raised-button
+      color="primary"
+      type="button"
+      [disabled]="!$formObj.form.valid || $formObj.form.pristine || submitting"
+      (click)="onSubmit($formObj)"
+    >
+      Submit
+    </button>
+    <div *ngIf="pref?.postForm" [innerHTML]="pref.postForm"></div>
+    <span *ngIf="submitting">Loading....</span>
+  </form>
+</ng-container>
+
+<ng-template #loading>Loading ......</ng-template>
+
+<!-- material design form-field example:
+<mat-form-field appearance="legacy">
+  <mat-label for="title">Title</mat-label>
+  <input matInput placeholder="title" formControlName="title" />
+  <mat-hint align="end"
+    ><span class="hint">no more than 70 chatacters</span></mat-hint
+  >
+  <mat-error *ngIf="!isValid('title')"
+    >{{ getErrorMessage("title") }}</mat-error
+  >
+</mat-form-field>
+
+
+  <mat-form-field appearance="legacy">
+    <mat-label for="content">Content</mat-label>
+    <textarea
+      formControlName="content"
+      matInput
+      cdkTextareaAutosize
+      #autosize="cdkTextareaAutosize"
+      cdkAutosizeMinRows="5"
+      placeholder="content..."
+    ></textarea>
+  </mat-form-field>
+
+
+  <h4>Cover image</h4>
+  <input
+    type="file"
+    #file
+    formControlName="cover"
+    style="display: none"
+    (change)="onFilesAdded()"
+    multiple
+    name="cover"
+  />
+  <button
+    type="button"
+    [disabled]="uploading || uploadSuccessful"
+    mat-raised-button
+    color="primary"
+    (click)="addFiles()"
+  >
+    Add Files
+  </button>
+
+-->
