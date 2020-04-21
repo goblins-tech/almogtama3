@@ -6,11 +6,7 @@ todo:
  - add copy-all btn to inde (or category) page (*ngIf=data.type=list){show ctg.title; add copy-all btn}
  */
 
-import {
-  ViewComponent,
-  Data,
-  Article
-} from "../../../packages/ngx-content/view/view";
+import { Data, Article } from "../../../packages/ngx-content/view/view";
 import { MetaService } from "../../../packages/ngx-content/view//meta.service";
 
 import {

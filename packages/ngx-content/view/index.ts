@@ -1,5 +1,5 @@
-export { ContentViewModule } from "./module";
-export { ViewComponent } from "./view";
+export { NgxContentViewModule } from "./module";
+export { NgxContentViewComponent } from "./view";
 export { MetaService } from "./meta.service";
 export {
   KeepHtmlPipe,

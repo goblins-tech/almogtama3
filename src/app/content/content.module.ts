@@ -6,7 +6,7 @@ import { ContentEditorComponent } from "./editor";
 import { ContentManageComponent } from "./manage";
 
 //todo: add 'packages' to tsConfig
-import { ContentViewModule } from "../../../packages/ngx-content/view";
+import { NgxContentViewModule } from "../../../packages/ngx-content/view";
 import { NgxContentEditorModule } from "../../../packages/ngx-content/editor";
 
 import { ShareButtonsModule } from "@ngx-share/buttons";
@@ -79,7 +79,7 @@ export const fileTypeModule = FileTypeModule.forRoot();
   ],
   exports: [RouterModule],
   imports: [
-    ContentViewModule,
+    NgxContentViewModule,
     NgxContentEditorModule,
     FormlyFileModule,
     FormlyCategoriesModule,

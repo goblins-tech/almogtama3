@@ -12,7 +12,7 @@
 import { HttpClientModule } from "@angular/common/http";
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { ViewComponent } from "./view";
+import { NgxContentViewComponent } from "./view";
 import {
   MatCardModule,
   MatGridListModule,
@@ -45,7 +45,7 @@ import { fas } from "@fortawesome/free-solid-svg-icons";
 
 @NgModule({
   declarations: [
-    ViewComponent,
+    NgxContentViewComponent,
     SlugPipe,
     Nl2brPipe,
     KeepHtmlPipe,
@@ -53,7 +53,7 @@ import { fas } from "@fortawesome/free-solid-svg-icons";
     LengthPipe,
     SummaryPipe
   ],
-  exports: [ViewComponent],
+  exports: [NgxContentViewComponent],
   imports: [
     CommonModule,
     MatCardModule,
@@ -74,7 +74,7 @@ import { fas } from "@fortawesome/free-solid-svg-icons";
   bootstrap: [],
   entryComponents: []
 })
-export class ContentViewModule {
+export class NgxContentViewModule {
   constructor(faIconLibrary: FaIconLibrary) {
     faIconLibrary.addIconPacks(fab, fas);
   }

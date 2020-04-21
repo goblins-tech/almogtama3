@@ -36,7 +36,7 @@ export interface Pref extends Obj {
   templateUrl: "./view.html",
   styleUrls: ["./view.scss"]
 })
-export class ViewComponent implements OnInit {
+export class NgxContentViewComponent implements OnInit {
   @Input("data") dataObj: Data | Observable<Data>;
   @Input() pref: Pref; //component prefrences
   data: Data;
