@@ -21,7 +21,7 @@
     "serve:inspect": "node --inspect dist/server.js --start",
     "serve:dev": "nodemon --inspect dist/server.js --start",
     "start": "npm run build && npm run serve",
-    "start:dev": "npm run build:dev && npm run serve:dev",
+    "start:dev": "npm run build:dev && npm run serve:inspect",
     "start:nodemon": "nodemon  src/ -e ts,html,scss --exec \"npm run start:dev\"",
     "firebase": "npm run firebase:build && npm run firebase:deploy",
     "firebase:build": "tsc -p firebase/tsconfig.json && node tasks firebase:copy",
