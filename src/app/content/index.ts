@@ -27,7 +27,7 @@ import { map, concatMap } from "rxjs/operators";
 import { HighlightJS } from "ngx-highlightjs";
 import { environment as env } from "../../environments/environment";
 import { summary } from "./functions";
-import { urlParams } from "../../../eldeeb/angular";
+import { urlParams } from "../../../packages/ngx-tools/routes";
 
 //todo: import module & interfaces from packages/content/ngx-content-view/index.ts
 
