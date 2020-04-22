@@ -4,7 +4,7 @@ import { HttpService } from "../http.service";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { MatSnackBar } from "@angular/material";
-import { Data } from "../../../packages/ngx-content/view/view"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
+import { Data } from "../../../packages/ngx-content/view"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
 import { article } from "../../../packages/ngx-formly/core/formly";
 import { HighlightJS } from "ngx-highlightjs";
 import { keepHtml, Categories } from "./functions";
@@ -256,7 +256,11 @@ export class ContentEditorComponent implements OnInit {
         let data = event.body.data;
         this.response = {
           ...event.body,
-          msg: `/${data.type}/id/${data.shortId || data._id || data.id}`
+          msg: data
+            ? `<a href="/${data.type}/id/${data.shortId ||
+                data._id ||
+                data.id}">view</a>`
+            : ""
         };
 
         this.submitting = false;

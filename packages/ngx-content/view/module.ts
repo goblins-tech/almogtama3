@@ -13,6 +13,7 @@ import { HttpClientModule } from "@angular/common/http";
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { NgxContentViewComponent } from "./view";
+import { NgxContentCoreModule } from "../core"; //to use pipes
 import {
   MatCardModule,
   MatGridListModule,
@@ -22,15 +23,6 @@ import {
   MatProgressBarModule,
   MatSnackBarModule
 } from "./material";
-
-import {
-  SlugPipe,
-  Nl2brPipe,
-  KeepHtmlPipe,
-  ContentPipe,
-  LengthPipe,
-  SummaryPipe
-} from "./pipes";
 
 import { LazyLoadImageModule } from "ng-lazyload-image";
 import { HighlightModule } from "ngx-highlightjs";
@@ -44,15 +36,7 @@ import { fab } from "@fortawesome/free-brands-svg-icons";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 
 @NgModule({
-  declarations: [
-    NgxContentViewComponent,
-    SlugPipe,
-    Nl2brPipe,
-    KeepHtmlPipe,
-    ContentPipe,
-    LengthPipe,
-    SummaryPipe
-  ],
+  declarations: [NgxContentViewComponent],
   exports: [NgxContentViewComponent],
   imports: [
     CommonModule,
@@ -68,7 +52,8 @@ import { fas } from "@fortawesome/free-solid-svg-icons";
     QuillModule.forRoot(),
     ShareButtonsModule,
     FontAwesomeModule,
-    HttpClientModule
+    HttpClientModule,
+    NgxContentCoreModule
   ],
   providers: [],
   bootstrap: [],

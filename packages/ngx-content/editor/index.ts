@@ -1,2 +1,2 @@
-export { NgxContentEditorModule } from "./module";
-export { NgxContentEditorComponent, Pref, Response, FormObj } from "./editor";
+export * from "./module";
+export * from "./editor";

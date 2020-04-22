@@ -11,7 +11,7 @@ import {
 import { Formly } from "../../ngx-formly/core/formly"; //todo: add to peerDependencies
 export { Formly as FormObj };
 import { Observable } from "rxjs";
-import { keepHtml } from "../view/functions";
+import { keepHtml } from "../core/functions";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 
 //you need to add css classes: alert, alert-ok, alert-error

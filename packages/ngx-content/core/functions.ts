@@ -6,7 +6,7 @@ import {
 } from "@angular/platform-browser";
 
 //todo: import from @dibo/general
-export function objectType(obj: any): string {
+function objectType(obj: any): string {
   return Object.prototype.toString
     .call(obj)
     .replace("[object ", "")

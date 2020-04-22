@@ -7,7 +7,7 @@ import { QuillViewComponent } from "ngx-quill"; //todo: enable sanitizing https:
 <content-view [data]="{title,content,keywords[],auther{},...}" [related]="[{id,title,..}]" >
 */
 
-export interface Obj {
+interface Obj {
   [key: string]: any;
 }
 

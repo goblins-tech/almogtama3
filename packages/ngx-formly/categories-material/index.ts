@@ -1,5 +1,2 @@
-export { FormlyCategoriesModule } from "./module";
-export {
-  FormlyFieldCategories,
-  FormlyFieldCategoriesHelper
-} from "./component";
+export * from "./module";
+export * from "./component";
