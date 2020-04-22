@@ -253,11 +253,17 @@ export class ContentEditorComponent implements OnInit {
       //todo: send to formObj$.fields[type=file]
       else if (type == "response") {
         console.log("response", event.body);
-        this.response = event.body;
+        let data = event.body.data;
+        this.response = {
+          ...event.body,
+          msg: `/${data.type}/id/${data.shortId || data._id || data.id}`
+        };
+
         this.submitting = false;
         //todo: reset progress value
         this.showSnackBar(
-          event.body.ok ? "form submitted" : "Error " + event.body.msg || "",
+          (event.body.ok ? "form submitted" : "Error ") + this.response.msg ||
+            "",
           "close",
           3000
         );
