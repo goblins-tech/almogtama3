@@ -105,14 +105,14 @@ export function categories() {
 
 //todo: id (ObjectId | shortId) | limit (number)
 export function getData(params) {
-  //console.log("getData", { type, id });
-  var cacheFile = "./temp/articles/";
+  var cacheFile = "./temp/articles/"; //todo: ./temp/$type
   if (params.id) cacheFile += `/${params.id}`;
   else if (params.category) cacheFile += `/${params.category}`;
   else cacheFile += "index";
 
   cacheFile += ".json";
 
+  //docs to be fetched in index mode
   let idx = "_id shortId title slug cover content"; //todo: summary
 
   return cache(
@@ -120,9 +120,10 @@ export function getData(params) {
     () =>
       connect()
         .then(() => {
+          if (dev) console.log("getData.cache()", { params });
+
           let contentModel = model("articles"), //todo: model(type)
             content;
-          //  console.log("getData.cache()", { type, id });
 
           if (params.id) {
             if (params.id.length == 24)
@@ -131,8 +132,7 @@ export function getData(params) {
               content = contentModel.find({ shortId: params.id }, null, {
                 limit: 1
               }); //note that the returned result is an array, not object
-          }
-          if (!params.category)
+          } else if (!params.category)
             content = contentModel.find({}, idx, { limit: 50 });
           else {
             content = Promise.all([

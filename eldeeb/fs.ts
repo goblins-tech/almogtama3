@@ -7,6 +7,8 @@ import { objectType, isEmpty, now, exportAll } from "./general";
 export * from "fs";
 export * from "path";
 
+const dev = process.env.NODE_ENV === "development";
+
 export namespace types {
   export enum moveOptionsExisting {
     "replace",
@@ -205,15 +207,16 @@ export async function cache(
   file = resolve(file);
   if (data === ":purge:") return fs.unlink(file, () => {}); //purging the cache; not a promise
 
-  if (process.env.NODE_ENV == "development") mdir(file as string, true);
+  mdir(file as string, true);
   if (ext(file) == ".json") json = true;
   if (
     !fs.existsSync(file) ||
     expire < 0 ||
-    (!isNaN(expire) && // if not a number consider it as epire=0 i.e: never expires
-    expire != 0 && // if expire=0 never expires
+    (!isNaN(expire) && // if not a number consider it as expire=0, i.e: never expires
+    expire != 0 && // if expire=0: never expires
       (mtime(file) as number) + expire * 60 * 60 * 1000 < now()) // todo: convert mimetime() to number or convert expire to bigInt??
   ) {
+    if (dev) console.log("cach: refreshing cache", file);
     function cache_save(data) {
       if (["array", "object"].includes(objectType(data)))
         data = JSON.stringify(data);
@@ -233,6 +236,7 @@ export async function cache(
 
     // todo: do we need to convert data to string? i.e: writeFileSync(file.toString()), try some different types of data
   } else {
+    if (dev) console.log("cache: file exists", file);
     // retrive data from file and return it as the required type
     data = fs.readFileSync(file, "utf8").toString(); // without encoding (i.e utf-8) will return a stream insteadof a string
     if (json) data = JSON.parse(data);

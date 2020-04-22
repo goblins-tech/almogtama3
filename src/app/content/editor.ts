@@ -244,7 +244,7 @@ export class ContentEditorComponent implements OnInit {
     this.formObj = formObj;
     let data = formObj.form.value;
 
-    console.log("content/submit.ts onSubmit()", data);
+    console.log("onSubmit()", data);
     this.submitting = true;
     let files = this.formObj.fields.filter(el => el.type == "file"); //todo: formObj$.form.get('cover').files?
     //todo: app.post("/api/",data)
@@ -264,8 +264,8 @@ export class ContentEditorComponent implements OnInit {
         //this.uploadedFiles=event.body;
         this.formObj.form.reset();
 
-        //todo: reset the form:
-        this.editor.formElement.reset(); //https://stackoverflow.com/a/49789012/12577650; also see create.html
+        //todo: fix: this.editor.formElement.reset is not a function
+        //  this.editor.formElement.reset(); //https://stackoverflow.com/a/49789012/12577650; also see create.html
         //  this.files.clear();
         this.files = [];
       }
