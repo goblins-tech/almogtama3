@@ -3,7 +3,7 @@ import { ActivatedRoute } from "@angular/router";
 import { HttpService } from "../http.service";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
-import { MatSnackBar } from "@angular/material";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { Data } from "../../../packages/ngx-content/view"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
 import { article } from "../../../packages/ngx-formly/core/formly";
 import { HighlightJS } from "ngx-highlightjs";
