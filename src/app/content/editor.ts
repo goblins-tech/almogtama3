@@ -54,7 +54,7 @@ export class ContentEditorComponent implements OnInit {
   data$: Observable<Object>; //todo: pass to formObj.model
 
   //uploading vars
-  @ViewChild("file", { static: false }) file; //access #file DOM element
+  @ViewChild("file") file; //access #file DOM element
 
   //access <content-editor> properties and methods
   @ViewChild(NgxContentEditorComponent, { static: true })

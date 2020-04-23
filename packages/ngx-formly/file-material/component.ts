@@ -14,7 +14,7 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor } from "@angular/forms";
   templateUrl: "./component.html"
 })
 export class FormlyFieldFile extends FieldType implements OnInit {
-  @ViewChild("fileInput", { static: false }) fileInput;
+  @ViewChild("fileInput") fileInput;
   @Input() progress: number = 0; //todo: progress:Observable & subscribe to it
   files: Set<File> = new Set();
   name = "";

@@ -48,7 +48,7 @@ export class NgxContentEditorComponent implements OnInit {
   @Output() submit = new EventEmitter<Formly>();
 
   //give the parent component access to #formElement, whitch is a child of this component
-  @ViewChild("formElement", { static: false }) formElement; //todo: formElement:ElementRef<HTMLElement>
+  @ViewChild("formElement") formElement; //todo: formElement:ElementRef<HTMLElement>
 
   /*
   in parent component, subscribe to `formChange` event to update `this.formObj`

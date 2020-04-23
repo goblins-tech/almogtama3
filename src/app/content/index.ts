@@ -44,7 +44,7 @@ const dev = !env.production;
   styleUrls: ["./index.scss"]
 })
 export class ContentComponent implements OnInit, AfterViewInit {
-  @ViewChild("quillView", { static: false }) quillView;
+  @ViewChild("quillView") quillView;
   data$: Observable<Data>;
   params: Params;
   pref = { layout: "grid" };
