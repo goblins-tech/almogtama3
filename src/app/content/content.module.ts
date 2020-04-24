@@ -30,11 +30,14 @@ import {
   FormlyFieldCategoriesHelper
 } from "../../../packages/ngx-formly/categories-material";
 import { HighlightModule } from "ngx-highlightjs";
+
+/*
+todo: enable  ngx-formly-material-file
 import {
   FileTypeComponent,
   FileTypeModule,
   FileTypeValidationMessages
-} from "ngx-formly-material-file";
+} from "ngx-formly-material-file"; */
 
 //material design
 import { MatButtonModule } from "@angular/material/button";
@@ -65,7 +68,7 @@ const routes: Routes = [
 ];
 
 export const APP_LOCALE_ID = "en-US";
-export const fileTypeModule = FileTypeModule.forRoot();
+//export const fileTypeModule = FileTypeModule.forRoot();
 
 @NgModule({
   declarations: [
