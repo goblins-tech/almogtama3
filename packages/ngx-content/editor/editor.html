@@ -6,8 +6,7 @@
 >
   <ng-container *ngIf="response.ok==true; else error">
     form submitted successfully<br />
-
-    <ng-template *ngIf="response.msg">{{response.msg | keepHtml }}</ng-template>
+    <div *ngIf="response.msg" [innerHTML]="response.msg"></div>
 
     <!--
       todo: pipes are registered in packages/ngx-content/view/module,

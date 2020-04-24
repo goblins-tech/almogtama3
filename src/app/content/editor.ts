@@ -252,12 +252,12 @@ export class ContentEditorComponent implements OnInit {
       if (type == "progress") this.progress = value;
       //todo: send to formObj$.fields[type=file]
       else if (type == "response") {
-        console.log("response", event.body);
+        console.log("event.body", event.body);
         let data = event.body.data;
         this.response = {
-          ...event.body,
+          ok:event.body.ok,
           msg: data
-            ? `<a href="/${data.type}/id/${data.shortId ||
+            ? `<a href="/id/${data.shortId ||
                 data._id ||
                 data.id}">view</a>`
             : ""
