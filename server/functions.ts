@@ -112,16 +112,14 @@ export function getData(params) {
 
   cacheFile += ".json";
 
-  //docs to be fetched in index mode
-  let idx = "_id shortId title slug cover content"; //todo: summary
+  //docs to be fetched in list mode
+  let docs = "_id shortId title slug cover content"; //todo: summary
 
   return cache(
     cacheFile,
     () =>
       connect()
         .then(() => {
-          if (dev) console.log("getData.cache()", { params });
-
           let contentModel = model("articles"), //todo: model(type)
             content;
 
@@ -133,7 +131,7 @@ export function getData(params) {
                 limit: 1
               }); //note that the returned result is an array, not object
           } else if (!params.category)
-            content = contentModel.find({}, idx, { limit: 50 });
+            content = contentModel.find({}, docs, { limit: 50 });
           else {
             content = Promise.all([
               cache(
@@ -147,35 +145,42 @@ export function getData(params) {
                 1
               )
             ]).then(([categories, article_categories]) => {
-              console.log({ categories, article_categories });
+              if (dev)
+                console.log("categories", { categories, article_categories });
               //get category._id from category.slug
-              let category = categories.find(el => el.slug == params.category);
-              if (dev) console.log("category", category);
+              let category,
+                selectedArticles = [];
 
-              if (category) {
-                //get articles from article_categories where category=category._id
-                let selectedArticles = [];
+              if (category == "jobs" || category == "articles") {
+                selectedArticles = [];
+                //todo: select articles where article.type==article
+              } else {
+                category = categories.find(el => el.slug == params.category);
+                if (dev) console.log("category", category);
 
-                article_categories.forEach(el => {
-                  if (el.category == category._id)
-                    selectedArticles.push(el.article);
-                });
-
-                if (dev) console.log({ selectedArticles });
-
-                //get articles from 'articles' where _id in selectedArticles[]
-                let articles = model("articles").find(
-                  { _id: { $in: selectedArticles } },
-                  idx, //todo: {shortid,title,slug,summary|content}
-                  {
-                    limit: params.limit || 50,
-                    sort: { _id: -1 }
-                  }
-                );
-
-                //  if (dev)  articles.then(result => console.log("articles", result));
-                return articles;
+                if (category) {
+                  //get articles from article_categories where category=category._id
+                  article_categories.forEach(el => {
+                    if (el.category == category._id)
+                      selectedArticles.push(el.article);
+                  });
+                }
               }
+
+              if (dev) console.log({ selectedArticles });
+
+              //get articles from 'articles' where _id in selectedArticles[]
+              let articles = model("articles").find(
+                { _id: { $in: selectedArticles } },
+                docs, //todo: {shortid,title,slug,summary|content}
+                {
+                  limit: params.limit || 50,
+                  sort: { _id: -1 }
+                }
+              );
+
+              //  if (dev)  articles.then(result => console.log("articles", result));
+              return articles;
             });
           }
 
