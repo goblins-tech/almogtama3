@@ -21,8 +21,8 @@ import {
   Pref,
   FormObj,
   Response,
-  NgxContentEditorComponent
-} from "../../../packages/ngx-content/editor";
+  NgxFormComponent
+} from "../../../packages/ngx-form";
 
 /*
 //for FormlyFieldCategories; https://stackoverflow.com/a/60267178/12577650
@@ -57,8 +57,8 @@ export class ContentEditorComponent implements OnInit {
   @ViewChild("file") file; //access #file DOM element
 
   //access <content-editor> properties and methods
-  @ViewChild(NgxContentEditorComponent, { static: true })
-  private editor: NgxContentEditorComponent;
+  @ViewChild(NgxFormComponent, { static: true })
+  private formComp: NgxFormComponent;
   files = []; //Set<File> = new Set();
   progress;
   submitting = false;
@@ -255,11 +255,9 @@ export class ContentEditorComponent implements OnInit {
         console.log("event.body", event.body);
         let data = event.body.data;
         this.response = {
-          ok:event.body.ok,
+          ok: event.body.ok,
           msg: data
-            ? `<a href="/id/${data.shortId ||
-                data._id ||
-                data.id}">view</a>`
+            ? `<a href="/id/${data.shortId || data._id || data.id}">view</a>`
             : ""
         };
 
@@ -274,8 +272,8 @@ export class ContentEditorComponent implements OnInit {
         //this.uploadedFiles=event.body;
         this.formObj.form.reset();
 
-        //todo: fix: this.editor.formElement.reset is not a function
-        //  this.editor.formElement.reset(); //https://stackoverflow.com/a/49789012/12577650; also see create.html
+        //todo: fix: this.formComp.formElement.reset is not a function
+        //  this.formComp.formElement.reset(); //https://stackoverflow.com/a/49789012/12577650; also see create.html
         //  this.files.clear();
         this.files = [];
       }

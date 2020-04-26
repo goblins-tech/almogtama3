@@ -7,7 +7,7 @@ import { ContentManageComponent } from "./manage";
 
 //todo: add 'packages' to tsConfig
 import { NgxContentViewModule } from "../../../packages/ngx-content/view";
-import { NgxContentEditorModule } from "../../../packages/ngx-content/editor";
+import { NgxFormModule } from "../../../packages/ngx-form";
 
 import { ShareButtonsModule } from "@ngx-share/buttons";
 import {
@@ -73,14 +73,14 @@ export const APP_LOCALE_ID = "en-US";
 @NgModule({
   declarations: [
     ContentComponent,
-    ContentEditorComponent,
     ContentManageComponent,
-    FormlyFieldQuill
+    FormlyFieldQuill,
+    ContentEditorComponent
   ],
   exports: [RouterModule],
   imports: [
     NgxContentViewModule,
-    NgxContentEditorModule,
+    NgxFormModule,
     FormlyFileModule,
     FormlyCategoriesModule,
     CommonModule,

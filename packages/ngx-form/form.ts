@@ -8,10 +8,10 @@ import {
   Output,
   EventEmitter
 } from "@angular/core";
-import { Formly } from "../../ngx-formly/core/formly"; //todo: add to peerDependencies
+import { Formly } from "../ngx-formly/core/formly"; //todo: add to peerDependencies
 export { Formly as FormObj };
 import { Observable } from "rxjs";
-import { keepHtml } from "../core/functions";
+import { keepHtml } from "../ngx-content/core/functions";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 
 //you need to add css classes: alert, alert-ok, alert-error
@@ -23,21 +23,16 @@ export interface Pref {
   postForm?: string | SafeHtml;
 }
 
-//todo: get Data interface from
-export interface Data {
-  title?: string;
-}
-
 export interface Response {
   ok: boolean;
   msg?: string;
 }
 
 @Component({
-  selector: "content-editor",
-  templateUrl: "./editor.html"
+  selector: "ngx-form",
+  templateUrl: "./form.html"
 })
-export class NgxContentEditorComponent implements OnInit {
+export class NgxFormComponent implements OnInit {
   @Input() formObj: Formly | Observable<Formly>;
   $formObj: Formly;
   @Input() pref: Pref | Observable<Pref>;
