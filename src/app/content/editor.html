@@ -1,6 +1,6 @@
 <ngx-form
-  [formObj]="formObj$"
-  [pref]="pref$"
+  [formObj]="formObj$ | async"
+  [pref]="pref$ | async"
   [response]="response"
   [progress]="progress"
   [submitting]="submitting"

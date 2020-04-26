@@ -33,10 +33,8 @@ export interface Response {
   templateUrl: "./form.html"
 })
 export class NgxFormComponent implements OnInit {
-  @Input() formObj: Formly | Observable<Formly>;
-  $formObj: Formly;
-  @Input() pref: Pref | Observable<Pref>;
-  $pref: Pref;
+  @Input() formObj: Formly;
+  @Input() pref: Pref;
   @Input() response: Response;
   @Input() submitting: boolean;
   @Input() progress; //todo: show progress bar
@@ -59,26 +57,10 @@ export class NgxFormComponent implements OnInit {
   //todo: onSubmit -> update response
   //todo: to auto fill the form use $formObj.model
   ngOnInit() {
-    if (this.formObj instanceof Observable)
-      this.formObj.subscribe(data => {
-        this.$formObj = data;
-      });
-    else this.$formObj = this.formObj;
-
-    if (this.pref instanceof Observable)
-      this.pref.subscribe(data => {
-        this.$pref = data;
-        if (this.$pref) {
-          this.$pref.preForm = keepHtml(this.$pref.preForm, this.sanitizer);
-          this.$pref.postForm = keepHtml(this.$pref.postForm, this.sanitizer);
-        }
-      });
-    else {
-      this.$pref = this.pref;
-      if (this.$pref) {
-        this.$pref.preForm = keepHtml(this.$pref.preForm, this.sanitizer);
-        this.$pref.postForm = keepHtml(this.$pref.postForm, this.sanitizer);
-      }
+    if (this.pref) {
+      //todo: use keepHtml pipe
+      this.pref.preForm = keepHtml(this.pref.preForm, this.sanitizer);
+      this.pref.postForm = keepHtml(this.pref.postForm, this.sanitizer);
     }
   }
 

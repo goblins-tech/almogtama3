@@ -1,4 +1,4 @@
-<h3 *ngIf="$pref?.title">{{$pref.title}}</h3>
+<h3 *ngIf="pref?.title">{{pref.title}}</h3>
 <div
   *ngIf="response"
   class="alert"
@@ -20,18 +20,18 @@
   <ng-template #error>Error: {{response.msg}}</ng-template>
 </div>
 
-<ng-container *ngIf="$formObj; else loading">
+<ng-container *ngIf="formObj; else loading">
   <form
     #formElement
-    [formGroup]="$formObj.form"
+    [formGroup]="formObj.form"
     method="post"
     enctype="multipart/form-data"
   >
-    <div *ngIf="$pref?.preForm" [innerHTML]="$pref.preForm"></div>
+    <div *ngIf="pref?.preForm" [innerHTML]="pref.preForm"></div>
     <formly-form
-      [form]="$formObj.form"
-      [fields]="$formObj.fields"
-      [model]="$formObj.model"
+      [form]="formObj.form"
+      [fields]="formObj.fields"
+      [model]="formObj.model"
     ></formly-form>
 
     <!--
@@ -42,12 +42,12 @@
       mat-raised-button
       color="primary"
       type="button"
-      [disabled]="!$formObj.form.valid || $formObj.form.pristine || submitting"
-      (click)="onSubmit($formObj)"
+      [disabled]="!formObj.form.valid || formObj.form.pristine || submitting"
+      (click)="onSubmit(formObj)"
     >
       Submit
     </button>
-    <div *ngIf="$pref?.postForm" [innerHTML]="$pref.postForm"></div>
+    <div *ngIf="pref?.postForm" [innerHTML]="pref.postForm"></div>
     <span *ngIf="submitting">Loading....</span>
   </form>
 </ng-container>
