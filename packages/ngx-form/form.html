@@ -1,4 +1,4 @@
-<h3 *ngIf="pref?.title">{{pref.title}}</h3>
+<h3 *ngIf="formObj.title">{{formObj.title}}</h3>
 <div
   *ngIf="response"
   class="alert"
@@ -27,7 +27,8 @@
     method="post"
     enctype="multipart/form-data"
   >
-    <div *ngIf="pref?.preForm" [innerHTML]="pref.preForm"></div>
+    <!-- todo: pass `step` number to the parent comp to display the proper content -->
+    <ng-content select="[data-before]"></ng-content>
     <formly-form
       [form]="formObj.form"
       [fields]="formObj.fields"
@@ -38,6 +39,24 @@
   using (ngSubmit)="onSubmit(..)" causes the form to show errors after submitting
   so we replaced it with (click)="onSubmit(..)", and  type="submit" with type="button"
   https://stackoverflow.com/a/51003685/12577650 -->
+
+    <ng-content select="[data-after]"></ng-content>
+    <button
+      *ngIf="formObj.steps"
+      (click)="go(-1)"
+      type="button"
+      [disabled]="step===0"
+    >
+      Previous
+    </button>
+    <button
+      *ngIf="formObj.steps"
+      (click)="go(+1)"
+      type="button"
+      [disabled]="step===formObj.steps.length-1"
+    >
+      Next
+    </button>
     <button
       mat-raised-button
       color="primary"
@@ -47,7 +66,7 @@
     >
       Submit
     </button>
-    <div *ngIf="pref?.postForm" [innerHTML]="pref.postForm"></div>
+
     <span *ngIf="submitting">Loading....</span>
   </form>
 </ng-container>

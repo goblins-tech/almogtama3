@@ -8,19 +8,30 @@ import {
   Output,
   EventEmitter
 } from "@angular/core";
-import { Formly } from "../ngx-formly/core/formly"; //todo: add to peerDependencies
-export { Formly as FormObj };
 import { Observable } from "rxjs";
 import { keepHtml } from "../ngx-content/core/functions";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
+import { FormGroup, FormArray } from "@angular/forms";
+import {
+  FormlyFieldConfig,
+  FormlyFormOptions,
+  FieldArrayType
+} from "@ngx-formly/core";
 
-//you need to add css classes: alert, alert-ok, alert-error
+//you need to add css classes: alert, alert-ok, alert-error for `reponse` div
 
-//todo:use <ng-container .pre|post> instead of pre.preForm, pre.postForm
-export interface Pref {
-  title?: string; //ex: Create a new article.
-  preForm?: string | SafeHtml; //an html content to render before the form.
-  postForm?: string | SafeHtml;
+export interface FormObj {
+  form?: FormGroup | FormArray;
+  fields?: FormlyFieldConfig[];
+  steps?: Step[];
+  model?: { [key: string]: any }; //data from API calls
+  options?: FormlyFormOptions;
+  title?: string;
+}
+
+export interface Step {
+  title?: string;
+  fields?: FormlyFieldConfig[];
 }
 
 export interface Response {
@@ -33,12 +44,12 @@ export interface Response {
   templateUrl: "./form.html"
 })
 export class NgxFormComponent implements OnInit {
-  @Input() formObj: Formly;
-  @Input() pref: Pref;
+  @Input() formObj: FormObj;
   @Input() response: Response;
   @Input() submitting: boolean;
   @Input() progress; //todo: show progress bar
-  @Output() submit = new EventEmitter<Formly>();
+  @Input() step: number;
+  @Output() submit = new EventEmitter<FormObj>();
 
   //give the parent component access to #formElement, whitch is a child of this component
   @ViewChild("formElement") formElement; //todo: formElement:ElementRef<HTMLElement>
@@ -49,7 +60,7 @@ export class NgxFormComponent implements OnInit {
   the `submit` event provide the recent updated version of `formObj`, so you can
   use it to update this.formObj value each time the form has been submitted.
    */
-  @Output() formChange = new EventEmitter<Formly>();
+  @Output() formChange = new EventEmitter<FormObj>();
 
   constructor(private sanitizer: DomSanitizer) {}
 
@@ -57,19 +68,35 @@ export class NgxFormComponent implements OnInit {
   //todo: onSubmit -> update response
   //todo: to auto fill the form use $formObj.model
   ngOnInit() {
-    if (this.pref) {
-      //todo: use keepHtml pipe
-      this.pref.preForm = keepHtml(this.pref.preForm, this.sanitizer);
-      this.pref.postForm = keepHtml(this.pref.postForm, this.sanitizer);
+    if (this.formObj) {
+      this.formObj.form = this.formObj.form || new FormGroup({});
+      if (this.formObj.steps) {
+        this.step = this.step || 0;
+        this.go();
+      }
     }
   }
 
-  onSubmit(formObj: Formly) {
+  go(n = 0) {
+    this.step += n;
+    let step = this.formObj.steps[this.step];
+
+    if (step) {
+      //https://stackoverflow.com/a/46070221/12577650
+      this.formObj = Object.assign(this.formObj, {
+        fields: step.fields,
+        title: step.title,
+        model: this.formObj.form.value //save the current value,so the feilds values preserved when the user come back to this step.
+      });
+    }
+  }
+
+  onSubmit(formObj: FormObj) {
     //emit the EventEmitter `submit`, and send `formObj`
     this.submit.emit(formObj);
   }
 
-  onFormChange(formObj: Formly) {
+  onFormChange(formObj: FormObj) {
     //todo: subscribe to `formly` change event.
     this.formChange.emit(formObj);
   }

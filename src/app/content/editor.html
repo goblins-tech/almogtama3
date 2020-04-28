@@ -1,9 +1,12 @@
+<!--todo: create or edit -->
+<h1>create new {{params.type}}</h1>
+
 <ngx-form
   [formObj]="formObj$ | async"
-  [pref]="pref$ | async"
   [response]="response"
   [progress]="progress"
   [submitting]="submitting"
   (submit)="onSubmit($event)"
   (formChange)="onFormChange($event)"
-></ngx-form>
+>
+</ngx-form>
