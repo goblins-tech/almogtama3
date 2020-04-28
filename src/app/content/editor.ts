@@ -212,6 +212,7 @@ export class ContentEditorComponent implements OnInit {
     //todo: data.files= {cover: #cover.files.data}
     //todo: send base64 data from data.content to firebase storage
     //this.formObj = formObj;
+
     if (!formObj || !formObj.form || !formObj.form.value) {
       this.response = {
         ok: false,
@@ -222,9 +223,10 @@ export class ContentEditorComponent implements OnInit {
     }
 
     let data = formObj.form.value;
-
     console.log("onSubmit()", data);
     this.submitting = true;
+    this.response = null;
+
     let files = formObj.fields.filter(el => el.type == "file"); //todo: formObj$.form.get('cover').files?
     //todo: app.post("/api/",data)
     this.httpService.upload(this.params.type, data, (type, event, value) => {
