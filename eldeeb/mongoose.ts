@@ -92,7 +92,9 @@ export function model(
   // todo: merge schema's defaultOptions
   if (mongoose.models[collection]) return mongoose.models[collection];
   let schema: mongoose.Schema;
+  options = options || {};
   options.collection = collection;
+  if (!("timestamps" in options)) options.timestamps = true; //add createdAt, updatedAt https://mongoosejs.com/docs/guide.html#timestamps
 
   if (!("fields" in obj)) obj = { fields: obj };
   schema = new mongoose.Schema(obj.fields, options);

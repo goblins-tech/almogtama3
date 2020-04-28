@@ -27,7 +27,6 @@ export function insertData(data) {
     () => {
       if (dev) console.log("connected");
       if (data) {
-        //  data.shortId = shortId.generate();
         let contentModel = model(type);
         let content = new contentModel(data);
         return content.save();

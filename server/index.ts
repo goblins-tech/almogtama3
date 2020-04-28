@@ -126,12 +126,12 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
 
   //we can resume this process at any time
   //todo: a process to check if there is any item in the queue
-  let sid;
-  if (!req.body.shortId) {
-    sid = shortId.generate();
-    req.body.shortId = sid;
+  let id;
+  if (!req.body._id) {
+    id = shortId.generate();
+    req.body._id = id;
   }
-  let dir = `./temp/queue/${sid}`;
+  let dir = `./temp/queue/${id}`;
   req.body.type = req.params.type;
   req.body.file = req.file;
   mdir(dir);
@@ -150,8 +150,9 @@ app.get("/api/:item?", (req, res, next) => {
 
   var item = req.params.item;
 
-  //ex: ~categories
-  if (item.startsWith("~")) {
+  //home page (/api/)
+  if (!item) category = "articles";
+  else if (item.startsWith("~")) {
     if (item == "~categories")
       categories().then(data => res.send({ ok: true, data }));
     else res.send({ ok: false, msg: `unknown param ${item}` });
