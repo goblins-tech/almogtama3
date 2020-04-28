@@ -164,9 +164,6 @@ export class ContentComponent implements OnInit, AfterViewInit {
     } else console.warn("adsense disabled in dev mode.");
   }
   getData(): Observable<Data> {
-    return this.httpService.get<Data>({
-      id: this.params.id,
-      category: this.params.category
-    });
+    return this.httpService.get<Data>(this.params);
   }
 }

@@ -64,7 +64,8 @@ const routes: Routes = [
   { path: "id/:id", component: ContentComponent },
   { path: ":category", component: ContentComponent },
   { path: ":category/manage", component: ContentManageComponent },
-  { path: ":category/:item", component: ContentComponent }
+  { path: ":category/:item", component: ContentComponent },
+  { path: "", component: ContentComponent, pathMatch: "full" }
 ];
 
 export const APP_LOCALE_ID = "en-US";

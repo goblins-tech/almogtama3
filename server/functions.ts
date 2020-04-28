@@ -113,25 +113,39 @@ export function getData(params) {
   cacheFile += ".json";
 
   //docs to be fetched in list mode
-  let docs = "_id shortId title slug cover content"; //todo: summary
+  let docs = "_id title subtitle slug content author cover updatedAt"; //todo: summary
 
   return cache(
     cacheFile,
     () =>
       connect()
         .then(() => {
-          let contentModel = model("articles"), //todo: model(type)
+          let contentModel = model("articles"),
             content;
 
           if (params.id) {
+            content = contentModel.findById(params.id);
+
+            /*
+              deprecated! now _id is type of ShortId
             if (params.id.length == 24)
               content = contentModel.findById(params.id);
             else
               content = contentModel.find({ shortId: params.id }, null, {
                 limit: 1
               }); //note that the returned result is an array, not object
-          } else if (!params.category)
-            content = contentModel.find({}, docs, { limit: 50 });
+              */
+          } else if (
+            !params.category ||
+            ["articles", "jobs"].includes(params.category)
+          )
+            content = contentModel.find(
+              { type: params.category || "articles", status: "approved" },
+              docs,
+              {
+                limit: 50
+              }
+            );
           else {
             content = Promise.all([
               cache(
@@ -204,10 +218,10 @@ export function saveData(data) {
    */
   if (dev) console.log("server/saveData()", data);
 
-  let sid = data.shortId;
-  let dataDir = `./temp/queue/${sid}`,
+  let id = data._id;
+  let dataDir = `./temp/queue/${id}`,
     dataFile = `${dataDir}/data.json`,
-    dir = `${data.type}/${sid}`;
+    dir = `${data.type}/${id}`;
 
   if (!data.slug || data.slug == "")
     data.slug = slug(data.title, 200, ":ar", false); //if slug changed, cover fileName must be changed
@@ -248,7 +262,7 @@ export function saveData(data) {
         .then(() =>
           resize(tmp, {
             type: data.type,
-            shortId: sid
+            id
           }).then(imgs => {
             if (dev) console.log(`file ${file} uploaded & resized`, imgs);
 
@@ -285,7 +299,7 @@ export function saveData(data) {
           .then(coverDir =>
             resize(coverDir, {
               type: data.type,
-              shortId: sid
+              id
             })
               .then(imgs => {
                 if (dev) console.log("cover uploaded & resized", imgs);
@@ -420,10 +434,7 @@ export function resize(img, info) {
             //.map(el => [el.width, el.file])
             .reduce((total, current) => {
               //convert from array[ {width,file, ..} ] into {width:file}
-              let file = current.file.replace(
-                MEDIA,
-                `${info.type}/${info.shortId}`
-              );
+              let file = current.file.replace(MEDIA, `${info.type}/${info.id}`);
               total[current.width] = file; //todo: remove D:/**,
               return total; //accumulator
             }, {})
