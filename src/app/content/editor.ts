@@ -176,7 +176,11 @@ export class ContentEditorComponent implements OnInit {
                   key: "categories",
                   type: "categories",
                   templateOptions: {
-                    categories: this.getCategories("articles")
+                    categories: this.getCategories("articles").pipe(
+                      map(result =>
+                        result.ok && result.data ? result.data.categories : {}
+                      )
+                    )
                   }
                 }
               ]
