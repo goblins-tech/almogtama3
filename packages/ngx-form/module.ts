@@ -17,7 +17,8 @@ import { NgxContentCoreModule } from "../ngx-content/core";
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    FormlyModule
+    FormlyModule,
+    MatButtonModule
   ],
   exports: [NgxFormComponent]
 })

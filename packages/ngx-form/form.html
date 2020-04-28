@@ -42,6 +42,7 @@
 
     <ng-content select="[data-after]"></ng-content>
     <button
+      mat-raised-button
       *ngIf="formObj.steps"
       (click)="go(-1)"
       type="button"
@@ -50,6 +51,7 @@
       Previous
     </button>
     <button
+      mat-raised-button
       *ngIf="formObj.steps"
       (click)="go(+1)"
       type="button"
@@ -61,6 +63,7 @@
       mat-raised-button
       color="primary"
       type="button"
+      *ngIf="step===formObj.steps.length-1"
       [disabled]="!formObj.form.valid || formObj.form.pristine || submitting"
       (click)="onSubmit(formObj)"
     >

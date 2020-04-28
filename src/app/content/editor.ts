@@ -248,6 +248,7 @@ export class ContentEditorComponent implements OnInit {
 
         this.submitting = false;
         //todo: reset progress value
+        //todo: showSnackBar() content: is html
         this.showSnackBar(
           (event.body.ok ? "form submitted" : "Error ") + this.response.msg ||
             "",
