@@ -33,7 +33,7 @@
     "firebase:start:dev": "npm run build:dev && npm run firebase:build && npm run firebase:serve"
   },
   "engines": {
-    "node": "10",
+    "node": "12",
     "npm": "6.9.0"
   },
   "main": "",
