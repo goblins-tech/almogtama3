@@ -113,7 +113,7 @@ export function getData(params) {
   cacheFile += ".json";
 
   //docs to be fetched in list mode
-  let docs = "_id title subtitle slug content author cover updatedAt"; //todo: summary
+  let docs = "_id title subtitle slug summary author cover updatedAt";
 
   return cache(
     cacheFile,

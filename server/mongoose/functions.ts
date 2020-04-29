@@ -1,4 +1,8 @@
-import * as mongoose from "../../packages/mongoose";
+import {
+  connect as _connect,
+  model as _model,
+  mongoose
+} from "../../packages/mongoose";
 import * as schemas from "./models";
 
 const dev = process.env.NODE_ENV === "development";
@@ -6,23 +10,26 @@ function encode(str: string) {
   return encodeURIComponent(str).replace(/%/g, "%25");
 }
 
-//todo: use eldeeb.mongoose
 export function connect() {
   //todo: get db config from /config.ts
-  let url = `mongodb+srv://${encode("xxyyzz2050")}:${encode(
-    "Xx159753@@"
-  )}@almogtama3-gbdqa.gcp.mongodb.net/test?retryWrites=true&w=majority`;
-
-  return mongoose.connect({
-    auth: ["xxyyzz2050", "Xx159753@@"],
-    host: "almogtama3-gbdqa.gcp.mongodb.net",
-    srv: true,
-    db: process.env.NODE_ENV == "production" ? "almogtama3" : "test"
-  });
+  if (dev)
+    console.log({
+      connection: mongoose.connection,
+      readyState: mongoose.connection.readyState
+    });
+  return mongoose.connection.readyState == 0
+    ? _connect({
+        auth: ["xxyyzz2050", "Xx159753@@"],
+        host: "almogtama3-gbdqa.gcp.mongodb.net",
+        srv: true,
+        db: dev ? "test" : "almogtama3"
+      })
+    : new Promise(r => mongoose.connection);
 }
 
 export function insertData(data) {
-  let type = data.type || "article";
+  let type = data.type || "articles";
+  if (type == "jobs") type = "articles";
   return connect().then(
     () => {
       if (dev) console.log("connected");
@@ -45,5 +52,5 @@ export function model(collection) {
 
   let schemaObj =
     collection in schemas ? schemas[collection] : schemas["basic"];
-  return mongoose.model(collection, schemaObj, { strict: false });
+  return _model(collection, schemaObj, { strict: false });
 }

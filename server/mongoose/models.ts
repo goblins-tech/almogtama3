@@ -1,4 +1,5 @@
 import shortId from "shortid";
+import mongoose from "mongoose";
 export const basic = {};
 
 //times (createdAt, updatedAt) are added automatically, by the option {typestamps: true}
@@ -39,7 +40,7 @@ export const accounts = {
   type: String,
   entry: {}, //for Adsense: id (pub-*), slot, channel;
   user: { type: String, ref: "persons" },
-  role: { type: ObjectId, ref: "roles" } //account role, ex: admin, modirator,...
+  role: { type: mongoose.ObjectId, ref: "roles" } //account role, ex: admin, modirator,...
 };
 
 export const countries = {

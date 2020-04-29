@@ -1,9 +1,11 @@
 // todo: export default mongoose (instead of export every method separately) i.e import mongoose, not import * as mongoose ..
 import mongoose from "mongoose";
-import shortId from "shortId";
-export * from "mongoose";
+import shortId from "shortid";
+export { mongoose };
 
-/*import { exportAll } from "./general";
+/*
+todo: export single properties from mongoose
+import { exportAll } from "./general";
 exportAll(mongoose);
 */
 export namespace types {

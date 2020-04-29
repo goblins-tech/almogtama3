@@ -146,7 +146,7 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
 });
 
 app.get("/api/:item?", (req, res, next) => {
-  console.log(req.params);
+  if (dev) console.log("req.params:", req.params);
 
   var item = req.params.item;
 
