@@ -44,7 +44,16 @@ export default [
     key: "keywords",
     type: "input",
     templateOptions: {
-      label: "keywords"
+      label: "keywords",
+      description: "article sources"
+    }
+  },
+  {
+    key: "sources",
+    type: "textarea",
+    templateOptions: {
+      label: "Sources",
+      rows: 10
     }
   },
   {
