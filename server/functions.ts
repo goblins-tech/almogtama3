@@ -1,4 +1,4 @@
-import { connect, insertData, model } from "../mongoose/functions";
+import { connect, insertData, model } from "./mongoose/functions";
 import {
   cache,
   mdir,

@@ -1,4 +1,4 @@
-import * as mongoose from "../eldeeb/mongoose";
+import * as mongoose from "../../eldeeb/mongoose";
 import * as schemas from "./models";
 
 const dev = process.env.NODE_ENV === "development";
