@@ -1,5 +1,6 @@
 // todo: export default mongoose (instead of export every method separately) i.e import mongoose, not import * as mongoose ..
 import mongoose from "mongoose";
+import shortId from "shortId";
 export * from "mongoose";
 
 /*import { exportAll } from "./general";
@@ -97,6 +98,10 @@ export function model(
   if (!("timestamps" in options)) options.timestamps = true; //add createdAt, updatedAt https://mongoosejs.com/docs/guide.html#timestamps
 
   if (!("fields" in obj)) obj = { fields: obj };
+  if (options.shortId !== false && !("_id" in obj.fields)) {
+    obj.feilds._id = { type: String, default: shortId.generate };
+    delete options.shortId;
+  }
   schema = new mongoose.Schema(obj.fields, options);
   // todo: add methods,virtuals,...
 
