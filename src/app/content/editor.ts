@@ -112,7 +112,7 @@ export class ContentEditorComponent implements OnInit {
         let content = article[article.findIndex(el => el.key == "content")];
         content.type = "quill";
         if (!content.templateOptions)
-          content.templateOptions = { label: "content" };
+          (content.templateOptions as any) = { label: "content" };
         content.templateOptions["modules"] = {
           toolbar: [
             ["bold", "italic", "underline", "strike"],

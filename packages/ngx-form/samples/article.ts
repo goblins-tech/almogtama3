@@ -1,4 +1,5 @@
-export default [
+import { FormlyFieldConfig } from "@ngx-formly/core";
+const fields: FormlyFieldConfig[] = [
   {
     key: "title", //todo:add validators: <100 chars, no special chars,...
     type: "input",
@@ -69,3 +70,4 @@ export default [
     }
   }
 ];
+export default fields;
