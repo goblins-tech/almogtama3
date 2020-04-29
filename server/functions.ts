@@ -1,4 +1,5 @@
 import { connect, insertData, model } from "./mongoose/functions";
+import mongoose from "mongoose";
 import {
   cache,
   mdir,
@@ -87,6 +88,7 @@ export function categories() {
             .lean()
         ])
           .then(([categories, articles_categories]) => {
+            mongoose.connection.close();
             let ctg = new Categories(categories),
               actg = new ArticlesCategories(articles_categories, ctg);
             return {
@@ -198,6 +200,7 @@ export function getData(params) {
             });
           }
 
+          mongoose.connection.close();
           //console.log("content", content);
           return content;
         })
@@ -316,6 +319,9 @@ export function saveData(data) {
     .then(() => {
       delete data.tmp;
       delete data.file;
+      if (dev) {
+        data.status = "approved";
+      }
       if (dev) console.log("inserting data", data);
       //we return the inner promise to catch it's thrown error
       //ex: promise.then(()=>{ return promise2.then(()=>{throw 'error'})} ).catch(e=>{/*inner error catched*/})
