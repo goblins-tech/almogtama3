@@ -1,6 +1,6 @@
 import "zone.js/dist/zone-node";
 import express from "express";
-import * as bodyParser from "body-parser";
+import { json as jsonParser, urlencoded as urlParser } from "body-parser";
 import cors from "cors"; //To be able to access our API from an angular application
 //import formidable from "formidable"; //to handle the uploaded files https://flaviocopes.com/express-forms-files/
 import parseDomain from "parse-domain";
@@ -85,8 +85,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(jsonParser());
+app.use(urlParser({ extended: true }));
 app.use(cors());
 
 /*

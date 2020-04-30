@@ -20,7 +20,7 @@ import {
 } from "../eldeeb/fs";
 import { replaceAsync } from "../eldeeb/string";
 import { Firebase } from "../eldeeb/firebase-admin";
-import * as admin from "firebase-admin";
+import { initializeApp, credential } from "firebase-admin";
 import multer from "multer";
 import { slug } from "../src/app/content/functions";
 import { resize as _resize, sharp } from "../eldeeb/graphics";
@@ -54,8 +54,8 @@ export const MEDIA = join(process.env.INIT_CWD || "", "./temp/media"); //don't s
 export const BUCKET = "almogtama3.com/media"; //todo: $config.domain/media
 
 //todo: use env:GOOGLE_APPLICATION_CREDENTIALS=Path.resolve("./firebase-almogtama3-eg.json")
-admin.initializeApp({
-  credential: admin.credential.cert(require("./firebase-almogtama3-eg.json")),
+initializeApp({
+  credential: credential.cert(require("./firebase-almogtama3-eg.json")),
   storageBucket: `gs://almogtama3-eg.appspot.com`
 });
 
