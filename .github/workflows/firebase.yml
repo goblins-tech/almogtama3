@@ -5,10 +5,10 @@ on:
       - master
 
 jobs:
-  prepare:
-    name: prepare
+  firebase:
+    name: firebase
     runs-on: ubuntu-latest
-   steps:
+    steps:
       #we use checkout because we want to use the repo (to install dependencies)
       - name: Checkout Repo
         uses: actions/checkout@v2
@@ -17,42 +17,38 @@ jobs:
         with:
           path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
           #create a cache dir for each Os, and when package-lock.json file changes
-          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/package-lock.json') }}
+          #change the last value ($today) to update the cache
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/package-lock.json') }}-152020
           #use restore-keys to search for alternative cache, in case of no cache found with the provided key.
-          restore-keys: |
-            ${{ runner.os }}-node_modules-
-            ${{ runner.os }}-
+        #  restore-keys: |
+        #    ${{ runner.os }}-node_modules-
+        #    ${{ runner.os }}-
       - name: Install devDpendencies
-        run: npm install --only=dev --no-audit
-
-  build:
-    name: Build
-    needs: prepare
-    runs-on: ubuntu-latest
-    steps:
+        #todo:  --only=dev (causes error with `cross-env`:  Cannot find module 'isexe')
+        run: |
+          sudo chown -R $USER /usr
+          npm install --no-audit
+          npm install -g @angular/cli
       - name: Build
         run: npm run build && npm run firebase:build
-      - name: upload Production Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: dist
-          path: dist
-
-  deploy:
-    name: Deploy to firebase
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: dist
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@v1.3.0
         with:
           args: deploy
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        #optional: upload 'dist' dir to be available for downloading
+        #todo: send to an external storage service (amazon AWS, google drive, ...)
+        #      to be publically available for downloading at any time
+      - name: upload Production Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist
 #github secrets & env: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets
 #from your repo: settings -> secrets
 #get firebase secret: run >firebase login:ci
+#to devide this job into small jobs (prepare:[checkout,cach,install dep], build[checkout,npm build,upload], deploy[download,deploy])
+#  -you must use checkout in 'prepare' to install dependencies, and in 'build' to use package.json/scripts
+#  -you must upload 'dist' to artifacts after 'build' job completed, and download it before 'deploy'
+#  -you must use 'need' in 'build'->'prepare' and 'deploy'->'build'
