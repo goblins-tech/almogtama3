@@ -61,6 +61,7 @@ todo:
   selector: "formly-field-categories-helper",
   template: `
     <div [innerHTML]="categories"></div>
+    <div *ngIf="!categories">Loading....</div>
   `
 })
 /*implements OnInit, AfterViewInit, AfterViewChecked*/
