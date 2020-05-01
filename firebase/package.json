@@ -2,7 +2,7 @@
   "name": "almogtama3-firebase",
   "version": "1.0.0",
   "engines": {
-    "node": "12",
+    "node": "10",
     "npm": "6.9.0"
   },
   "main": "firebase/index.js",
