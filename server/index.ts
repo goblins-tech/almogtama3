@@ -14,7 +14,7 @@ import {
   MEDIA,
   BUCKET,
   dev,
-  categories
+  getCategories
 } from "./functions";
 
 //console.clear();
@@ -114,7 +114,7 @@ app.use(cors());
 //todo: cover= only one img -> upload.single()
 app.post("/api/:type", upload.single("cover"), (req: any, res) => {
   if (dev)
-    console.log("server post", {
+    console.log("[server] post", {
       body: req.body,
       files: req.files,
       file: req.file,
@@ -137,7 +137,7 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
   mdir(dir);
   json.write(`${dir}/data.json`, req.body);
 
-  if (dev) console.log("req.body:", req.body);
+  if (dev) console.log("[server] post", { body: req.body });
   saveData(req.body)
     .then(data => res.send({ ok: true, data }))
     .catch(error => res.send({ ok: false, error }));
@@ -146,27 +146,25 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
 });
 
 app.get("/api/:item?", (req, res, next) => {
-  if (dev) console.log("req.params:", req.params);
-
   var item = req.params.item;
 
   //home page (/api/)
   if (!item) category = "articles";
   else if (item.startsWith("~")) {
     if (item == "~categories")
-      categories().then(data => res.send({ ok: true, data }));
+      getCategories().then(data => res.send({ ok: true, data }));
     else res.send({ ok: false, msg: `unknown param ${item}` });
   } else {
     var id, category;
     if (item.startsWith("id-")) id = item.slice(3);
     else category = item;
 
-    if (dev) console.log("app.get", { id, category });
+    if (dev) console.log("[server] get:", { id, category });
 
     getData({ id, category })
       .then(
         payload => {
-          if (dev) console.log({ payload });
+          if (dev) console.log("[server] get:", { payload });
           if (typeof payload == "string") payload = JSON.parse(payload);
           res.json({ ok: true, type: id ? "item" : "list", payload });
         },
@@ -199,5 +197,5 @@ if (process.argv[2] == "--start") {
     .listen(PORT, () => {
       console.log(`Node Express server listening on port:${PORT}`); //,{server}
     })
-    .on("error", error => console.warn("express server error:", { error }));
+    .on("error", error => console.error("express server error:", { error }));
 }

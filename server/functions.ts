@@ -71,20 +71,16 @@ export const bucket = new Firebase(/*{
  * @method categories
  * @return {categories, main, article_categories, category_articles, inputs}
  */
-export function categories() {
-  console.log("==categories==");
-  let dir = "temp/articles/categories";
-  let result = {};
-
-  return cache(`${dir}/categories.json`, () =>
+export function getCategories() {
+  return cache("temp/articles/categories.json", () =>
     connect().then(
       () =>
         Promise.all([
           model("categories")
             .find({})
             .lean(),
-          model("article_categories")
-            .find({})
+          model("articles")
+            .find({}, "categories")
             .lean()
         ])
           .then(([categories, articles_categories]) => {
@@ -122,13 +118,11 @@ export function getData(params) {
     () =>
       connect()
         .then(() => {
+          if (dev) console.log("connected");
           let contentModel = model("articles"),
             content;
 
-          if (params.id) {
-            content = contentModel.findById(params.id);
-
-            /*
+          /*
               deprecated! now _id is type of ShortId
             if (params.id.length == 24)
               content = contentModel.findById(params.id);
@@ -137,7 +131,8 @@ export function getData(params) {
                 limit: 1
               }); //note that the returned result is an array, not object
               */
-          } else if (
+          if (params.id) content = contentModel.findById(params.id);
+          else if (
             !params.category ||
             ["articles", "jobs"].includes(params.category)
           )
@@ -200,16 +195,13 @@ export function getData(params) {
             });
           }
 
-          mongoose.connection.close();
-          //console.log("content", content);
           return content;
         })
-        .then(content =>
-          params.id && params.id.length != 24 && content instanceof Array
-            ? content[0]
-            : content
-        ),
-    params.id ? 0 : 24 //index must be updated periodly (even if it removed on update), item may be remain forever
+        .then(content => {
+          mongoose.connection.close();
+          return content;
+        }),
+    params.id ? 3 : 24
   );
 }
 

@@ -1,10 +1,20 @@
 export class Categories {
   ctg;
+
+  /**
+   * [constructor description]
+   * @method constructor
+   * @param  categories  [{_id, title, slug, ...}]
+   */
   constructor(categories) {
-    this.ctg = categories;
+    this.ctg = categories || [];
   }
 
-  // add main[] & branches, parents, top to every category
+  /**
+   *
+   * @method adjust
+   * @return  main[] & categories ( and add branches, parents, top to every category)
+   */
   adjust() {
     let main = this.getMain();
     let categories = this.ctg.map(ctg => {
@@ -18,17 +28,32 @@ export class Categories {
     return { main, categories };
   }
 
-  //convert categories[{}] into ids[]
+  /**
+   * convert categories[{...}] into ids[]
+   * @method ids
+   * @param  ctg array of categories
+   * @return ids[]
+   */
   ids(ctg) {
     return ctg.map(el => (typeof el == "string" ? el : el._id));
   }
 
-  //get category{} from id
+  /**
+   * get category{} from id
+   * @method getCtg
+   * @param  id     [description]
+   * @return category{}
+   */
   getCtg(id) {
     return typeof id == "string" ? this.ctg.find(el => el._id == id) || {} : id;
   }
 
-  //main categories i.e: have no parent
+  /**
+   * get main categories i.e: have no parent
+   * @method getMain
+   * @param  ids  if true: return id[] instead of categories[]
+   * @return categories[] | ids[]
+   */
   getMain(ids = true) {
     let data = this.ctg.filter(el => !el.parent);
     return ids ? this.ids(data) : data;
@@ -37,9 +62,10 @@ export class Categories {
   //top-level category of the carent one
   getTop(ctg, parents, ids = true) {
     let main = this.getMain(true);
-    if (!parents) parents = this.getParents(ctg, true);
 
-    let top = this.getParents(ctg, true).find(el => main.includes(el));
+    let top = (parents || this.getParents(ctg, true)).find(el =>
+      main.includes(el)
+    );
     return ids ? top : this.getCtg(top);
   }
 
@@ -67,7 +93,7 @@ export class Categories {
     return [...new Set(branches)]; //get unique items
   }
 
-  //get parent and parent pf parent etc...
+  //get parent and parent of parent etc...
   getParents(ctg, ids = true) {
     let parents = [];
     ctg = this.getCtg(ctg);
@@ -97,6 +123,7 @@ export class Categories {
     - add btn to open a dialog to select categories
    */
 
+  //todo: compitible with angular reactive forms, add formControl,...
   createInputs(ctg?, filter?: ((el: any) => boolean) | string[], tab = "") {
     if (!ctg) ctg = this.getMain(false);
     let output = "";
@@ -126,6 +153,12 @@ export class Categories {
 export class ArticlesCategories {
   ctg;
   data;
+  /**
+   * [constructor description]
+   * @method constructor
+   * @param  articlesCategories [{_id,categories[]}], _id= article_id
+   * @param  categories         {_id,title,...}
+   */
   constructor(articlesCategories, categories) {
     if (!(categories instanceof Categories))
       categories = new Categories(categories);
@@ -142,8 +175,16 @@ export class ArticlesCategories {
     };
   }
 
-  //get categories related to each article
+  /**
+   * get categories related to each article
+   * @method articleCategories
+   * @return [{_id, categories[]}]
+   */
   articleCategories() {
+    return this.data;
+
+    /*
+    --> depricated: old data format [{_id,article_id,category_id}]
     let articles = [];
     let result = {};
     this.data.forEach(el => {
@@ -152,9 +193,18 @@ export class ArticlesCategories {
         articles.push(el.article);
       }
     });
-    return result;
+    return result; */
   }
 
+  /* -->deprecated, see articleCategories()
+  //get categories that this article belongs to
+  getCategories(article, ids = true) {
+    if (!article) return [];
+    if (typeof article !== "string") article = article._id;
+    let result = this.data.filter(el => el.article == article);
+    return ids ? this.ctg.ids(result) : result;
+  }
+ */
   //get articles related to each category and it's branches
   //main: if true: get articles from main categories only,
   //useful for index page to show $n articles from each main category
@@ -169,21 +219,20 @@ export class ArticlesCategories {
 
   //get articles from this category and it's brances
   getArticles(category, ids = true) {
-    if (typeof category !== "string") category = category._id;
-    let categories = [category, ...this.ctg.getBranches(category, true)];
-    let articleIds = []; //to get unique articles
-    let result = this.data.filter(el => {
-      articleIds.push(el.ids);
-      return categories.includes(el.category) && !articleIds.includes(el._id);
-    });
-    return ids ? this.ctg.ids(result) : result; //or [...SET(articleIds)]
-  }
+    if (ids) category = typeof category == "string" ? category : category._id;
+    else
+      category =
+        typeof category == "string" ? this.ctg.getCtg(category) : category;
+    let categories = [category, ...this.ctg.getBranches(category, ids)]; //ids[] | categories[]
+    let articles = new Set();
 
-  //get categories that this article belongs to
-  getCategories(article, ids = true) {
-    if (!article) return [];
-    if (typeof article !== "string") article = article._id;
-    let result = this.data.filter(el => el.article == article);
-    return ids ? this.ctg.ids(result) : result;
+    //filter categories whitch el.categories[] contains at least one of it's elements
+    //Array.some() returns true if at least one element in the array passes the test
+    categories
+      .filter(el => el.categories instanceof Array && el.categories.length > 0)
+      .filter(el => categories.some(c => el.categories.includes(c)))
+      .forEach(el => articles.add(el)); //to remove duplicates
+
+    return articles;
   }
 }

@@ -41,7 +41,6 @@ Object.keys(mongoose).forEach(key => {
 });*/
 
 export function connect(uri: types.uri, options?: types.ConnectionOptions) {
-  console.log("*** mongoose.connect() ***");
   const defaultOptions = {
     // todo: export static defaultConnectionOptions={..}
     useCreateIndex: true,
@@ -96,12 +95,13 @@ export function model(
   if (mongoose.models[collection]) return mongoose.models[collection];
   let schema: mongoose.Schema;
   options = options || {};
+  if (!("fields" in obj)) obj = { fields: obj };
+
   options.collection = collection;
   if (!("timestamps" in options)) options.timestamps = true; //add createdAt, updatedAt https://mongoosejs.com/docs/guide.html#timestamps
 
-  if (!("fields" in obj)) obj = { fields: obj };
   if (options.shortId !== false && !("_id" in obj.fields)) {
-    obj.feilds._id = { type: String, default: shortId.generate };
+    obj.fields._id = { type: String, default: shortId.generate };
     delete options.shortId;
   }
   schema = new mongoose.Schema(obj.fields, options);
