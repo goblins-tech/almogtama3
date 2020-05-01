@@ -1,7 +1,7 @@
 /*
 todo:
 - update: run() deprecated!, use unit test to trace errors
-- transpiler to auto inject eldeeb.run(), using notation @eldeeb.run()
+- transpiler to auto inject run(), using notation @run()
 - run(): auto get function name & arguments list,
 - run(): mark may be object: arguments -> if(mark:obj && mark.collee)mark={run:mark/mark.callee.name,...arguments}
 */
@@ -16,6 +16,10 @@ export function exportAll(module: any) {
     // todo:  export const [key] = module[key];
   });
   */
+}
+
+export interface Object {
+  [key: string]: any;
 }
 
 /**
@@ -139,26 +143,25 @@ export function merge(target: any, ...obj: any[]): any {
   // merge objects,arrays,classes (must besame type) ;
   // don't use "arguments" in an arrow functions, also don't use 'this' inside a normal function, so we declare a new variable = arguments
   const _arg = arguments; // the arguments of merge() not run()
-  return this.run({ run: "merge", ...arguments }, () => {
-    const type = objectType(target); // todo: error: Cannot read property 'objectType' of undefined
-    for (let i = 1; i < _arg.length; i++) {
-      if (this.objectType(_arg[i]) !== type) {
-        return target;
-      }
-    }
-    if (type == "array") {
-      target = target.concat(...obj);
-    } else if (type == "object") {
-      // target=Object.assign(target,...obj) //later objects dosen't override previous ones
-      for (let i = 1; i < _arg.length; i++) {
-        for (const p in _arg[i]) {
-          target[p] = _arg[i][p]; // to override current values
-        }
-      }
-    } else if (type == "class") {
-      // add or override target's methods & properties
-    }
 
-    return target;
-  });
+  const type = objectType(target); // todo: error: Cannot read property 'objectType' of undefined
+  for (let i = 1; i < _arg.length; i++) {
+    if (this.objectType(_arg[i]) !== type) {
+      return target;
+    }
+  }
+  if (type == "array") {
+    target = target.concat(...obj);
+  } else if (type == "object") {
+    // target=Object.assign(target,...obj) //later objects dosen't override previous ones
+    for (let i = 1; i < _arg.length; i++) {
+      for (const p in _arg[i]) {
+        target[p] = _arg[i][p]; // to override current values
+      }
+    }
+  } else if (type == "class") {
+    // add or override target's methods & properties
+  }
+
+  return target;
 }

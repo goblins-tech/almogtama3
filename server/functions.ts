@@ -17,13 +17,13 @@ import {
   json,
   statSync
   //promises //todo: promises.writeFile as writeFilePromise
-} from "../eldeeb/fs";
-import { replaceAsync } from "../eldeeb/string";
-import { Firebase } from "../eldeeb/firebase-admin";
+} from "../packages/nodejs-tools/fs";
+import { replaceAsync } from "../packages/nodejs-tools/string";
+import { Firebase } from "../packages/firebase/admin";
 import { initializeApp, credential } from "firebase-admin";
 import multer from "multer";
 import { slug } from "../src/app/content/functions";
-import { resize as _resize, sharp } from "../eldeeb/graphics";
+import { resize as _resize, sharp } from "../packages/graphics";
 import {
   Categories,
   ArticlesCategories

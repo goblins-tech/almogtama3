@@ -1,5 +1,5 @@
 import _sharp from "sharp";
-import { parsePath } from "./fs";
+import { parsePath } from "../nodejs-tools/fs";
 
 export const sharp = _sharp;
 

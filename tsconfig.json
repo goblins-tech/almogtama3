@@ -24,8 +24,7 @@
     "noImplicitReturns": false,
     "paths": {
       "*": ["node_modules/*", "types/*"],
-      "eldeeb": ["dist/eldeeb"],
-      "eldeeb/*": ["dist/eldeeb/*"]
+      "pkg/*": ["packages/*"]
     },
     "rootDir": "./",
     "allowSyntheticDefaultImports": true,

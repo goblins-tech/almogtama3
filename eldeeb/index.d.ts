@@ -8,10 +8,6 @@ todo: namespace Vs module
 */
 
 export namespace types {
-  export interface Object {
-    [key: string]: any;
-  }
-
   /*
   export namespace promise {
     export type FN = <T>(

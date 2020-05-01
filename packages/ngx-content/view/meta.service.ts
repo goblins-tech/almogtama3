@@ -1,4 +1,4 @@
-// import { types } from '../../projects/eldeeb/src/lib/index'; // todo: /// <reference types="eldeeb/index" />
+// todo: types
 //todo tags.author{name, email, url}
 import { Injectable } from "@angular/core";
 import {
