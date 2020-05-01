@@ -15,7 +15,10 @@ module.exports = {
   },
   target: "node",
   //https://github.com/googleapis/gax-nodejs/issues/719#issuecomment-605250814
-  resolve: { extensions: [".ts", ".js", ".json"] },
+  resolve: {
+    extensions: [".ts", ".js", ".json"],
+    alias: { pkg: path.resolve(__dirname, "./packages") }
+  },
   optimization: {
     minimize: false
   },

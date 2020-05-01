@@ -6,8 +6,8 @@ todo:
  - add copy-all btn to inde (or category) page (*ngIf=data.type=list){show ctg.title; add copy-all btn}
  */
 
-import { Data, Article } from "../../../packages/ngx-content/view/view";
-import { MetaService } from "../../../packages/ngx-content/view//meta.service";
+import { Data, Article } from "pkg/ngx-content/view/view";
+import { MetaService } from "pkg/ngx-content/view//meta.service";
 
 import {
   Component,
@@ -23,7 +23,7 @@ import { map, concatMap } from "rxjs/operators";
 import { HighlightJS } from "ngx-highlightjs";
 import { environment as env } from "../../environments/environment";
 import { summary } from "./functions";
-import { urlParams } from "../../../packages/ngx-tools/routes";
+import { urlParams } from "pkg/ngx-tools/routes";
 
 //todo: import module & interfaces from packages/content/ngx-content-view/index.ts
 

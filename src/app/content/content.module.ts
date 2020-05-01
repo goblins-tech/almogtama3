@@ -6,8 +6,8 @@ import { ContentEditorComponent } from "./editor";
 import { ContentManageComponent } from "./manage";
 
 //todo: add 'packages' to tsConfig
-import { NgxContentViewModule } from "../../../packages/ngx-content/view";
-import { NgxFormModule } from "../../../packages/ngx-form";
+import { NgxContentViewModule } from "pkg/ngx-content/view";
+import { NgxFormModule } from "pkg/ngx-form";
 
 import { ShareButtonsModule } from "@ngx-share/buttons";
 import {
@@ -21,14 +21,14 @@ import { FormlyModule } from "@ngx-formly/core";
 import {
   FormlyFileModule,
   FormlyFieldFile
-} from "../../../packages/ngx-formly/file-material";
+} from "pkg/ngx-formly/file-material";
 import { FormlyMaterialModule } from "@ngx-formly/material";
-import { FormlyFieldQuill } from "../../../packages/ngx-formly/quill/component";
+import { FormlyFieldQuill } from "pkg/ngx-formly/quill/component";
 import {
   FormlyCategoriesModule,
   FormlyFieldCategories,
   FormlyFieldCategoriesHelper
-} from "../../../packages/ngx-formly/categories-material";
+} from "pkg/ngx-formly/categories-material";
 import { HighlightModule } from "ngx-highlightjs";
 
 /*
@@ -56,7 +56,7 @@ import { MatSnackBarModule } from "@angular/material/snack-bar";
 import { fab } from "@fortawesome/free-brands-svg-icons";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { LazyLoadImageModule } from "ng-lazyload-image";
-import { DynamicLoadService } from "../../../packages/ngx-tools/dynamic-load.service";
+import { DynamicLoadService } from "pkg/ngx-tools/dynamic-load.service";
 
 const routes: Routes = [
   { path: "editor", component: ContentEditorComponent }, // ex: /editor?type=jobs

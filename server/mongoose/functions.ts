@@ -1,8 +1,4 @@
-import {
-  connect as _connect,
-  model as _model,
-  mongoose
-} from "../../packages/mongoose";
+import { connect as _connect, model as _model, mongoose } from "pkg/mongoose";
 import * as schemas from "./models";
 
 const dev = process.env.NODE_ENV === "development";

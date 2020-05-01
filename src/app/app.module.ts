@@ -12,7 +12,7 @@ import { HttpService } from "./http.service";
 import { ContentModule } from "./content/content.module";
 import { FormModule } from "./forms/forms.module";
 import { UniversalInterceptor } from "../../universal-interceptor";
-import { MetaService } from "../../packages/ngx-content/view/meta.service";
+import { MetaService } from "pkg/ngx-content/view/meta.service";
 import { SocialComponent } from "./social";
 import { ServiceWorkerModule } from "@angular/service-worker";
 

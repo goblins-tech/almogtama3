@@ -17,17 +17,17 @@ import {
   json,
   statSync
   //promises //todo: promises.writeFile as writeFilePromise
-} from "../packages/nodejs-tools/fs";
-import { replaceAsync } from "../packages/nodejs-tools/string";
-import { Firebase } from "../packages/firebase/admin";
+} from "pkg/nodejs-tools/fs";
+import { replaceAsync } from "pkg/nodejs-tools/string";
+import { Firebase } from "pkg/firebase/admin";
 import { initializeApp, credential } from "firebase-admin";
 import multer from "multer";
 import { slug } from "../src/app/content/functions";
-import { resize as _resize, sharp } from "../packages/graphics";
+import { resize as _resize, sharp } from "pkg/graphics";
 import {
   Categories,
   ArticlesCategories
-} from "../packages/ngx-formly/categories-material/functions";
+} from "pkg/ngx-formly/categories-material/functions";
 
 export const dev = process.env.NODE_ENV === "development";
 

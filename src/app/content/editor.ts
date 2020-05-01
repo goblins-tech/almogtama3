@@ -4,10 +4,10 @@ import { HttpService } from "../http.service";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { Data } from "../../../packages/ngx-content/view"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
+import { Data } from "pkg/ngx-content/view"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
 import { HighlightJS } from "ngx-highlightjs";
 import { keepHtml, Categories } from "./functions";
-import { urlParams } from "../../../packages/ngx-tools/routes";
+import { urlParams } from "pkg/ngx-tools/routes";
 import { environment as env } from "../../environments/environment";
 import {
   AngularFireStorage,
@@ -16,12 +16,7 @@ import {
 } from "@angular/fire/storage"; //todo: move to server.ts (how to inject AngularFireStorage?)
 import { DomSanitizer } from "@angular/platform-browser";
 import { FieldType } from "@ngx-formly/material";
-import {
-  FormObj,
-  Response,
-  NgxFormComponent,
-  article
-} from "../../../packages/ngx-form";
+import { FormObj, Response, NgxFormComponent, article } from "pkg/ngx-form";
 
 /*
 //for FormlyFieldCategories; https://stackoverflow.com/a/60267178/12577650
