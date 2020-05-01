@@ -18,6 +18,11 @@ var tasks = {
       }
     });
   },
+  /*
+   from cmd:
+    - linux cp firebase/package.json dist/package.json 
+    - windows copy firebase\package.json dist\package.json
+   */
   "firebase:copy": function(src = "./firebase", dist = "./dist") {
     fs.copyFileSync(`${src}/package.json`, `${dist}/package.json`);
   }

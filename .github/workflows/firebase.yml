@@ -5,35 +5,50 @@ on:
       - master
 
 jobs:
+  prepare:
+    name: prepare
+    runs-on: ubuntu-latest
+   steps:
+      #we use checkout because we want to use the repo (to install dependencies)
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Caching node modules
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
+          #create a cache dir for each Os, and when package-lock.json file changes
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/package-lock.json') }}
+          #use restore-keys to search for alternative cache, in case of no cache found with the provided key.
+          restore-keys: |
+            ${{ runner.os }}-node_modules-
+            ${{ runner.os }}-
+      - name: Install devDpendencies
+        run: npm install --only=dev --no-audit
+
   build:
     name: Build
+    needs: prepare
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@master
-      - name: Install Dependencies
-        run: npm install
       - name: Build
-        #cp: copy files in linux (in windows use COPY)
-        run: npm run build && npm run firebase:build && cp firebase/package.json dist/package.json && cd dist && npm i
-      - name: Archive Production Artifact
-        uses: actions/upload-artifact@master
+        run: npm run build && npm run firebase:build
+      - name: upload Production Artifact
+        uses: actions/upload-artifact@v2
         with:
           name: dist
           path: dist
+
   deploy:
-    name: Deploy
+    name: Deploy to firebase
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@master
       - name: Download Artifact
-        uses: actions/download-artifact@master
+        uses: actions/download-artifact@v2
         with:
           name: dist
       - name: Deploy to Firebase
-        uses: w9jds/firebase-action@master
+        uses: w9jds/firebase-action@v1.3.0
         with:
           args: deploy
         env:
