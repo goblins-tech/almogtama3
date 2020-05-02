@@ -87,6 +87,7 @@ export function getCategories() {
             return ctg.articleCategories(articles_categories);
           })
           .catch(err => {
+            console.error("Error @categories", err);
             throw new Error(`Error @categories, ${err.message}`);
           }),
       1

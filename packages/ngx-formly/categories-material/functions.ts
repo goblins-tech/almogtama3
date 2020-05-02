@@ -50,9 +50,10 @@ export class Categories {
         el.categories instanceof Array &&
         el.categories.length > 0
       ) {
-        el.categories.forEach(c =>
-          this.ctg.categories[c].articles.push(el._id)
-        );
+        el.categories.forEach(c => {
+          if (this.ctg.categories[c])
+            this.ctg.categories[c].articles.push(el._id);
+        });
       }
     });
     return this.ctg;
