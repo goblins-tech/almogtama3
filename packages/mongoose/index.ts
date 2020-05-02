@@ -15,7 +15,7 @@ export namespace types {
   }
 
   export interface ConnectionOptions extends mongoose.ConnectionOptions {
-    db?: string;
+    dbName?: string;
   }
   export interface Model extends types.Object {
     fields?: types.Object;
@@ -30,9 +30,10 @@ export namespace types {
         auth: [string, string];
         host?: string | string[]; // host1:port1,...
         srv?: boolean;
-        db?: string;
-      }
-    | [string, string, string | string[], boolean, string]; // [user,pass,host,srv,db]
+        dbName?: string;
+      };
+  //-->deprecated
+  //| [string, string, string | string[], boolean, string]; // [user,pass,host,srv,dbName]
 }
 
 /*
@@ -55,14 +56,15 @@ export function connect(uri: types.uri, options?: types.ConnectionOptions) {
 
   let srv = false;
   if (typeof uri !== "string") {
+    /* -->deprecated
     if (uri instanceof Array) {
       uri = {
         auth: [uri[0], uri[1]],
         host: uri[2],
         srv: uri[3],
-        db: uri[4]
+        dbName: uri[4]
       };
-    }
+    } */
 
     srv = uri.srv;
     if (!uri.host) {
@@ -71,7 +73,9 @@ export function connect(uri: types.uri, options?: types.ConnectionOptions) {
       uri.host = uri.host.join(",");
     }
 
-    uri = `${encode(uri.auth[0])}:${encode(uri.auth[1])}@${uri.host}/${uri.db}`;
+    uri = `${encode(uri.auth[0])}:${encode(uri.auth[1])}@${uri.host}/${
+      uri.dbName
+    }`;
   }
 
   if ((uri as string).substr(0, 7) != "mongodb") {

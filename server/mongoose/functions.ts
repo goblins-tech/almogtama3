@@ -18,7 +18,7 @@ export function connect() {
         auth: ["xxyyzz2050", "Xx159753@@"],
         host: "almogtama3-gbdqa.gcp.mongodb.net",
         srv: true,
-        db: dev ? "test" : "almogtama3"
+        dbName: dev ? "test" : "almogtama3"
       })
     : new Promise(r => mongoose.connection);
 }
