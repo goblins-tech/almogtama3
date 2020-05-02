@@ -21,10 +21,12 @@ export class HttpService {
   get<T>(params) {
     var url = "/api/";
 
-    //ex: ~categories
     if (typeof params == "string") url += params;
     else if (params.id) url += `id-${params.id}`;
     else if (params.category) url += encodeURIComponent(params.category);
+    else url += "articles";
+
+    if (dev) console.log("[http.get]", { params, url });
     return this.http.get<T>(url);
   }
 

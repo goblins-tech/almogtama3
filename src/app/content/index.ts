@@ -8,6 +8,7 @@ todo:
 
 import { Data, Article } from "pkg/ngx-content/view/view";
 import { MetaService } from "pkg/ngx-content/view//meta.service";
+import { slug } from "pkg/ngx-content/core/functions";
 
 import {
   Component,
@@ -105,6 +106,13 @@ export class ContentComponent implements OnInit, AfterViewInit {
           } else {
             data.payload.map(item => {
               item.id = item.shortId || item._id;
+              if (!item.slug || item.slug == "") item.slug = slug(item.title);
+              if (!item.link)
+                item.link =
+                  item.categories && item.categories.length > 0
+                    ? `/${item.categories[0]}/${item.id}-${item.slug}`
+                    : `/id/${item.id}`;
+
               return item;
             });
 
