@@ -7,7 +7,7 @@ export class Categories {
    * @param  categories  [{_id, title, slug, ...}]
    */
   constructor(categories) {
-    this.ctg = categories || [];
+    this.ctg = { main: null, categories: categories || [] };
   }
 
   /**
@@ -16,8 +16,9 @@ export class Categories {
    * @return  main[] & categories ( and add branches, parents, top to every category)
    */
   adjust() {
+    if (this.ctg.main) return this.ctg; //already adjusted
     let main = this.getMain();
-    let categories = this.ctg.map(ctg => {
+    let categories = this.ctg.categories.map(ctg => {
       let parents = this.getParents(ctg);
       ctg.branches = this.getBranches(ctg._id);
       ctg.parents = parents;
@@ -25,7 +26,36 @@ export class Categories {
       return ctg;
     });
 
-    return { main, categories };
+    this.ctg = { main, categories };
+    return this.ctg;
+  }
+
+  /**
+   * add articles of each category to this.ctg.categories[category]
+   * @method articleCategories
+   * @param  data        [{_id, categories[]}]
+   * @return [description]
+   */
+  articleCategories(data) {
+    data = data || [];
+
+    //remove old articles from all categories
+    this.ctg.categories.map(el => {
+      el.articles = [];
+      return el;
+    });
+    data.forEach(el => {
+      if (
+        el.categories &&
+        el.categories instanceof Array &&
+        el.categories.length > 0
+      ) {
+        el.categories.forEach(c =>
+          this.ctg.categories[c].articles.push(el._id)
+        );
+      }
+    });
+    return this.ctg;
   }
 
   /**
@@ -45,7 +75,9 @@ export class Categories {
    * @return category{}
    */
   getCtg(id) {
-    return typeof id == "string" ? this.ctg.find(el => el._id == id) || {} : id;
+    return typeof id == "string"
+      ? this.ctg.categories.find(el => el._id == id) || {}
+      : id;
   }
 
   /**
@@ -55,7 +87,9 @@ export class Categories {
    * @return categories[] | ids[]
    */
   getMain(ids = true) {
-    let data = this.ctg.filter(el => !el.parent);
+    let data = this.ctg.main
+      ? this.ctg.main
+      : this.ctg.categories.filter(el => !el.parent);
     return ids ? this.ids(data) : data;
   }
 
@@ -72,7 +106,7 @@ export class Categories {
   //get childs of this category
   getChilds(id, ids = true) {
     if (typeof id != "string") id = id._id;
-    let data = this.ctg.filter(el => el.parent == id);
+    let data = this.ctg.categories.filter(el => el.parent == id);
     return ids ? this.ids(data) : data;
   }
 
@@ -147,92 +181,5 @@ export class Categories {
     }
 
     return output;
-  }
-}
-
-export class ArticlesCategories {
-  ctg;
-  data;
-  /**
-   * [constructor description]
-   * @method constructor
-   * @param  articlesCategories [{_id,categories[]}], _id= article_id
-   * @param  categories         {_id,title,...}
-   */
-  constructor(articlesCategories, categories) {
-    if (!(categories instanceof Categories))
-      categories = new Categories(categories);
-
-    this.ctg = categories;
-    this.data = articlesCategories;
-  }
-
-  //returns {article_categories, category_articles}
-  adjust() {
-    return {
-      categoryArticles: this.categoryArticles(),
-      articleCategories: this.articleCategories()
-    };
-  }
-
-  /**
-   * get categories related to each article
-   * @method articleCategories
-   * @return [{_id, categories[]}]
-   */
-  articleCategories() {
-    return this.data;
-
-    /*
-    --> depricated: old data format [{_id,article_id,category_id}]
-    let articles = [];
-    let result = {};
-    this.data.forEach(el => {
-      if (!articles.includes(el.article)) {
-        result[el.article] = this.getCategories(el.article, true);
-        articles.push(el.article);
-      }
-    });
-    return result; */
-  }
-
-  /* -->deprecated, see articleCategories()
-  //get categories that this article belongs to
-  getCategories(article, ids = true) {
-    if (!article) return [];
-    if (typeof article !== "string") article = article._id;
-    let result = this.data.filter(el => el.article == article);
-    return ids ? this.ctg.ids(result) : result;
-  }
- */
-  //get articles related to each category and it's branches
-  //main: if true: get articles from main categories only,
-  //useful for index page to show $n articles from each main category
-  categoryArticles(main = false) {
-    let ctgs = main ? this.ctg.getMain(true) : this.ctg.ids(this.ctg.ctg);
-    let result = {};
-    ctgs.forEach(ctg => {
-      result[ctg] = this.getArticles(ctg, true);
-    });
-    return result;
-  }
-
-  //get articles from this category and it's brances
-  getArticles(category, ids = true) {
-    if (ids) category = typeof category == "string" ? category : category._id;
-    else
-      category =
-        typeof category == "string" ? this.ctg.getCtg(category) : category;
-    let categories = [category, ...this.ctg.getBranches(category, ids)]; //ids[] | categories[]
-    let articles = new Set();
-
-    //filter categories whitch el.categories[] contains at least one of it's elements
-    //Array.some() returns true if at least one element in the array passes the test
-    categories
-      .filter(el => el.categories instanceof Array && el.categories.length > 0)
-      .filter(el => categories.some(c => el.categories.includes(c)))
-      .forEach(el => articles.add(el)); //to remove duplicates
-
-    return articles;
   }
 }

@@ -24,10 +24,7 @@ import { initializeApp, credential } from "firebase-admin";
 import multer from "multer";
 import { slug } from "../src/app/content/functions";
 import { resize as _resize, sharp } from "pkg/graphics";
-import {
-  Categories,
-  ArticlesCategories
-} from "pkg/ngx-formly/categories-material/functions";
+import { Categories } from "pkg/ngx-formly/categories-material/functions";
 
 export const dev = process.env.NODE_ENV === "development";
 
@@ -85,13 +82,9 @@ export function getCategories() {
         ])
           .then(([categories, articles_categories]) => {
             mongoose.connection.close();
-            let ctg = new Categories(categories),
-              actg = new ArticlesCategories(articles_categories, ctg);
-            return {
-              ...ctg.adjust(),
-              ...actg.adjust()
-              //inputs: ctg.createInputs(), or: inputs_articles, inputs_jobs
-            };
+            let ctg = new Categories(categories);
+            ctg.adjust();
+            return ctg.articleCategories(articles_categories);
           })
           .catch(err => {
             throw new Error(`Error @categories, ${err.message}`);
