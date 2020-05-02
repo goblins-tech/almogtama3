@@ -1,6 +1,7 @@
 const fs = require("fs");
 const { execSync } = require("child_process");
 const { argv } = require("process");
+const { backup, restore } = require("./backup");
 
 var tasks = {
   terser: function(dir = "./dist") {
@@ -20,12 +21,14 @@ var tasks = {
   },
   /*
    from cmd:
-    - linux cp firebase/package.json dist/package.json 
+    - linux cp firebase/package.json dist/package.json
     - windows copy firebase\package.json dist\package.json
    */
   "firebase:copy": function(src = "./firebase", dist = "./dist") {
     fs.copyFileSync(`${src}/package.json`, `${dist}/package.json`);
-  }
+  },
+  backup,
+  restore
 };
 
 const task = argv.slice(2)[0];
@@ -33,6 +36,8 @@ if (!task) console.error("enter a task");
 else if (!(task in tasks)) console.error(`task ${task} not found`);
 else
   try {
+    console.log(`running the task: ${task}`);
+    args.forEach(el => console.log(`  > ${el}`));
     tasks[task](...argv.slice(3));
   } catch (err) {
     err => console.error(`error in task ${task}`, err);
