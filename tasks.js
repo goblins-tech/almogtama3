@@ -37,7 +37,7 @@ else if (!(task in tasks)) console.error(`task ${task} not found`);
 else
   try {
     console.log(`running the task: ${task}`);
-    args.forEach(el => console.log(`  > ${el}`));
+    argv.slice(3).forEach(el => console.log(`  > ${el}`));
     tasks[task](...argv.slice(3));
   } catch (err) {
     err => console.error(`error in task ${task}`, err);
