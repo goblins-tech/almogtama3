@@ -1,8 +1,8 @@
 import { Component, OnInit, ViewChild, Input } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { HttpService } from "../http.service";
-import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
+import { Observable, of } from "rxjs";
+import { map, concatMap } from "rxjs/operators";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Data } from "pkg/ngx-content/view"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
 import { HighlightJS } from "ngx-highlightjs";
@@ -64,7 +64,6 @@ export class ContentEditorComponent implements OnInit {
     private hljs: HighlightJS,
     private storage: AngularFireStorage
   ) {}
-  ngOnInit() {}
 
   ngOnInit() {
     //queryParams --concatMap-->combineLatest(getData(), getCategories()) --map--> formObj
