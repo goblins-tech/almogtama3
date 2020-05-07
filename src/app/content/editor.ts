@@ -4,7 +4,7 @@ import { HttpService } from "../http.service";
 import { Observable, of } from "rxjs";
 import { map, concatMap } from "rxjs/operators";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { Data } from "pkg/ngx-content/view"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
+import { Data, Article } from "pkg/ngx-content/view"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
 import { HighlightJS } from "ngx-highlightjs";
 import { keepHtml, Categories } from "./functions";
 import { urlParams } from "pkg/ngx-tools/routes";
@@ -82,12 +82,18 @@ export class ContentEditorComponent implements OnInit {
         this.getData(params).pipe(map(data => ({ params, data })))
       ),
 
-      map(({ params, data }) => {
-        let model = data.payload;
+      concatMap(({ params, data }) => {
+        let model = <Article>data.payload;
         params.type = model.type || params.type || "articles";
 
         this.params = params;
-        return { params, model, categories: this.getCategories(params.type) };
+        return this.getCategories(params.type).pipe(
+          map(result => ({
+            params,
+            model,
+            categories: result.data || {}
+          }))
+        );
       }),
       map(({ params, model, categories }) => {
         //create formObj:
@@ -114,7 +120,7 @@ export class ContentEditorComponent implements OnInit {
           //,syntax: true //->install highlight.js or ngx-highlight
         };
 
-        if (this.params.type == "jobs") {
+        if (params.type == "jobs") {
           /*
             //delete cover image since jobs.layout=="list" not grid
             //dont use delete article.fields(...)
@@ -166,20 +172,14 @@ export class ContentEditorComponent implements OnInit {
   }
 
   getData(params) {
-    let data = params.id
+    return params.id
       ? this.httpService.get<Data>(params)
       : of(<Data>{ type: "item", payload: { type: params.type } });
-    console.log({ data });
-    return data;
   }
 
   getCategories(type: string) {
     //todo: getCategories(~categories/:type)
-    return this.httpService
-      .get<any>("~categories")
-      .pipe(
-        map(result => (result.ok && result.data ? result.data.categories : {}))
-      );
+    return this.httpService.get<any>("~categories");
   }
 
   onSubmit(formObj: FormObj) {
@@ -193,12 +193,12 @@ export class ContentEditorComponent implements OnInit {
         ok: false,
         msg: "technichal error, `formObj` is undefined"
       };
-      console.log({ formObj });
+      if (dev) console.log({ formObj });
       return;
     }
 
     let data = formObj.form.value;
-    console.log("onSubmit()", data);
+    if (dev) console.log("onSubmit()", data);
     this.submitting = true;
     this.response = null;
 
@@ -208,7 +208,7 @@ export class ContentEditorComponent implements OnInit {
       if (type == "progress") this.progress = value;
       //todo: send to formObj$.fields[type=file]
       else if (type == "response") {
-        console.log("event.body", event.body);
+        if (dev) console.log("event.body", event.body);
         let data = event.body.data;
         this.response = {
           ok: event.body.ok,
