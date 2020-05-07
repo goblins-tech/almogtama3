@@ -64,43 +64,33 @@ export class ContentEditorComponent implements OnInit {
     private hljs: HighlightJS,
     private storage: AngularFireStorage
   ) {}
+  ngOnInit() {}
+
   ngOnInit() {
+    //queryParams --concatMap-->combineLatest(getData(), getCategories()) --map--> formObj
+    /* updating this.formObj$, this.params value after waiting getData() to finish
+       will caue error: ExpressionChangedAfterItHasBeenCheckedError
+       solutions:
+         - move this.params={...} to constractor (will need to call getData() in constructor)
+         - force change detection call
+    */
     this.formObj$ = urlParams(this.route).pipe(
-      map(([params, query]) => {
-        //todo: if($_GET[id])getData(type,id)
-        //ex: /editor?type=jobs or /editor:id
-        this.params = {
-          id: params.get("id") || "",
-          type: query.get("type")
-        };
+      map(([params, query]) => ({
+        id: params.get("id"),
+        type: query.get("type")
+      })),
+      concatMap(params =>
+        this.getData(params).pipe(map(data => ({ params, data })))
+      ),
 
-        //set the default type
-        if (!this.params.id && !this.params.type) this.params.type = "articles";
+      map(({ params, data }) => {
+        let model = data.payload;
+        params.type = model.type || params.type || "articles";
 
-        /*
-      todo: if(id){
-              - getData()
-              - get this.params.type from getData().type
-            }
-       */
-
-        //todo: this.formObj.model = this.getData()
-        //todo: load categories
-        /*
-        this.getCategories("articles").subscribe(data => {
-          console.log({ categories: data });
-          if (data.ok && data.data && data.data.categories) {
-            let ctg = new Categories(data.data.categories);
-            console.log({ ctg: data.data.categories });
-            this.categories = ctg.createInputs(
-              null,
-              el => el._id != "5ac348980d63be4aa0e967cb"
-            );
-          }
-          //todo: else
-        });
-         */
-
+        this.params = params;
+        return { params, model, categories: this.getCategories(params.type) };
+      }),
+      map(({ params, model, categories }) => {
         //create formObj:
 
         //change content.type from textarea to quill
@@ -127,12 +117,12 @@ export class ContentEditorComponent implements OnInit {
 
         if (this.params.type == "jobs") {
           /*
-              //delete cover image since jobs.layout=="list" not grid
-              //dont use delete article.fields(...)
-              article.splice(
-                article.findIndex(el => el.type == "file"),
-                1
-              );*/
+            //delete cover image since jobs.layout=="list" not grid
+            //dont use delete article.fields(...)
+            article.splice(
+              article.findIndex(el => el.type == "file"),
+              1
+            );*/
 
           //add field:contacts after content
           article.splice(article.findIndex(el => el.key == "content") + 1, 0, {
@@ -154,13 +144,6 @@ export class ContentEditorComponent implements OnInit {
           //todo: if(form.content contains contacts)error -> email, mobile, link
         }
 
-        if (dev)
-          console.log({
-            params,
-            query,
-            calculatedParamas: this.params
-          });
-
         return {
           steps: [
             { title: "", fields: article },
@@ -171,39 +154,33 @@ export class ContentEditorComponent implements OnInit {
                   key: "categories",
                   type: "categories",
                   templateOptions: {
-                    categories: this.getCategories("articles").pipe(
-                      map(result =>
-                        result.ok && result.data ? result.data.categories : {}
-                      )
-                    )
+                    categories //todo: categories is observable, not obj{}
                   }
                 }
               ]
             }
-          ]
+          ],
+          model //this.getData(this.params.id).map(v => v.payload)
         };
-
-        /*this.getCategories("articles").subscribe(ctg => {
-              console.log({ ctg });
-
-              if (typeof ctg.data == "string") ctg.data = JSON.parse(ctg.data); //todo: why response: string
-              console.log({ ctg });
-              this.formObj$.form.get("title").setValue("test");
-              //or: this.formObj$.fields.find(el => el.key == "title").formControl.setValue("test2");
-
-            });*/
       })
     );
   }
 
-  getData() {
-    return this.httpService.get<Data>({
-      id: this.params.id
-    });
+  getData(params) {
+    let data = params.id
+      ? this.httpService.get<Data>(params)
+      : of(<Data>{ type: "item", payload: { type: params.type } });
+    console.log({ data });
+    return data;
   }
 
   getCategories(type: string) {
-    return this.httpService.get<any>("~categories"); //todo: ~categories/:type
+    //todo: getCategories(~categories/:type)
+    return this.httpService
+      .get<any>("~categories")
+      .pipe(
+        map(result => (result.ok && result.data ? result.data.categories : {}))
+      );
   }
 
   onSubmit(formObj: FormObj) {

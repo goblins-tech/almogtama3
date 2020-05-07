@@ -1,5 +1,5 @@
 <!--todo: create or edit -->
-<h1>create new {{params.type}}</h1>
+<h1 *ngIf="params?.type">create new {{params.type}}</h1>
 
 <ngx-form
   [formObj]="formObj$ | async"
