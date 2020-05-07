@@ -12,15 +12,16 @@ interface Obj {
 }
 
 export interface Article extends Obj {
-  id: string;
-  title: string;
-  subtitle: string;
-  content: string;
-  keywords: string | string[];
-  cover: string;
-  avatar: string;
-  link: any;
-  auther: any; //todo
+  id?: string;
+  title?: string;
+  subtitle?: string;
+  content?: string;
+  keywords?: string | string[];
+  cover?: string;
+  avatar?: string;
+  link?: any;
+  auther?: any; //todo
+  [key: string]: any; //ex: _id,...
 }
 export interface Data {
   type: string; //item || list -> todo: if(payload: Array)type=list
