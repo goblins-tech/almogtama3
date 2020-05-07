@@ -20,7 +20,7 @@
   <ng-template #error>Error: {{response.msg}}</ng-template>
 </div>
 
-<ng-container *ngIf="formObj; else loading">
+<ng-container *ngIf="formObj?.form; else loading">
   <form
     #formElement
     [formGroup]="formObj.form"
