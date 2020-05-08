@@ -85,12 +85,22 @@ export class NgxFormComponent implements OnInit {
       //https://stackoverflow.com/a/46070221/12577650
       this.formObj = Object.assign(this.formObj, {
         fields: step.fields,
-        title: step.title,
-        model: this.formObj.form.value //save the current value,so the feilds values preserved when the user come back to this step.
+        title: step.title
+        //  model: this.formObj.form.value
       });
+
+      this.save(); //save the current value,so the feilds values preserved when the user come back to this step.
     }
   }
 
+  save(replace = false) {
+    //update `model` with current state.
+    /*if (this.formObj.form.value) {
+      let v = this.formObj.form.value;
+      if(replace)this.formObj.model=v
+      v.forEach(k => (this.formObj.model[k] = v[k]));
+    }*/
+  }
   onSubmit(formObj: FormObj) {
     //emit the EventEmitter `submit`, and send `formObj`
     this.submit.emit(formObj);
