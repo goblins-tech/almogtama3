@@ -198,6 +198,7 @@ export class ContentEditorComponent implements OnInit {
     }
 
     let data = formObj.form.value;
+    data._id = this.params.id;
     if (dev) console.log("onSubmit()", data);
     this.submitting = true;
     this.response = null;
