@@ -1,4 +1,4 @@
-<h3 *ngIf="formObj?.title">{{formObj.title}}</h3>
+<h3 *ngIf="_formObj?.title">{{_formObj.title}}</h3>
 <div
   *ngIf="response"
   class="alert"
@@ -20,19 +20,19 @@
   <ng-template #error>Error: {{response.msg}}</ng-template>
 </div>
 
-<ng-container *ngIf="formObj?.form; else loading">
+<ng-container *ngIf="_formObj?.form; else loading">
   <form
     #formElement
-    [formGroup]="formObj.form"
+    [formGroup]="_formObj.form"
     method="post"
     enctype="multipart/form-data"
   >
     <!-- todo: pass `step` number to the parent comp to display the proper content -->
     <ng-content select="[data-before]"></ng-content>
     <formly-form
-      [form]="formObj.form"
-      [fields]="formObj.fields"
-      [model]="formObj.model"
+      [form]="_formObj.form"
+      [fields]="_formObj.fields"
+      [model]="_formObj.model"
     ></formly-form>
 
     <!--
@@ -43,7 +43,7 @@
     <ng-content select="[data-after]"></ng-content>
     <button
       mat-raised-button
-      *ngIf="formObj.steps"
+      *ngIf="_formObj.steps"
       (click)="go(-1)"
       type="button"
       [disabled]="step===0"
@@ -52,10 +52,10 @@
     </button>
     <button
       mat-raised-button
-      *ngIf="formObj.steps"
+      *ngIf="_formObj.steps"
       (click)="go(+1)"
       type="button"
-      [disabled]="step===formObj.steps.length-1"
+      [disabled]="step===_formObj.steps.length-1"
     >
       Next
     </button>
@@ -63,9 +63,9 @@
       mat-raised-button
       color="primary"
       type="button"
-      *ngIf="step===formObj.steps.length-1"
-      [disabled]="!formObj.form.valid || formObj.form.pristine || submitting"
-      (click)="onSubmit(formObj)"
+      *ngIf="step===_formObj.steps.length-1"
+      [disabled]="!_formObj.form.valid || _formObj.form.pristine || submitting"
+      (click)="onSubmit(_formObj)"
     >
       Submit
     </button>

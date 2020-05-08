@@ -33,7 +33,7 @@ export class FormlyFieldCategories extends FieldType implements OnInit {
     //  this.createComponent();
     //todo: load <mat-checkbox> inputs directly without a helper class
     this.dynamic.load(FormlyFieldCategoriesHelper, this.ref, {
-      data$: this.to.categories,
+      data: this.to.categories,
       to: this.to,
       formControl: this.formControl,
       field: this.field
@@ -66,30 +66,27 @@ todo:
 })
 /*implements OnInit, AfterViewInit, AfterViewChecked*/
 export class FormlyFieldCategoriesHelper {
-  @Input() data$: Observable<any>;
+  @Input() data: any[];
   @Input() to: any; //templateOptions
   @Input() formControl: any; //https://github.com/aitboudad/ngx-formly/blob/28bf56ab63ad158a7418ea6d7f2377165252a3e3/src/material/checkbox/src/checkbox.type.ts
   @Input() field: any;
   categories;
   constructor(private sanitizer: DomSanitizer) {}
   ngOnInit() {
-    this.data$.subscribe(data => {
-      if (typeof data == "string") data = JSON.parse(data);
-      console.log("FormlyFieldCategoriesHelper", {
-        data,
-        to: this.to,
-        formControl: this.formControl,
-        field: this.field
-      });
-
-      let ctg = new Categories(data);
-      let inputs =
-        ctg.createInputs(null, el => el._id != "5ac348980d63be4aa0e967cb") +
-        `<mat-checkbox [formControl]="formControl" [formlyAttributes]="field">test</mat-checkbox>` +
-        `<input type="checkbox" name="categories" value="5ac348980d63be4aa0e96846" [formcontrol]="formControl" [formlyattributes]="field"> test2`;
-      this.categories = this.sanitizer.bypassSecurityTrustHtml(inputs);
-      //using "keepHtml" pipe makes all checkboxes disabled.
+    console.log("FormlyFieldCategoriesHelper", {
+      categories: this.data,
+      to: this.to,
+      formControl: this.formControl,
+      field: this.field
     });
+
+    let ctg = new Categories(this.data);
+    let inputs =
+      ctg.createInputs(null, el => el._id != "5ac348980d63be4aa0e967cb") +
+      `<mat-checkbox [formControl]="formControl" [formlyAttributes]="field">test</mat-checkbox>` +
+      `<input type="checkbox" name="categories" value="5ac348980d63be4aa0e96846" [formcontrol]="formControl" [formlyattributes]="field"> test2`;
+    this.categories = this.sanitizer.bypassSecurityTrustHtml(inputs);
+    //using "keepHtml" pipe makes all checkboxes disabled.
   }
 
   /*  //https://stackoverflow.com/a/58906176

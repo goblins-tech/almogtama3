@@ -2,7 +2,7 @@
 <h1 *ngIf="params?.type">create new {{params.type}}</h1>
 
 <ngx-form
-  [formObj]="formObj$ | async"
+  [formObj]="formObj$"
   [response]="response"
   [progress]="progress"
   [submitting]="submitting"

@@ -44,7 +44,8 @@ export interface Response {
   templateUrl: "./form.html"
 })
 export class NgxFormComponent implements OnInit {
-  @Input() formObj: FormObj;
+  @Input() formObj: FormObj | Observable<FormObj>;
+  _formObj: FormObj;
   @Input() response: Response;
   @Input() submitting: boolean;
   @Input() progress; //todo: show progress bar
@@ -68,9 +69,24 @@ export class NgxFormComponent implements OnInit {
   //todo: onSubmit -> update response
   //todo: to auto fill the form use $formObj.model
   ngOnInit() {
-    if (this.formObj) {
-      this.formObj.form = this.formObj.form || new FormGroup({});
-      if (this.formObj.steps) {
+    //todo: use <ngx-form [formObj]="formObj | async">
+    //https://stackoverflow.com/q/61681239/12577650
+    this.obs(this.formObj, v => {
+      this._formObj = v;
+      this.adjust();
+    });
+  }
+
+  obs(value, cb) {
+    if (value instanceof Observable) {
+      value.subscribe(v => cb(v));
+    } else cb(value);
+  }
+
+  adjust() {
+    if (this._formObj) {
+      this._formObj.form = this._formObj.form || new FormGroup({});
+      if (this._formObj.steps) {
         this.step = this.step || 0;
         this.go();
       }
@@ -79,11 +95,11 @@ export class NgxFormComponent implements OnInit {
 
   go(n = 0) {
     this.step += n;
-    let step = this.formObj.steps[this.step];
+    let step = this._formObj.steps[this.step];
 
     if (step) {
       //https://stackoverflow.com/a/46070221/12577650
-      this.formObj = Object.assign(this.formObj, {
+      this._formObj = Object.assign(this._formObj, {
         fields: step.fields,
         title: step.title
         //  model: this.formObj.form.value
