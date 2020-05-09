@@ -8,6 +8,7 @@ import { ContentManageComponent } from "./manage";
 //todo: add 'packages' to tsConfig
 import { NgxContentViewModule } from "pkg/ngx-content/view";
 import { NgxFormModule } from "pkg/ngx-form";
+import { NgxAdsenseModule } from "pkg/ngx-adsense";
 
 import { ShareButtonsModule } from "@ngx-share/buttons";
 import {
@@ -82,6 +83,7 @@ export const APP_LOCALE_ID = "en-US";
   imports: [
     NgxContentViewModule,
     NgxFormModule,
+    NgxAdsenseModule,
     FormlyFileModule,
     FormlyCategoriesModule,
     CommonModule,

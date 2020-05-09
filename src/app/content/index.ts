@@ -49,6 +49,10 @@ export class ContentComponent implements OnInit, AfterViewInit {
   data$: Observable<Data>;
   params: Params;
   pref = { layout: "grid" };
+  dev = !env.production;
+
+  //todo: share adsense by changeing this value based on the article's author
+  adsense = "ca-pub-8421502147716920";
   constructor(
     private route: ActivatedRoute,
     private httpService: HttpService,
@@ -159,17 +163,6 @@ export class ContentComponent implements OnInit, AfterViewInit {
       p: comp.querySelectorAll("p"),
       html: comp.querySelectorAll("html")
     });
-
-    //activate adsense
-    if (dev) {
-      let adsense = document.getElementById("adsense");
-      if (adsense) {
-        //adsense.setAttribute("data-ad-client", "ca-pub-8421502147716920"); //todo: ad sharing
-        let adsenseSrc = adsense.dataset.src; //to avoid warning: adSense head tag doesn't support data-src attribut
-        adsense.removeAttribute("data-src");
-        adsense.setAttribute("src", adsenseSrc);
-      }
-    } else console.warn("adsense disabled in dev mode.");
   }
   getData(): Observable<Data> {
     return this.httpService.get<Data>(this.params);
