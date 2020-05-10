@@ -15,6 +15,7 @@ import { UniversalInterceptor } from "../../universal-interceptor";
 import { MetaService } from "pkg/ngx-content/view/meta.service";
 import { SocialComponent } from "./social";
 import { ServiceWorkerModule } from "@angular/service-worker";
+import { environment as env } from "../environments/environment";
 
 /*
 routes are devided into routes (for AppRutingModule) & appRoutes (for AppModule)
@@ -22,6 +23,7 @@ because Modules are proceeded befor RouterModule.forRoot() and RouterModule.forC
 we need to load AppRutingModule first then routes defineded in ContentModule (contains RouterModule.forChild())
 then appRoutes in the last (because it contains '**')
  */
+const dev = !env.production;
 const routes: Routes = [{ path: "social", component: SocialComponent }];
 const appRoutes: Routes = [{ path: "**", component: ErrorComponent }];
 
@@ -77,7 +79,6 @@ export class AppRoutingModule {}
 export class AppModule {
   constructor(router: Router) {
     //test the routers' order;
-    if (process.env.NODE_ENV == "development")
-      console.log("Routes: ", router.config);
+    if (dev) console.log("Routes: ", router.config);
   }
 }
