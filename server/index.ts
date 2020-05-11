@@ -164,11 +164,10 @@ app.get("/api/:item?", (req, res, next) => {
     getData({ id, category })
       .then(
         payload => {
-          if (dev) console.log("[server] get:", { payload });
-          if (typeof payload == "string") payload = JSON.parse(payload);
-          res.json({ ok: true, type: id ? "item" : "list", payload });
+          if (dev) console.log("[server] getData:", payload);
+          res.json(payload);
         },
-        error => ({ ok: false, error }) //todo: content/index.html admin:show error
+        error => ({ error }) //todo: content/index.html admin:show error
       )
       .catch(next); //https://expressjs.com/en/advanced/best-practice-performance.html#use-promises
   }

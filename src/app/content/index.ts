@@ -6,9 +6,8 @@ todo:
  - add copy-all btn to inde (or category) page (*ngIf=data.type=list){show ctg.title; add copy-all btn}
  */
 
-import { Data, Article } from "pkg/ngx-content/view/view";
-import { MetaService } from "pkg/ngx-content/view//meta.service";
-import { slug } from "pkg/ngx-content/core/functions";
+import { Data, Article, MetaService } from "pkg/ngx-content/view";
+import { slug } from "pkg/ngx-content/core";
 
 import {
   Component,
@@ -84,49 +83,49 @@ export class ContentComponent implements OnInit, AfterViewInit {
         if (typeof data == "string") data = JSON.parse(data); //ex: the url fetched via a ServiceWorker
 
         //todo: import site meta tags from config
-        let metaTags = {
+        let metaTags: any = {
           name: "almogtama3",
           hashtag: "@almogtama3", //todo: @hashtag or #hashtag for twitter??
-          baseUrl: "https://www.almogtama3.com/"
+          baseUrl: "https://www.almogtama3.com/",
+          description: "almogtama3 dot com" //todo:
         };
 
-        if (data.payload) {
-          if (!data.type)
-            data.type = data.payload instanceof Array ? "list" : "item";
+        //todo: item.cover = {{item.type}}/{{item.id}}/{{item.cover}}
+        if (data instanceof Array) {
+          data.map((item: Article) => {
+            item.id = item.shortId || item._id;
+            item.content = item.summary || summary(item.content);
+            if (!item.slug || item.slug == "") item.slug = slug(item.title);
 
-          if (data.type == "item") {
-            (data.payload as Article).id =
-              (data.payload as any).shortId || (data.payload as any)._id;
-            this.meta.setTags({
-              ...metaTags,
-              description: summary((data.payload as Article).content),
-              ...data.payload
-            });
+            //todo: this needs to fetch categories, ..
+            if (!item.link)
+              item.link =
+                item.categories && item.categories.length > 0
+                  ? `/${item.categories[0]}/${item.id}-${item.slug}`
+                  : `/id/${item.id}`;
 
-            if (this.params.type == "jobs")
-              (data.payload as Article).content += `<div class='contacts'>${
-                (data.payload as Article).contacts
-              }</div>`;
-          } else {
-            data.payload.map(item => {
-              item.id = item.shortId || item._id;
-              if (!item.slug || item.slug == "") item.slug = slug(item.title);
-              if (!item.link)
-                item.link =
-                  item.categories && item.categories.length > 0
-                    ? `/${item.categories[0]}/${item.id}-${item.slug}`
-                    : `/id/${item.id}`;
+            return item;
+          });
+        } else {
+          data = <Article>data;
+          (data as Article).id = (data as any).shortId || (data as any)._id;
 
-              return item;
-            });
+          data.summary = data.summary || summary(data.content);
+          if (!data.link)
+            data.link =
+              data.categories && data.categories.length > 0
+                ? `/${data.categories[0]}/${data.id}-${data.slug}`
+                : `/id/${data.id}`;
+          metaTags = {
+            ...metaTags,
+            ...data,
+            description: data.summary
+          };
 
-            if (data.type == "list") {
-              this.meta.setTags({ ...metaTags });
-              //todo: meta tags from category
-            }
-          }
+          if (this.params.type == "jobs")
+            data.content += `<div id='contacts'>${data.contacts}</div>`;
         }
-
+        this.meta.setTags({ ...metaTags });
         return data;
       })
     );

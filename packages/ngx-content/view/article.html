@@ -4,9 +4,10 @@
       <img src="{{data.avatar}}" />
     </div>
     <mat-card-title dir="auto">
-      <a href="{{data.link || '#'}}"
-        >{{data.title | length:200}}</a
-      ></mat-card-title
+      <a href="{{data.link || '#'}}">
+        <h1 *ngIf="type=='item'; else normal">{{data.title | length:200}}</h1>
+        <ng-template #normal>{{data.title | length:200}}</ng-template>
+      </a></mat-card-title
     >
     <mat-card-subtitle dir="auto"
       >{{data.subtitle | length:200}}</mat-card-subtitle

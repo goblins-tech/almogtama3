@@ -83,7 +83,7 @@ export class ContentEditorComponent implements OnInit {
       ),
 
       concatMap(({ params, data }) => {
-        let model = <Article>data.payload;
+        let model = <Article>data;
         params.type = model.type || params.type || "articles";
 
         this.params = params;
@@ -174,7 +174,7 @@ export class ContentEditorComponent implements OnInit {
   getData(params) {
     return params.id
       ? this.httpService.get<Data>(params)
-      : of(<Data>{ type: "item", payload: { type: params.type } });
+      : of(<Data>{ type: params.type });
   }
 
   getCategories(type: string) {
