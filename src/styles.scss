@@ -2,7 +2,24 @@ html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 *{max-width:100%; box-sizing: border-box;}
 
-.page-container{margin:0 10px;}
+/* the main container, below the header(toolbar) and above the footer*/
+.page{
+  padding:10px;
+
+}
+
+.page-loading{
+
+}
+
+a, a:visited, a:hover {
+  color: #1976d2;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #125699;
+}
 
 /* bootstrap-like alerts */
 .alert-error {
