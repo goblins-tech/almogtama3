@@ -1,51 +1,8 @@
-/*@import '~@angular/material/prebuilt-themes/deeppurple-amber.css';*/
-@import '~@ngx-share/button/themes/default/default-theme';
-@import '~quill/dist/quill.core.css';
-@import '~quill/dist/quill.snow.css';
-
-
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 *{max-width:100%; box-sizing: border-box;}
+
 .page-container{margin:0 10px;}
-
-.masonry {
-  column-count: 4;
-  column-gap: 1em;
-}
-.masonry .masonry-item {
-  display: inline-block;
-  margin: 0 0 1em;
-  width: 100%;
-}
-@media  (max-width: 1000px) {
-  .masonry {
-    column-count: 3;
-  }
-}
-@media  (max-width: 800px) {
-  .masonry {
-    column-count: 2;
-  }
-}
-@media  (max-width: 550px) {
-  .masonry {
-    column-count: 1;
-  }
-}
-
-mat-card{
-  width:500px;
-  margin: 15px auto;
-  padding: 10px;
-  border: solid thin #C9C1C1;
-  border-radius: 0.5rem;
-  overflow: hidden;
-}
-mat-card div[mat-card-avatar]{
-   overflow: hidden; border: solid medium gray;
-}
-mat-card-img{margin:16px auto;}
 
 /* bootstrap-like alerts */
 .alert-error {
@@ -68,6 +25,3 @@ mat-card-img{margin:16px auto;}
     text-align: center;
 }
 .alert a { font-weight: 700; }
-
-/* todo: css dosen't have dir:auto */
-mat-card-title,mat-card-subtitle,mat-card-content,dir-auto{direction: auto}

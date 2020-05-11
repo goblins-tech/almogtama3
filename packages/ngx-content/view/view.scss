@@ -29,7 +29,6 @@
 }
 
 mat-card{
-  width:500px;
   margin: 15px auto;
   padding: 10px;
   border: solid thin #C9C1C1;
@@ -37,16 +36,24 @@ mat-card{
   overflow: hidden;
 }
 mat-card div[mat-card-avatar]{
-   overflow: hidden; border: solid medium gray;
+   overflow: hidden;
+   border: solid medium gray;
 }
-mat-card-img{margin:16px auto;}
+mat-card-img{ margin:16px auto; }
+
+/* todo: mat-card-header{display:flex} prevents this */
+mat-card-title {text-align: center;}
+
 mat-card-title a{
   text-decoration: none;
   color:inherit;
   font-weight: bold
 }
 
+/* todo: css direction dosen't have the value 'auto' */
+mat-card-title, mat-card-subtitle, mat-card-content, dir-auto{direction: auto}
 
-
-/* todo: css dosen't have dir:auto */
-mat-card-title,mat-card-subtitle,mat-card-content,dir-auto{direction: auto}
+/* remove text-align:left because it prevent dir="auto" */
+.ql-editor{
+  text-align: inherit !important;
+}
