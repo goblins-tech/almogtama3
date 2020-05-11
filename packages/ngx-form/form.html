@@ -74,7 +74,9 @@
   </form>
 </ng-container>
 
-<ng-template #loading>Loading ......</ng-template>
+<ng-template #loading>
+  <ngx-loading [show]="true"></ngx-loading>
+</ng-template>
 
 <!-- material design form-field example:
 <mat-form-field appearance="legacy">

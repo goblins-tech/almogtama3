@@ -5,6 +5,7 @@ import { FormlyModule } from "@ngx-formly/core";
 import { NgxFormComponent } from "./form";
 import { MatButtonModule } from "../ngx-content/view/material"; //todo: add ngx-content-view & material to peerDependencies
 import { NgxContentCoreModule } from "../ngx-content/core";
+import { NgxLoadingModule } from "ngx-loading";
 /*
  - we added NgxFormComponent to @NgModule.exports[]
    to be used in other modules (parent component),
@@ -18,7 +19,12 @@ import { NgxContentCoreModule } from "../ngx-content/core";
     FormsModule,
     ReactiveFormsModule,
     FormlyModule,
-    MatButtonModule
+    MatButtonModule,
+    NgxLoadingModule.forRoot({
+      primaryColour: "red",
+      secondaryColour: "blue",
+      tertiaryColour: "green"
+    })
   ],
   exports: [NgxFormComponent]
 })

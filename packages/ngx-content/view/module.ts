@@ -35,6 +35,7 @@ import {
 } from "@fortawesome/angular-fontawesome";
 import { fab } from "@fortawesome/free-brands-svg-icons";
 import { fas } from "@fortawesome/free-solid-svg-icons";
+import { NgxLoadingModule } from "ngx-loading";
 
 @NgModule({
   declarations: [NgxContentViewComponent, NgxContentArticleComponent],
@@ -54,7 +55,12 @@ import { fas } from "@fortawesome/free-solid-svg-icons";
     ShareButtonsModule,
     FontAwesomeModule,
     HttpClientModule,
-    NgxContentCoreModule
+    NgxContentCoreModule,
+    NgxLoadingModule.forRoot({
+      primaryColour: "red",
+      secondaryColour: "blue",
+      tertiaryColour: "green"
+    })
   ],
   providers: [],
   bootstrap: [],

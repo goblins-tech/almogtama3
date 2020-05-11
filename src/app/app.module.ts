@@ -16,6 +16,7 @@ import { MetaService } from "pkg/ngx-content/view/meta.service";
 import { SocialComponent } from "./social";
 import { ServiceWorkerModule } from "@angular/service-worker";
 import { environment as env } from "../environments/environment";
+import { NgxLoadingModule } from "ngx-loading";
 
 /*
 routes are devided into routes (for AppRutingModule) & appRoutes (for AppModule)
@@ -63,7 +64,12 @@ export class AppRoutingModule {}
     HttpClientModule,
     AppRoutingModule, //Modules will process before RouterModule.forRoot() https://blogs.msmvps.com/deborahk/angular-route-ordering/
     FormModule,
-    ContentModule //must be after other modules, because it's first part is dynamic :item/..
+    ContentModule, //must be after other modules, because it's first part is dynamic :item/..
+    NgxLoadingModule.forRoot({
+      primaryColour: "red",
+      secondaryColour: "blue",
+      tertiaryColour: "green"
+    })
   ],
   providers: [
     HttpService,

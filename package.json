@@ -75,6 +75,7 @@
     "ng-lazyload-image": "^7.1.0",
     "ngx-formly-material-file": "^1.0.0",
     "ngx-highlightjs": "^4.0.2",
+    "ngx-loading": "^8.0.0",
     "ngx-quill": "^7.3.12",
     "node-loader": "^0.6.0",
     "parse-domain": "^2.3.4",
