@@ -17,3 +17,4 @@ export function obs(value: any, cb: (value: any) => void) {
     value.subscribe(v => cb(v));
   } else cb(value);
 }
+//
