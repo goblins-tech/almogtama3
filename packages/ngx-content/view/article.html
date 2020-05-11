@@ -1,7 +1,8 @@
 <mat-card>
   <mat-card-header>
-    <div *ngIf="data.avatar" mat-card-avatar>
-      <img src="{{data.avatar}}" />
+    <!-- todo: author.name (avatar.text), article.date -->
+    <div *ngIf="data.author" mat-card-avatar>
+      <img src="{{data.author.img}}" />
     </div>
     <mat-card-title dir="auto">
       <a href="{{data.link || '#'}}">
@@ -9,9 +10,13 @@
         <ng-template #normal>{{data.title | length:200}}</ng-template>
       </a></mat-card-title
     >
-    <mat-card-subtitle dir="auto"
-      >{{data.subtitle | length:200}}</mat-card-subtitle
-    >
+    <mat-card-subtitle *ngIf="data.author">
+      <span dir="auto"
+        ><a href="{{data.author.link}}">{{data.author.name}}</a></span
+      >
+      <!--todo: a pipe to convert timestamp or Date to string -->
+      <span>{{data.date}}</span>
+    </mat-card-subtitle>
   </mat-card-header>
 
   <img
@@ -23,7 +28,6 @@
 
   <!-- it is recommended to render the contet that was generated via <quill-editor> inside <quill-view>
   https://www.npmjs.com/package/ngx-quill#quillviewcomponent---using-quilljs-to-render-content
-
   <mat-card-content
     dir="auto"
     innerHtml="{{data.content | content}}"

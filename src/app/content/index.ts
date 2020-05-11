@@ -104,6 +104,12 @@ export class ContentComponent implements OnInit, AfterViewInit {
                   ? `/${item.categories[0]}/${item.id}-${item.slug}`
                   : `/id/${item.id}`;
 
+            item.author = {
+              name: "author name",
+              img: "assets/avatar-female.png",
+              link: ""
+            };
+            item.date = "1/1/2020";
             return item;
           });
         } else {
@@ -116,6 +122,14 @@ export class ContentComponent implements OnInit, AfterViewInit {
               data.categories && data.categories.length > 0
                 ? `/${data.categories[0]}/${data.id}-${data.slug}`
                 : `/id/${data.id}`;
+
+          data.author = {
+            name: "author name",
+            img: "assets/avatar-female.png",
+            link: ""
+          };
+
+          data.date = "1/1/2020";
           metaTags = {
             ...metaTags,
             ...data,

@@ -50,9 +50,21 @@ mat-card-title a{
   font-weight: bold
 }
 
+/* to display title beside the avater*/
+mat-card-title a h1{
+  display: inline;
+}
+
 /* todo: css direction dosen't have the value 'auto' */
 mat-card-title, mat-card-subtitle, mat-card-content, dir-auto{direction: auto}
 
+mat-card .info{
+  text-align:center
+}
+
+mat-card-subtitle span{
+  margin:10px
+}
 /* remove text-align:left because it prevent dir="auto" */
 .ql-editor{
   text-align: inherit !important;

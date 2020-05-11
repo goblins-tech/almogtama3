@@ -9,11 +9,10 @@ export interface Article extends Obj {
   title?: string;
   subtitle?: string;
   content?: string;
-  keywords?: string | string[];
+  keywords?: string | string[]; //todo: if(string)..
   cover?: string;
-  avatar?: string;
-  link?: any;
-  auther?: any; //todo
+  author?: { name?: string; img?: string; link?: string };
+  link?: string;
   [key: string]: any; //ex: _id,...
 }
 
