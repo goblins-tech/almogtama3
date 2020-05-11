@@ -1,0 +1,53 @@
+<mat-card>
+  <mat-card-header>
+    <div *ngIf="data.avatar" mat-card-avatar>
+      <img src="{{data.avatar}}" />
+    </div>
+    <mat-card-title dir="auto">
+      <a href="{{data.link || '#'}}"
+        >{{data.title | length:200}}</a
+      ></mat-card-title
+    >
+    <mat-card-subtitle dir="auto"
+      >{{data.subtitle | length:200}}</mat-card-subtitle
+    >
+  </mat-card-header>
+
+  <img
+    mat-card-image
+    *ngIf="data.cover"
+    lazyLoad="{{data.cover}}"
+    alt="{{data.title}}"
+  />
+
+  <!-- it is recommended to render the contet that was generated via <quill-editor> inside <quill-view>
+  https://www.npmjs.com/package/ngx-quill#quillviewcomponent---using-quilljs-to-render-content
+
+  <mat-card-content
+    dir="auto"
+    innerHtml="{{data.content | content}}"
+  ></mat-card-content> -->
+  <mat-card-content dir="auto"
+    ><quill-view
+      #quillView
+      [content]="data.content"
+      format="text"
+      theme="snow"
+    ></quill-view
+  ></mat-card-content>
+  <!-- todo: use content[] to add content segments, ex: for jobs we need to add: expiration alert -> content -> contacts -->
+  <mat-card-actions>
+    <!--
+    <share-buttons show="5"></share-buttons>
+  -->
+  </mat-card-actions>
+</mat-card>
+
+<!-- <mat-card-actions>
+  <button mat-flat-button color="primary">
+    <mat-icon>like</mat-icon> Like
+  </button>
+  <button mat-flat-button color="accent">
+    <mat-icon>share</mat-icon> SHARE
+  </button>
+</mat-card-actions> -->

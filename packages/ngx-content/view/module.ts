@@ -13,6 +13,7 @@ import { HttpClientModule } from "@angular/common/http";
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { NgxContentViewComponent } from "./view";
+import { NgxContentArticleComponent } from "./article";
 import { NgxContentCoreModule } from "../core"; //to use pipes
 import {
   MatCardModule,
@@ -36,8 +37,8 @@ import { fab } from "@fortawesome/free-brands-svg-icons";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 
 @NgModule({
-  declarations: [NgxContentViewComponent],
-  exports: [NgxContentViewComponent],
+  declarations: [NgxContentViewComponent, NgxContentArticleComponent],
+  exports: [NgxContentViewComponent, NgxContentArticleComponent],
   imports: [
     CommonModule,
     MatCardModule,
