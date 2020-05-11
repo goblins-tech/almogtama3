@@ -17,6 +17,7 @@ import {
   FormlyFormOptions,
   FieldArrayType
 } from "@ngx-formly/core";
+import { obs } from "pkg/ngx-tools";
 
 //you need to add css classes: alert, alert-ok, alert-error for `reponse` div
 
@@ -71,16 +72,10 @@ export class NgxFormComponent implements OnInit {
   ngOnInit() {
     //todo: use <ngx-form [formObj]="formObj | async">
     //https://stackoverflow.com/q/61681239/12577650
-    this.obs(this.formObj, v => {
+    obs(this.formObj, v => {
       this._formObj = v;
       this.adjust();
     });
-  }
-
-  obs(value, cb) {
-    if (value instanceof Observable) {
-      value.subscribe(v => cb(v));
-    } else cb(value);
   }
 
   adjust() {
