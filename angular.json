@@ -40,8 +40,8 @@
             "production": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
+                  "replace": "src/env/index.ts",
+                  "with": "src/env/prod.ts"
                 }
               ],
               "optimization": false,
@@ -141,8 +141,8 @@
             "production": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
+                  "replace": "src/env/index.ts",
+                  "with": "src/env/prod.ts"
                 }
               ],
               "sourceMap": false,

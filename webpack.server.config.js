@@ -7,10 +7,10 @@ module.exports = {
   mode: "none",
   entry: {
     // This is our Express server for Dynamic universal
-    server: "./server/index.ts"
+    express: "./src/server/express.ts"
   },
   externals: {
-    "./dist/server/main": 'require("./server/main")',
+    "./dist/server/main": 'require("./main")',
     sharp: "commonjs sharp" //https://github.com/lovell/sharp/issues/794#issuecomment-306555683
   },
   target: "node",
@@ -24,8 +24,8 @@ module.exports = {
   },
   output: {
     // Puts the output at the root of the dist folder
-    path: path.join(__dirname, "dist"), //todo: dist/this.mode
-    filename: "[name].js",
+    path: path.join(__dirname, "dist/server"), //todo: `dist/${this.mode}`
+    filename: "[name].js", //'[name]' = entry[$key]
     library: "",
     libraryTarget: "commonjs-module"
     //fix: setting library & libraryTarget to fix issue: require('./server.js') == undefined

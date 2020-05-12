@@ -8,7 +8,7 @@ import { Data, Article } from "pkg/ngx-content/view"; //todo: use tripple direct
 import { HighlightJS } from "ngx-highlightjs";
 import { keepHtml, Categories } from "./functions";
 import { urlParams } from "pkg/ngx-tools/routes";
-import { environment as env } from "../../environments/environment";
+import env from "../../env";
 import {
   AngularFireStorage,
   AngularFireStorageReference,
@@ -32,7 +32,6 @@ export interface Params {
   type: string; //todo: movr to query i.e: editor/?type=jobs
   id?: string;
 }
-const dev = !env.production;
 
 @Component({
   selector: "app-content",
@@ -193,13 +192,13 @@ export class ContentEditorComponent implements OnInit {
         ok: false,
         msg: "technichal error, `formObj` is undefined"
       };
-      if (dev) console.log({ formObj });
+      if (env.dev) console.log({ formObj });
       return;
     }
 
     let data = formObj.form.value;
     data._id = this.params.id;
-    if (dev) console.log("onSubmit()", data);
+    if (env.dev) console.log("onSubmit()", data);
     this.submitting = true;
     this.response = null;
 
@@ -209,7 +208,7 @@ export class ContentEditorComponent implements OnInit {
       if (type == "progress") this.progress = value;
       //todo: send to formObj$.fields[type=file]
       else if (type == "response") {
-        if (dev) console.log("event.body", event.body);
+        if (env.dev) console.log("event.body", event.body);
         let data = event.body.data;
         this.response = {
           ok: event.body.ok,

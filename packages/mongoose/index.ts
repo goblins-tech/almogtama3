@@ -8,6 +8,9 @@ todo: export single properties from mongoose
 import { exportAll } from "./general";
 exportAll(mongoose);
 */
+
+const dev = process.env.NODE_ENV === "development";
+
 export namespace types {
   // todo: merge `namespace types` from ./index.d.ts
   export interface Object {
@@ -81,10 +84,9 @@ export function connect(uri: types.uri, options?: types.ConnectionOptions) {
   if ((uri as string).substr(0, 7) != "mongodb") {
     uri = "mongodb" + (srv ? "+srv" : "") + "://" + uri;
   }
-  console.log("uri: ", uri);
 
   options = Object.assign(options || {}, defaultOptions);
-  console.log("options:", options);
+  if (dev) console.log("[mongoose]:", { uri, options });
 
   // todo: return Promise<this mongoose, not Mongoose>
   return mongoose.connect(uri as string, options);

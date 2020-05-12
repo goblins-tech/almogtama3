@@ -22,7 +22,7 @@ import { replaceAsync } from "pkg/nodejs-tools/string";
 import { Firebase } from "pkg/firebase/admin";
 import { initializeApp, credential } from "firebase-admin";
 import multer from "multer";
-import { slug } from "../src/app/content/functions";
+import { slug } from "../app/content/functions";
 import { resize as _resize, sharp } from "pkg/graphics";
 import { Categories } from "pkg/ngx-formly/categories-material/functions";
 
@@ -112,7 +112,7 @@ export function getData(params) {
     () =>
       connect()
         .then(() => {
-          if (dev) console.log("connected");
+          console.log("[mongoose] connected");
           let contentModel = model("articles"),
             content;
 
@@ -184,7 +184,7 @@ export function getData(params) {
                 }
               );
 
-              //  if (dev)  articles.then(result => console.log("articles", result));
+              //  if (env.dev)  articles.then(result => console.log("articles", result));
               return articles;
             });
           }

@@ -6,12 +6,11 @@ import {
   HttpResponse
 } from "@angular/common/http";
 import { Observable, Subject } from "rxjs";
-import { environment } from "../environments/environment";
+import env from "../env";
 
 export interface Obj {
   [key: string]: any;
 }
-const dev = !environment.production;
 
 @Injectable({
   providedIn: "root"
@@ -26,12 +25,12 @@ export class HttpService {
     else if (params.category) url += encodeURIComponent(params.category);
     else url += "articles";
 
-    if (dev) console.log("[http.get]", { params, url });
+    if (env.dev) console.log("[http.get]", { params, url });
     return this.http.get<T>(url);
   }
 
   post(type: string, data: Obj, options: Obj = {}) {
-    if (dev) console.log("httpService post", { type, data });
+    if (env.dev) console.log("httpService post", { type, data });
     options = options || {};
     //todo: sending data as FormData instead of Object causes that req.body=undefined
     if (options.formData !== false) data = this.toFormData(data); //typescript 3.2 dosen't support null safe operator i.e: options?.formData
@@ -77,7 +76,7 @@ export class HttpService {
         }
       }
     }
-    if (dev) console.log("toFormData()", { data, formData });
+    if (env.dev) console.log("toFormData()", { data, formData });
     return formData;
   }
 

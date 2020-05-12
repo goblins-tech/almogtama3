@@ -21,7 +21,7 @@ import { HttpService } from "../http.service";
 import { Observable } from "rxjs";
 import { map, concatMap } from "rxjs/operators";
 import { HighlightJS } from "ngx-highlightjs";
-import { environment as env } from "../../environments/environment";
+import env from "../../env";
 import { summary } from "./functions";
 import { urlParams } from "pkg/ngx-tools/routes";
 
@@ -36,8 +36,6 @@ export interface Params extends Obj {
   id?: string;
 }
 
-const dev = !env.production;
-
 @Component({
   selector: "app-content",
   templateUrl: "./index.html",
@@ -48,7 +46,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
   data$: Observable<Data>;
   params: Params;
   pref = { layout: "grid" };
-  dev = !env.production;
+  dev = env.dev; //to disable adsense in dev mode
 
   //todo: share adsense by changeing this value based on the article's author
   adsense = "ca-pub-8421502147716920";
@@ -72,7 +70,8 @@ export class ContentComponent implements OnInit, AfterViewInit {
           id: id || item.substring(0, item.indexOf("-")) || item
         };
 
-        if (dev) console.log({ params, query, calculatedParamas: this.params });
+        if (env.dev)
+          console.log({ params, query, calculatedParamas: this.params });
         return this.params;
       }),
       //we use concatMap here instead of map because it immits Observable (this.getData())

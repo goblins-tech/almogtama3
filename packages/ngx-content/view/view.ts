@@ -20,7 +20,7 @@ export interface DataObj {
   styleUrls: ["./view.scss"]
 })
 export class NgxContentViewComponent implements OnInit {
-  @Input("data") data: Data | Observable<Data>;
+  @Input() data: Data | Observable<Data>;
   @Input() pref: Pref; //component prefrences
   dataObj: DataObj;
 
