@@ -44,7 +44,7 @@
                   "with": "src/env/prod.ts"
                 }
               ],
-              "optimization": false,
+              "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
               "extractCss": true,
@@ -148,7 +148,7 @@
               "sourceMap": false,
               "optimization": {
                 "scripts": false,
-                "styles": true
+                "styles": false
               }
             }
           }
