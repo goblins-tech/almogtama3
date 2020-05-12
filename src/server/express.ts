@@ -152,8 +152,10 @@ app.get("/api/:item?", (req, res, next) => {
   if (!item) category = "articles";
   else if (item.startsWith("~")) {
     if (item == "~categories")
-      getCategories().then(data => res.send({ ok: true, data }));
-    else res.send({ ok: false, msg: `unknown param ${item}` });
+      getCategories()
+        .then(data => res.json({ data }))
+        .catch(error => res.json({ error }));
+    else res.json({ error: { message: `unknown param ${item}` } });
   } else {
     var id, category;
     if (item.startsWith("id-")) id = item.slice(3);
@@ -162,14 +164,17 @@ app.get("/api/:item?", (req, res, next) => {
     if (dev) console.log("[server] get:", { id, category });
 
     getData({ id, category })
-      .then(
-        payload => {
-          if (dev) console.log("[server] getData:", payload);
-          res.json(payload);
-        },
-        error => ({ error }) //todo: content/index.html admin:show error
-      )
-      .catch(next); //https://expressjs.com/en/advanced/best-practice-performance.html#use-promises
+      .then(payload => {
+        if (dev) console.log("[server] getData:", payload);
+        res.json(payload);
+      })
+      .catch(error => {
+        if (dev) console.log("[server] getData error:", error);
+        res.json({ error });
+      });
+    //or .catch(next)
+    //https://expressjs.com/en/advanced/best-practice-performance.html#use-promises
+    //https://expressjs.com/en/guide/error-handling.html
   }
 });
 
