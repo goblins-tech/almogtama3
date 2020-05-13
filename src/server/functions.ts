@@ -25,6 +25,7 @@ import multer from "multer";
 import { slug } from "../app/content/functions";
 import { resize as _resize, sharp } from "pkg/graphics";
 import { Categories } from "pkg/ngx-formly/categories-material/functions";
+import { setTimer, getTimer, endTimer } from "pkg/nodejs-tools/timer";
 
 export const dev = process.env.NODE_ENV === "development";
 
@@ -70,33 +71,43 @@ export const bucket = new Firebase(/*{
  */
 export function getCategories() {
   return cache("temp/articles/categories.json", () =>
-    connect().then(
-      () =>
-        Promise.all([
-          model("categories")
-            .find({})
-            .lean(),
-          model("articles")
-            .find({}, "categories")
-            .lean()
-        ])
-          .then(([categories, articles_categories]) => {
-            mongoose.connection.close();
-            let ctg = new Categories(categories);
-            ctg.adjust();
-            return ctg.articleCategories(articles_categories);
-          })
-          .catch(err => {
-            console.error("Error @categories", err);
-            throw new Error(`Error @categories, ${err.message}`);
-          }),
-      1
-    )
+    connect().then(() => {
+      setTimer("getCategories");
+      return Promise.all([
+        model("categories")
+          .find({})
+          .lean(),
+        model("articles")
+          .find({}, "categories")
+          .lean()
+      ])
+        .then(([categories, articles_categories]) => {
+          if (dev)
+            console.log(
+              "[server] getCategories: fetched from server",
+              getTimer("getCategories")
+            );
+          mongoose.connection.close();
+          let ctg = new Categories(categories);
+          ctg.adjust();
+          if (dev)
+            console.log(
+              "[server] getCategories: adjusted",
+              endTimer("getCategories")
+            );
+          return ctg.articleCategories(articles_categories);
+        })
+        .catch(err => {
+          console.error("Error @categories", err);
+          throw new Error(`Error @categories, ${err.message}`);
+        });
+    }, 1)
   );
 }
 
 //todo: id (ObjectId | shortId) | limit (number)
 export function getData(params) {
+  setTimer("getData");
   var cacheFile = "./temp/articles/"; //todo: ./temp/$type
   if (params.id) cacheFile += `/${params.id}`;
   else if (params.category) cacheFile += `/${params.category}`;
@@ -112,7 +123,6 @@ export function getData(params) {
     () =>
       connect()
         .then(() => {
-          console.log("[mongoose] connected");
           let contentModel = model("articles"),
             content;
 
@@ -193,6 +203,7 @@ export function getData(params) {
         })
         .then(content => {
           mongoose.connection.close();
+          if (dev) console.log("[server] getData", endTimer("getData"));
           return content;
         }),
     params.id ? 3 : 24
@@ -205,7 +216,8 @@ export function saveData(data) {
   2- insert data to db
   3- upload cover image then resize it
    */
-  if (dev) console.log("server/saveData()", data);
+  setTimer("saveData");
+  if (dev) console.log("[server] saveData", data);
 
   let id = data._id;
   let dataDir = `./temp/queue/${id}`,
@@ -333,7 +345,10 @@ export function saveData(data) {
           throw new Error(`Error @insertData(), ${err.message}`);
         });
     })
-    .then(() => data);
+    .then(() => {
+      if (dev) console.log("[server] saveData", endTimer("saveData"));
+      return data;
+    });
 
   //todo: data.summary=summary(data.content)
 
@@ -404,6 +419,7 @@ export let upload = multer({
  * @return Promise<{size:path}>
  */
 export function resize(img, info) {
+  setTimer("resize");
   let originalSize = statSync(img).size; //todo: get size of Buffer img
   //todo: if(parts.type=="dir")size all images inside this dir
   //todo: add meta tag sized=true, original=file
@@ -420,17 +436,23 @@ export function resize(img, info) {
           }
         )
       )
-        .then(images =>
-          images
-            .filter(image => image && image.size < originalSize) //ignore images larger than the original one
-            //.map(el => [el.width, el.file])
-            .reduce((total, current) => {
-              //convert from array[ {width,file, ..} ] into {width:file}
-              let file = current.file.replace(MEDIA, `${info.type}/${info.id}`);
-              total[current.width] = file; //todo: remove D:/**,
-              return total; //accumulator
-            }, {})
-        )
+        .then(images => {
+          if (dev) console.log("[server] resize", endTimer("resize"), img);
+          return (
+            images
+              .filter(image => image && image.size < originalSize) //ignore images larger than the original one
+              //.map(el => [el.width, el.file])
+              .reduce((total, current) => {
+                //convert from array[ {width,file, ..} ] into {width:file}
+                let file = current.file.replace(
+                  MEDIA,
+                  `${info.type}/${info.id}`
+                );
+                total[current.width] = file; //todo: remove D:/**,
+                return total; //accumulator
+              }, {})
+          );
+        })
         .catch(err => console.error(err));
     });
 }
