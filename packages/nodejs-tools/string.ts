@@ -1,3 +1,6 @@
+import { setTimer, endTimer, getTimer } from "./timer";
+const dev = process.env.NODE_ENV === "development";
+
 /**
  * asynchronously replace part of a string
  * @method replaceAsync
@@ -15,6 +18,7 @@ todo:
    ex: replacer may be a promise or a function that returns a promise
  */
 export function replaceAsync(str, regex, replacer) {
+  setTimer("replaceAsync");
   const matched = str.match(regex);
   if (!matched) return Promise.resolve(str);
   if (!regex.global)
@@ -42,5 +46,9 @@ export function replaceAsync(str, regex, replacer) {
     i++;
   }
   result[i] = str.slice(index);
-  return Promise.all(callbacks).then(() => result.join(""));
+  return Promise.all(callbacks).then(() => {
+    if (dev)
+      console.log("replaceAsync", endTimer("replaceAsync"), { str, regex });
+    return result.join("");
+  });
 }
