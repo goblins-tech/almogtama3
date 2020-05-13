@@ -18,7 +18,7 @@
     {
       "name": "assets",
       "installMode": "lazy",
-      "updateMode": "prefetch",
+      "updateMode": "lazy",
       "resources": {
         "files": [
           "/assets/**",
@@ -29,22 +29,12 @@
   ],
   "dataGroups": [
     {
-      "name": "api-long-term",
-      "urls": ["/api/*", "/social"],
+      "name": "api",
+      "urls": ["/api/**", "/**", "!/**/*.*"],
       "version": 1,
       "cacheConfig": {
         "maxSize": 100,
-        "maxAge": "3d",
-        "strategy": "performance"
-      }
-    },
-    {
-      "name": "api-short-term",
-      "urls": ["/jobs", "/articles"],
-      "version": 1,
-      "cacheConfig": {
-        "maxSize": 100,
-        "maxAge": "1h",
+        "maxAge": "30d",
         "strategy": "freshness"
       }
     }
