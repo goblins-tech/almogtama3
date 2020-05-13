@@ -8,7 +8,7 @@
     "build:server:dev": "ng run almogtama3:server --bundleDependencies all",
     "build:server:webpack": "webpack --config webpack.server.config.js --progress --colors --mode=production",
     "build:server:webpack:dev": "webpack --config webpack.server.config.js --progress --colors --mode=development",
-    "build:all": "npm run build:browser && npm run build:server && npm run build:server:webpack && node tasks terser",
+    "build:all": "npm run build:browser && npm run build:server && npm run build:server:webpack && node tasks terser && npx ngsw-config dist/browser ngsw-config.json",
     "build:all:dev": "npm run build:browser:dev && npm run build:server:dev && npm run build:server:webpack:dev",
     "build": "npx cross-env NODE_ENV=production npm run build:all",
     "build:dev": "npx cross-env NODE_ENV=development npm run build:all:dev",
