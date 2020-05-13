@@ -107,7 +107,7 @@ export function getCategories() {
 
 //todo: id (ObjectId | shortId) | limit (number)
 export function getData(params) {
-  setTimer("getData");
+  //setTimer("getData"); //timer('getData') = timer('cache')
   var cacheFile = "./temp/articles/"; //todo: ./temp/$type
   if (params.id) cacheFile += `/${params.id}`;
   else if (params.category) cacheFile += `/${params.category}`;
@@ -203,7 +203,7 @@ export function getData(params) {
         })
         .then(content => {
           mongoose.connection.close();
-          if (dev) console.log("[server] getData", endTimer("getData"));
+          //  if (dev) console.log("[server] getData", endTimer("getData"));
           return content;
         }),
     params.id ? 3 : 24

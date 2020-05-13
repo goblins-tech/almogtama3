@@ -92,7 +92,8 @@ export function connect(uri: types.uri, options?: types.ConnectionOptions) {
 
   // todo: return Promise<this mongoose, not Mongoose>
   return mongoose.connect(uri as string, options).then(c => {
-    if (dev) console.log("[mongoose] connected", endTimer("connect"));
+    //this will log in both dev & prod mode to track the connection execution time.
+    console.log("[mongoose] connected", endTimer("connect"));
     return c;
   });
 }

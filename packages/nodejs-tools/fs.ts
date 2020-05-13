@@ -256,7 +256,7 @@ export async function cache(
     }); //todo: return a promise
 
   mdir(file as string, true);
-  if (ext(file) == ".json") json = true;
+
   if (
     !fs.existsSync(file) ||
     expire < 0 ||
@@ -276,7 +276,7 @@ export async function cache(
         : Promise.resolve(cache_save(file, data, allowEmpty));
 
     return p.then(data => {
-      if (dev) console.log("[cache] file refereshed", file, endTimer("cache"));
+      if (dev) console.log("[cache] file refereshed", endTimer("cache"), file);
       return data;
     });
 
@@ -286,7 +286,7 @@ export async function cache(
   } else {
     // retrive data from file and return it as the required type
     data = fs.readFileSync(file, "utf8").toString(); // without encoding (i.e utf-8) will return a stream insteadof a string
-    if (json) data = JSON.parse(data);
+    if (json || ext(file) == ".json") data = JSON.parse(data);
 
     return new Promise(r => {
       if (dev) console.log("[cache] file exists", endTimer("cache"), file);

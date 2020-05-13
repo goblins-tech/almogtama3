@@ -167,14 +167,15 @@ export class ContentComponent implements OnInit, AfterViewInit {
         });
 
     let comp = this.comp.nativeElement;
-    console.log("selector", {
-      "pre.ql-syntax": comp.querySelectorAll("pre.ql-syntax"),
-      pre: comp.querySelectorAll("pre"),
-      ".ql-syntax": comp.querySelectorAll(".ql-syntax"),
-      "quill-editor": comp.querySelectorAll("quill-editor"),
-      p: comp.querySelectorAll("p"),
-      html: comp.querySelectorAll("html")
-    });
+    if (env.dev)
+      console.log("selector", {
+        "pre.ql-syntax": comp.querySelectorAll("pre.ql-syntax"),
+        pre: comp.querySelectorAll("pre"),
+        ".ql-syntax": comp.querySelectorAll(".ql-syntax"),
+        "quill-editor": comp.querySelectorAll("quill-editor"),
+        p: comp.querySelectorAll("p"),
+        html: comp.querySelectorAll("html")
+      });
   }
   getData(): Observable<Data> {
     return this.httpService.get<Data>(this.params);

@@ -58,6 +58,7 @@ app.enable("trust proxy");
 //https://dev.to/splodingsocks/getting-all-404s-with-your-firebase-functions-3p1
 
 app.use((req, res, next) => {
+  if (dev) console.log("[server] request:", req.originalUrl, { req });
   if (!req.path) req.url = `/{req.url}`;
   next();
 });
