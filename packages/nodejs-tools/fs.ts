@@ -1,8 +1,9 @@
 // todo: create fileSync
 
-import fs from "fs";
-import Path from "path";
+import * as fs from "fs";
+import * as Path from "path";
 import { objectType, isEmpty, now, exportAll } from "./general";
+import { setTimer, getTimer } from "./timer";
 
 export * from "fs";
 export * from "path";
@@ -20,11 +21,11 @@ export namespace types {
     existing: moveOptionsExisting;
   }
   export interface DeleteOptions {
-    files?: boolean; // delete files only, dont delete folders
+    filesOnly?: boolean; // delete files only, don't delete folders
     keepDir?: boolean; // if false, delete the folder content, but not the folder itself, default=false
     // [name: string]: any;
   }
-  export type PathLike = import("fs").PathLike;
+  export type PathLike = fs.PathLike;
   // = string | Buffer | URL, but URL here refers to typescript/URL not node/URL
 }
 
@@ -96,9 +97,19 @@ export function size(file?: types.PathLike, unit?: "kb" | "mb" | "gb"): number {
  * @method isDir
  * @param  path  [description]
  * @return [description]
+ * @examples:
+ * ex1:
+ *   if(isDir(path)){ ... }
+ * ex2:
+ *   idDir(path, dir=>console.log(dir?'directory':'file'))
  */
-export function isDir(path: types.PathLike): boolean {
-  return fs.lstatSync(path).isDirectory(); // todo:
+export function isDir(
+  path: types.PathLike,
+  cb?: (result: boolean) => void
+): boolean | void {
+  return !cb
+    ? fs.lstatSync(path).isDirectory()
+    : fs.lstat(path, (err, stats) => cb(stats.isDirectory()));
 }
 
 // todo: overload: move([ ...[from,to,options] ], globalOptions)
@@ -113,16 +124,18 @@ export function isDir(path: types.PathLike): boolean {
 export function move(
   path: types.PathLike,
   newPath: types.PathLike,
-  options?: types.MoveOptions
-): {} {
-  // let destination = this.isDir(path) ? newPath : Path.dirname(newPath); //todo: ??
-  fs.renameSync(path, newPath); // todo: when removing URL from path types, error solved i.e: move(path:string|Buffer,..), why?
-  /*TODO:
-     - if faild, try copy & unlink
-     - options.existing:replace|rename_pattern|continue
-     - accept multiple files: move([file1,file2],newPath), move({file1:newPath1,...})
+  options?: types.MoveOptions,
+  cb?: (err) => void
+) {
+  return !cb ? fs.renameSync(path, newPath) : fs.rename(path, newPath, cb);
+  /*
+  todo:
+   - if isDir(newPath)newPath+=basename(path)
+   - bulk: move({file1:newPath1, file2:newFile2}) or move([file1,file2],newPath)
+   - move directories and files.
+   - if faild, try copy & unlink
+   - options.existing:replace|rename_pattern|continue
    */
-  return {}; // todo: return a result
 }
 
 /**
@@ -131,8 +144,13 @@ export function move(
  * @param  file  [description]
  * @return [description]
  */
-export function mtime(file: types.PathLike): number | bigint {
-  return fs.statSync(file).mtimeMs;
+export function mtime(
+  file: types.PathLike,
+  cb?: (mtimeMs: number | BigInt) => void
+): number | BigInt | void {
+  return !cb
+    ? fs.statSync(file).mtimeMs
+    : fs.stat(file, (err, stats) => cb(stats.mtimeMs));
 }
 
 //
@@ -154,32 +172,58 @@ export function mtime(file: types.PathLike): number | bigint {
  */
 
 export function remove(
-  path: types.PathLike,
-  options?: types.DeleteOptions
-): void {
+  path: types.PathLike | types.PathLike[],
+  options?: types.DeleteOptions,
+  cb?: (err) => void
+): boolean | void {
   /*
    todo:
-    - return boolean
+    - return boolean | {file:boolean} | throw Error
     - check path type (file/folder)
  */
-  if (!path) {
-    return;
-  }
+  if (!path) return cb ? cb("no path") : false;
+  if (path instanceof Array)
+    return path.forEach(p => remove(p as types.PathLike, options, cb));
+  path = path as types.PathLike;
   path = resolve(path);
-  if (fs.existsSync(path)) {
-    fs.readdirSync(path).forEach(file => {
-      const curPath = `${path}/${file}`;
-      if (fs.lstatSync(curPath).isDirectory()) {
-        if (!options.files) {
-          remove(curPath);
-        }
-      } else {
-        fs.unlinkSync(curPath);
-      }
-    });
-    if (!options.keepDir) {
-      fs.rmdirSync(path);
+  options = options || {};
+  if (!cb) {
+    if (fs.existsSync(path)) {
+      if (isDir(path))
+        fs.readdirSync(path).forEach(file => {
+          let curPath = `${path}/${file}`;
+          if (isDir(curPath)) {
+            if (!options.filesOnly) remove(curPath, options);
+          } else fs.unlinkSync(curPath);
+        });
+      else fs.unlinkSync(path);
+      if (!options.keepDir) fs.rmdirSync(path);
     }
+  } else {
+    //todo: only run cb() one time when all files removed
+    fs.access(path, fs.constants.R_OK, err => {
+      if (err) return cb(err);
+      isDir(path, dir => {
+        if (dir)
+          fs.readdir(path, {}, (err, files) => {
+            if (err) return cb(err);
+            (files as any).forEach(file => {
+              let curPath = `${path}/${file}`;
+              isDir(curPath, _isDir => {
+                if (_isDir) {
+                  if (!options.filesOnly) remove(curPath, options, cb);
+                } else fs.unlink(curPath, cb);
+              });
+            });
+            //todo: after removing all files, remove path
+            //readdir(path,{},files=>{files.foreach(..); unlink(path)}), use promises
+            //https://stackoverflow.com/questions/18983138/callback-after-all-asynchronous-foreach-callbacks-are-completed
+            //https://gist.github.com/yoavniran/adbbe12ddf7978e070c0
+            //or: remove all files and add dirs to dirs[], then remove all dirs
+          });
+        else fs.unlink(path, cb);
+      });
+    });
   }
 }
 
@@ -204,8 +248,13 @@ export async function cache(
        allowEmpty: allow creating an empty cache file
        expire (hours)
    */
+  setTimer("cache");
   file = resolve(file);
-  if (data === ":purge:") return fs.unlink(file, () => {}); //purging the cache; not a promise
+  if (data === ":purge:")
+    return fs.unlink(file, () => {
+      if (dev)
+        cosole.console.log("[cache] file purged", getTimer("cache"), file);
+    }); //todo: return a promise
 
   mdir(file as string, true);
   if (ext(file) == ".json") json = true;
@@ -216,35 +265,47 @@ export async function cache(
     expire != 0 && // if expire=0: never expires
       (mtime(file) as number) + expire * 60 * 60 * 1000 < now()) // todo: convert mimetime() to number or convert expire to bigInt??
   ) {
-    if (dev) console.log("cach: refreshing cache", file);
-    function cache_save(data) {
-      if (["array", "object"].includes(objectType(data)))
-        data = JSON.stringify(data);
-
-      if (allowEmpty || !isEmpty(data)) fs.writeFileSync(file, data);
-      return data;
-    }
+    if (dev) console.log("[cache] refreshing cache", file);
 
     //todo: also support rxjs.Observable
     //no need to support Async functions, because it is nonsense if data() function returns another function. (func.constructor.name === "AsyncFunction")
     if (typeof data == "function") data = await data();
 
-    if (data && (data instanceof Promise || typeof data.then == "function"))
-      return data.then(data => cache_save(data));
-    else return Promise.resolve(cache_save(data));
+    let p =
+      data && (data instanceof Promise || typeof data.then == "function")
+        ? data.then(data => cache_save(file, data, allowEmpty))
+        : Promise.resolve(cache_save(file, data, allowEmpty));
+
+    return p.then(data => {
+      if (dev) console.log("[cache] file refereshed", file, endTimer("cache"));
+      return data;
+    });
+
     //else return new Promise(r => r(cache_save(data)));
 
     // todo: do we need to convert data to string? i.e: writeFileSync(file.toString()), try some different types of data
   } else {
-    if (dev) console.log("cache: file exists", file);
     // retrive data from file and return it as the required type
     data = fs.readFileSync(file, "utf8").toString(); // without encoding (i.e utf-8) will return a stream insteadof a string
     if (json) data = JSON.parse(data);
 
-    return new Promise(r => r(data));
+    return new Promise(r => {
+      if (dev) console.log("[cache] file exists", endTimer("cache"), file);
+      return r(data);
+    });
     // todo: elseif(type=="number") elseif ...
   }
 }
+
+//todo: use async functions
+function cache_save(file, data, allowEmpty) {
+  if (["array", "object"].includes(objectType(data)))
+    data = JSON.stringify(data);
+
+  if (allowEmpty || !isEmpty(data)) fs.writeFileSync(file, data);
+  return data;
+}
+
 export function mdir(path: string | string[], file = false) {
   if (path instanceof Array) {
     let result = {};
