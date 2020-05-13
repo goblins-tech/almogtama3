@@ -1,6 +1,7 @@
 // todo: export default mongoose (instead of export every method separately) i.e import mongoose, not import * as mongoose ..
 import mongoose from "mongoose";
 import shortId from "shortid";
+import { setTimer, endTimer } from "pkg/nodejs-tools/timer";
 export { mongoose };
 
 /*
@@ -45,6 +46,7 @@ Object.keys(mongoose).forEach(key => {
 });*/
 
 export function connect(uri: types.uri, options?: types.ConnectionOptions) {
+  setTimer("connect");
   const defaultOptions = {
     // todo: export static defaultConnectionOptions={..}
     useCreateIndex: true,
@@ -86,10 +88,13 @@ export function connect(uri: types.uri, options?: types.ConnectionOptions) {
   }
 
   options = Object.assign(options || {}, defaultOptions);
-  if (dev) console.log("[mongoose]:", { uri, options });
+  if (dev) console.log("[mongoose]", { uri, options });
 
   // todo: return Promise<this mongoose, not Mongoose>
-  return mongoose.connect(uri as string, options);
+  return mongoose.connect(uri as string, options).then(c => {
+    if (dev) console.log("[mongoose] connected", endTimer("connect"));
+    return c;
+  });
 }
 
 export function model(

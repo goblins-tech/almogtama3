@@ -24,16 +24,14 @@ export function connect() {
 }
 
 export function insertData(data) {
+  if (!data) return Promise.reject("no data");
   let type = data.type || "articles";
   if (type == "jobs") type = "articles";
   return connect().then(
     () => {
-      if (dev) console.log("connected");
-      if (data) {
-        let contentModel = model(type);
-        let content = new contentModel(data);
-        return content.save();
-      }
+      let contentModel = model(type);
+      let content = new contentModel(data);
+      return content.save();
     },
     err => {
       console.error("connection failed", { err });
