@@ -6,7 +6,7 @@ todo:
 - run(): mark may be object: arguments -> if(mark:obj && mark.collee)mark={run:mark/mark.callee.name,...arguments}
 */
 
-import util from "util";
+import * as util from "util";
 
 // todo: test if this function exports module keys & work correctly
 export function exportAll(module: any) {

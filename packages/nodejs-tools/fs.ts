@@ -3,7 +3,7 @@
 import * as fs from "fs";
 import * as Path from "path";
 import { objectType, isEmpty, now, exportAll } from "./general";
-import { setTimer, getTimer } from "./timer";
+import { setTimer, getTimer, endTimer } from "./timer";
 
 export * from "fs";
 export * from "path";
@@ -203,9 +203,9 @@ export function remove(
     //todo: only run cb() one time when all files removed
     fs.access(path, fs.constants.R_OK, err => {
       if (err) return cb(err);
-      isDir(path, dir => {
+      isDir(path as types.PathLike, dir => {
         if (dir)
-          fs.readdir(path, {}, (err, files) => {
+          fs.readdir(path as types.PathLike, {}, (err, files) => {
             if (err) return cb(err);
             (files as any).forEach(file => {
               let curPath = `${path}/${file}`;
@@ -221,7 +221,7 @@ export function remove(
             //https://gist.github.com/yoavniran/adbbe12ddf7978e070c0
             //or: remove all files and add dirs to dirs[], then remove all dirs
           });
-        else fs.unlink(path, cb);
+        else fs.unlink(path as types.PathLike, cb);
       });
     });
   }
@@ -252,8 +252,7 @@ export async function cache(
   file = resolve(file);
   if (data === ":purge:")
     return fs.unlink(file, () => {
-      if (dev)
-        cosole.console.log("[cache] file purged", getTimer("cache"), file);
+      if (dev) console.log("[cache] file purged", getTimer("cache"), file);
     }); //todo: return a promise
 
   mdir(file as string, true);
