@@ -1,3 +1,13 @@
+/*
+- quill css already defined in content/view (in pkg/content/view),
+  but they also needed for content/editor, because they didn't defined in
+   <ngx-form> we have to import them globally (i.e in style.scss)
+
+*/
+@import '~quill/dist/quill.core.css';
+@import '~quill/dist/quill.snow.css';
+
+
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 *{max-width:100%; box-sizing: border-box;}
