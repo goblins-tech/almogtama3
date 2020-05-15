@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 
 @Component({
-  selector: "app-manage",
+  selector: "content-manage",
   templateUrl: "./manage.html",
   styleUrls: ["./manage.scss"]
 })

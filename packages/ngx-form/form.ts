@@ -37,7 +37,7 @@ export interface Step {
 
 export interface Response {
   ok: boolean;
-  msg?: string;
+  message?: string;
 }
 
 @Component({

@@ -15,7 +15,7 @@ export interface DataObj {
 }
 
 @Component({
-  selector: "content-view",
+  selector: "ngx-content-view",
   templateUrl: "./view.html",
   styleUrls: ["./view.scss"]
 })

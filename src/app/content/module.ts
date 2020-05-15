@@ -1,7 +1,7 @@
 import { LOCALE_ID, NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Routes, RouterModule, UrlSegment } from "@angular/router";
-import { ContentComponent } from "./index";
+import { ContentComponent } from "./view";
 import { ContentEditorComponent } from "./editor";
 import { ContentManageComponent } from "./manage";
 

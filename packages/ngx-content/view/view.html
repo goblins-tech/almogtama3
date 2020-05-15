@@ -15,13 +15,13 @@ todo:
 </ng-container>
 
 <ng-template let-item="dataObj" #itemBlock>
-  <content-article [data]="item" type="item"></content-article>
+  <ngx-content-article [data]="item" type="item"></ngx-content-article>
 </ng-template>
 
 <ng-template #gridBlock let-dataObj="dataObj">
   <div class="masonry">
     <div class="masonry-item" *ngFor="let item of dataObj">
-      <content-article [data]="item" type="list"></content-article>
+      <ngx-content-article [data]="item" type="list"></ngx-content-article>
     </div>
   </div>
 </ng-template>

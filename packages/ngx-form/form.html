@@ -1,12 +1,12 @@
 <h3 *ngIf="_formObj?.title">{{_formObj.title}}</h3>
 <div
-  *ngIf="response"
+  *ngIf="response?.message"
   class="alert"
-  [ngClass]="response.ok==true?'alert-ok':'alert-error'"
+  [ngClass]="response.ok?'alert-ok':'alert-error'"
 >
-  <ng-container *ngIf="response.ok==true; else error">
+  <ng-container *ngIf="response.ok; else error">
     form submitted successfully<br />
-    <div *ngIf="response.msg" [innerHTML]="response.msg"></div>
+    <div [innerHTML]="response.message"></div>
 
     <!--
       todo: pipes are registered in packages/ngx-content/view/module,
@@ -17,7 +17,7 @@
       >{{response.data.title}}</a
     > -->
   </ng-container>
-  <ng-template #error>Error: {{response.msg}}</ng-template>
+  <ng-template #error>Error: {{response.message}}</ng-template>
 </div>
 
 <ng-container *ngIf="_formObj?.form; else loading">

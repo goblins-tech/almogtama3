@@ -34,7 +34,7 @@ export interface Params {
 }
 
 @Component({
-  selector: "app-content",
+  selector: "content-editor",
   templateUrl: "./editor.html",
   styleUrls: ["./editor.scss"]
 })
@@ -190,7 +190,7 @@ export class ContentEditorComponent implements OnInit {
     if (!formObj || !formObj.form || !formObj.form.value) {
       this.response = {
         ok: false,
-        msg: "technichal error, `formObj` is undefined"
+        message: "technichal error, `formObj` is undefined"
       };
       if (env.dev) console.log({ formObj });
       return;
@@ -205,16 +205,16 @@ export class ContentEditorComponent implements OnInit {
     let files = formObj.fields.filter(el => el.type == "file"); //todo: formObj$.form.get('cover').files?
     //todo: app.post("/api/",data)
     this.httpService.upload(this.params.type, data, (type, event, value) => {
+      if (env.dev) console.log("[upload]", { type, event, value });
       if (type == "progress") this.progress = value;
       //todo: send to formObj$.fields[type=file]
       else if (type == "response") {
-        if (env.dev) console.log("event.body", event.body);
-        let data = event.body.data;
+        let data = event.body;
         this.response = data.error
-          ? { ok: false, msg: data.error.msg }
+          ? { ok: false, message: data.error.message || data.error.msg }
           : {
               ok: true,
-              msg: data
+              message: data
                 ? `<a href="/id/${data.shortId ||
                     data._id ||
                     data.id}">view</a>`
@@ -225,10 +225,10 @@ export class ContentEditorComponent implements OnInit {
         //todo: reset progress value
         //todo: showSnackBar() content: is html
         this.showSnackBar(
-          (event.body.ok ? "form submitted" : "Error ") + this.response.msg ||
-            "",
+          (!event.body.error ? "form submitted" : "Error ") +
+            this.response.message || "",
           "close",
-          3000
+          7000
         );
         //this.uploadedFiles=event.body;
         formObj.form.reset();

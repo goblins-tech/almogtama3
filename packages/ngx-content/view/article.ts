@@ -23,7 +23,7 @@ export interface Pref extends Obj {
 }
 
 @Component({
-  selector: "content-article",
+  selector: "ngx-content-article",
   templateUrl: "./article.html",
   styleUrls: ["./view.scss"]
 })

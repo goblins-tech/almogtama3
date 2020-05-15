@@ -9,7 +9,7 @@ import { AngularFireStorageModule } from "@angular/fire/storage";
 import { AngularFireAuthModule } from "@angular/fire/auth";
 import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { HttpService } from "./http.service";
-import { ContentModule } from "./content/content.module";
+import { ContentModule } from "./content/module";
 import { FormModule } from "./forms/forms.module";
 import { UniversalInterceptor } from "../../universal-interceptor";
 import { MetaService } from "pkg/ngx-content/view/meta.service";

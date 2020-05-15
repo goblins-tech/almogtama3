@@ -37,9 +37,9 @@ export interface Params extends Obj {
 }
 
 @Component({
-  selector: "app-content",
-  templateUrl: "./index.html",
-  styleUrls: ["./index.scss"]
+  selector: "content-view",
+  templateUrl: "./view.html",
+  styleUrls: ["./view.scss"]
 })
 export class ContentComponent implements OnInit, AfterViewInit {
   @ViewChild("quillView") quillView;
