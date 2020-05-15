@@ -51,10 +51,22 @@ export class Firebase {
       if (!("storageBucket" in options))
         options.storageBucket = `gs://${options.project}.appspot.com`;
       if (!("databaseURL" in options))
-        options.storageBucket = `https://${options.project}.firebaseio.com`;
+        //todo:a duplicate key: options.storageBucket
+        options.databaseURL = `https://${options.project}.firebaseio.com`;
     }
     this.admin.initializeApp(options);
   }
+  /*
+  firebase.initializeApp({
+  apiKey: "AIza....",                             // Auth / General Use
+  applicationId: "1:27992087142:web:ce....",      // General Use
+  projectId: "my-firebase-project",               // General Use
+  authDomain: "YOUR_APP.firebaseapp.com",         // Auth with popup/redirect
+  databaseURL: "https://YOUR_APP.firebaseio.com", // Realtime Database
+  storageBucket: "YOUR_APP.appspot.com",          // Storage
+  messagingSenderId: "123456789"                  // Cloud Messaging
+});
+   */
 
   storage(bucket?: string) {
     return new Storage(this.admin, bucket);
