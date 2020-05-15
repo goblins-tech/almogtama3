@@ -4,18 +4,32 @@ import { json as jsonParser, urlencoded as urlParser } from "body-parser";
 import cors from "cors"; //To be able to access our API from an angular application
 //import formidable from "formidable"; //to handle the uploaded files https://flaviocopes.com/express-forms-files/
 import parseDomain from "parse-domain";
-import { renameSync, json, mdir, existsSync } from "pkg/nodejs-tools/fs";
+import {
+  renameSync,
+  json,
+  mdir,
+  existsSync,
+  constants,
+  parsePath,
+  cache
+} from "pkg/nodejs-tools/fs";
 import shortId from "shortid";
 import {
   getData,
   upload,
   saveData,
+  bucket,
   BROWSER,
   MEDIA,
   BUCKET,
   dev,
   getCategories
 } from "./functions";
+import { resize } from "pkg/graphics";
+import { setTimer, endTimer, getTimer } from "pkg/nodejs-tools/timer";
+
+//todo: import {} from 'fs/promises' dosen't work yet (expremental)
+const { access, readFile, writeFile } = require("fs").promises;
 
 //console.clear();
 
@@ -177,6 +191,60 @@ app.get("/api/:item?", (req, res, next) => {
     //https://expressjs.com/en/advanced/best-practice-performance.html#use-promises
     //https://expressjs.com/en/guide/error-handling.html
   }
+});
+
+//todo: /\/(?<type>image|cover)\/(?<id>[^\/]+) https://github.com/expressjs/express/issues/4277
+app.get(/\/(image|cover)\/([^\/]+)/, (req, res) => {
+  //<img src="/images/$id/slug.png?size=250" />
+  setTimer("/image");
+
+  //todo: use system.temp folder
+  let type = req.params[0],
+    id = req.params[1],
+    size = <string>req.query.size,
+    path = `articles/${type}/${id}`,
+    bucketPath = `${BUCKET}/${path}.webp`,
+    localPath = `${MEDIA}/${path}.webp`,
+    resizedPath = `${localPath}_${size}.webp`;
+
+  if (!id || !type)
+    return res.json({ error: { message: "[server] undefined id or type " } });
+
+  cache(
+    resizedPath,
+    () =>
+      cache(
+        localPath,
+        () => bucket.download(bucketPath).then(data => data[0]),
+        24
+      ).then(data =>
+        resize(data, size, {
+          //  dest: resizedPath, //if the resizid img saved to a file, data=readFile(resized)
+          format:
+            req.headers.accept.indexOf("image/webp") !== -1 ? "webp" : "jpg",
+          allowBiggerDim: false, //todo: add this options to resize()
+          allowBiggerSize: false
+        })
+      ),
+    24
+  )
+    .then(data => {
+      console.log({ data });
+      //todo: set cache header
+      //todo: resize with sharp, convert to webp
+      //res.write VS res.send https://stackoverflow.com/a/54874227/12577650
+      //res.write VS res.sendFile https://stackoverflow.com/a/44693016/12577650
+      //res.writeHead VS res.setHeader https://stackoverflow.com/a/28094490/12577650
+      res.writeHead(200, {
+        "Content-Type": "image/jpg",
+        "Cache-Control": "max-age=31536000"
+      });
+
+      res.write(data);
+      if (dev) console.log("[server] get /image", endTimer("/image"), path);
+      res.end();
+    })
+    .catch(error => res.json({ error }));
 });
 
 // Serve static files; /file.ext will be served from /dist/browser/file.ext then /data/media/file.ext
