@@ -137,7 +137,7 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
     });
 
   if (!req.body || !req.body.content)
-    return res.send({ ok: false, msg: "no data posted" });
+    return res.send({ error: { message: "no data posted" } });
 
   if (!req.body._id) req.body._id = shortId.generate();
   req.body.type = req.params.type;
@@ -145,8 +145,8 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
   if (dev) console.log("[server] post", { body: req.body });
 
   saveData(req.body)
-    .then(data => res.send({ ok: true, data }))
-    .catch(error => res.send({ ok: false, error }));
+    .then(data => res.send(data))
+    .catch(error => res.send({ error }));
 
   //the content will be available after the process completed (uploading files, inserting to db, ..)
 });

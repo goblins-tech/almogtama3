@@ -210,12 +210,16 @@ export class ContentEditorComponent implements OnInit {
       else if (type == "response") {
         if (env.dev) console.log("event.body", event.body);
         let data = event.body.data;
-        this.response = {
-          ok: event.body.ok,
-          msg: data
-            ? `<a href="/id/${data.shortId || data._id || data.id}">view</a>`
-            : ""
-        };
+        this.response = data.error
+          ? { ok: false, msg: data.error.msg }
+          : {
+              ok: true,
+              msg: data
+                ? `<a href="/id/${data.shortId ||
+                    data._id ||
+                    data.id}">view</a>`
+                : ""
+            };
 
         this.submitting = false;
         //todo: reset progress value
