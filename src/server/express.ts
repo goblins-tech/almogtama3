@@ -139,20 +139,11 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
   if (!req.body || !req.body.content)
     return res.send({ ok: false, msg: "no data posted" });
 
-  //we can resume this process at any time
-  //todo: a process to check if there is any item in the queue
-  let id;
-  if (!req.body._id) {
-    id = shortId.generate();
-    req.body._id = id;
-  }
-  let dir = `./temp/queue/${id}`;
+  if (!req.body._id) req.body._id = shortId.generate();
   req.body.type = req.params.type;
   req.body.file = req.file;
-  mdir(dir);
-  json.write(`${dir}/data.json`, req.body);
-
   if (dev) console.log("[server] post", { body: req.body });
+
   saveData(req.body)
     .then(data => res.send({ ok: true, data }))
     .catch(error => res.send({ ok: false, error }));

@@ -23,7 +23,7 @@ import { Firebase } from "pkg/firebase/admin";
 import { initializeApp, credential } from "firebase-admin";
 import multer from "multer";
 import { slug } from "../app/content/functions";
-import { resize as _resize, sharp } from "pkg/graphics";
+import { resize, sharp } from "pkg/graphics";
 import { Categories } from "pkg/ngx-formly/categories-material/functions";
 import { setTimer, getTimer, endTimer } from "pkg/nodejs-tools/timer";
 
@@ -219,146 +219,66 @@ export function saveData(data) {
   setTimer("saveData");
   if (dev) console.log("[server] saveData", data);
 
-  let id = data._id;
-  let dataDir = `./temp/queue/${id}`,
-    dataFile = `${dataDir}/data.json`,
-    dir = `${data.type}/${id}`;
+  let date = new Date();
 
   if (!data.slug || data.slug == "")
     data.slug = slug(data.title, 200, ":ar", false); //if slug changed, cover fileName must be changed
+  if (dev) data.status = "approved";
 
-  // handle base64-encoded data
-  mdir(`${dataDir}/files`);
+  // handle base64-encoded data (async)
+  data.content.replace(
+    /<img src="data:image\/(.+?);base64,(.+?)={0,2}">/g,
+    (match, extention, imgData, matchPosition, fullString) => {
+      let fileName = `${data._id}-${date.getTime()}`,
+        bucketFileName = `${BUCKET}/${data.type}/image/${fileName}.webp`,
+        imgName = `/image/${fileName}/${data.slug}.webp`,
+        srcset = "",
+        sizes = ""; //todo: ?size=
 
-  //data.images[]: an array contains all images pathes inside the article
-  //to be downloaded when this article requested in case of the site moved to
-  //a new server.
-  //it contain all available sizes includes 'opt' (optimized version) but doesn't contain 'orig' (the original file)
-  if (!data.images) data.images = [];
-  let date = new Date();
+      //todo: catch(err=>writeFile('queue/*',{imgData,err})) to retry uploading again
+      resize(imgData, "", { format: "webp" })
+        .then(data =>
+          //todo: upload by data (buffer)
+          bucket.upload(data, `${bucketFileName}`)
+        ) //todo: get fileName
+        .then(file => console.log(`[server] ${file} uploaded`));
 
-  let mediaDir = `${MEDIA}/${dir}`,
-    bucketDir = `${BUCKET}/${dir}`;
-  mdir(mediaDir);
-
-  return replaceAsync(
-    data.content,
-    /<img src="data:image\/(.+?);base64,(.+?)={0,2}">/g, //todo: handle other mimetypes
-    (match, group1, group2, position, fullString) => {
-      let file = `${data.slug}-${date.getTime()}.${group1}`; //todo: slug(title,limit=50)
-      data.images.push(file);
-      let tmp = `${mediaDir}/${file}`;
-
-      if (dev) console.log(`uploading file: ${file}`);
-
-      //or promises.writeFile().then() //expremental
-      //or util.promisify(fs.writeFile()).then()
-      return new Promise((r, j) => {
-        writeFile(tmp, group2, "base64", err => {
-          if (err) j(err);
-          else r(tmp);
-        });
-      })
-        .then(() => bucket.upload(tmp, `${bucketDir}/${file}`))
-        .then(() =>
-          resize(tmp, {
-            type: data.type,
-            id
-          }).then(imgs => {
-            if (dev) console.log(`file ${file} uploaded & resized`, imgs);
-
-            //imgs={width:path}
-            let srcset, sizes; //todo:
-            return `<img data-src="${dir}/${file}" data-srcset="${srcset}" sizes="${sizes}" alt="${data.title}" />`;
-          })
-        )
-
-        .catch(err => {
-          throw new Error(`Error @file: ${file}, ${err.message}`);
-        });
+      return `<img data-src="${imgName}" data-srcset="${srcset}" sizes="${sizes}" alt="${data.title}" />`;
     }
-  )
-    .then(content => {
-      data.content = content;
+  );
 
-      if (data.file && existsSync(data.file.path)) {
-        if (dev) console.log("uploading cover ...");
+  //upload cover
+  if (data.file) {
+    if (dev) console.log("uploading cover ...");
+    data.cover = true;
 
-        if (!data.cover)
-          data.cover = {
-            src: `${data.slug}${ext(data.file.originalname)}`
-          };
-        //todo: await until cover uploaded, then insert data
+    //to get original name: data.file.originalname
+    let fileName = `${data._id}`,
+      bucketFileName = `${BUCKET}/${data.type}/cover/${fileName}.webp`,
+      imgName = `/cover/${fileName}/${data.slug}.webp`,
+      srcset = "",
+      sizes = "";
 
-        return bucket
-          .upload(data.file.path, `${bucketDir}/${data.cover.src}`)
-          .then(() => {
-            let coverDir = `${mediaDir}/${data.cover.src}`;
-            renameSync(data.file.path, coverDir);
-            return coverDir;
-          })
-          .then(coverDir =>
-            resize(coverDir, {
-              type: data.type,
-              id
-            })
-              .then(imgs => {
-                if (dev) console.log("cover uploaded & resized", imgs);
-                //todo: convert imgs to scrSet (i.e: img.jpg 400w,...)
-                data.cover.srcSet = imgs;
-              })
-              .catch(err => console.error({ err }))
-          )
-          .catch(err => {
-            throw new Error(`Error: uploading cover failed, ${err.message}`);
-          });
-      }
-    })
-    .then(() => {
-      delete data.tmp;
-      delete data.file;
-      if (dev) {
-        data.status = "approved";
-      }
-      if (dev) console.log("inserting data", data);
-      //we return the inner promise to catch it's thrown error
-      //ex: promise.then(()=>{ return promise2.then(()=>{throw 'error'})} ).catch(e=>{/*inner error catched*/})
-      //https://stackoverflow.com/a/39212325
-      return insertData(data)
-        .then(_data => {
-          data = _data;
-          if (dev) console.log("data inserted");
-          unlink(dataFile, e => {}); //todo: remove dataDir
-          //create cache
-          json.write(`./temp/${data.type}/${data.shortId}.json`, data);
-          let indexCache = `./temp/${data.type}/index.json`;
-          if (existsSync(indexCache)) {
-            let { _id, shortId, slug, cover } = data; //todo:,summary
-            json.write(
-              indexCache,
-              json.read(indexCache).unshift({ _id, shortId, slug, cover })
-            );
-            //or: cache(indexCache, ":purge:");
-          }
-        })
-        .catch(err => {
-          throw new Error(`Error @insertData(), ${err.message}`);
-        });
-    })
-    .then(() => {
-      if (dev) console.log("[server] saveData", endTimer("saveData"));
-      return data;
-    });
+    resize(data.file.path, "", { format: "webp" })
+      .then(data => bucket.upload(data, `${bucketFileName}`))
+      .then(file => {
+        delete data.tmp;
+        unlink(data.tmp.path, () => {}); //async
+        console.log(`[server] cover uploaded`);
+      });
+  }
 
+  //we return the inner promise to catch it's thrown error
+  //ex: promise.then(()=>{ return promise2.then(()=>{throw 'error'})} ).catch(e=>{/*inner error catched*/})
+  //https://stackoverflow.com/a/39212325
   //todo: data.summary=summary(data.content)
-
-  //todo: Promise.all([upload.cover, upload all files]).then(db.insert);
-
-  //insert data to db
-  //todo: if(all previous seps completed)
-  //i.e if !exists(cover) && no file exists in /files
-
-  //when done: remove queue/sid.json
+  return insertData(data)
+    .then(data => {
+      if (dev) console.log("data inserted");
+    })
+    .catch(err => {
+      throw new Error(`Error @insertData(), ${err.message}`);
+    });
 }
 
 export const jsonData = {
@@ -412,32 +332,38 @@ export let upload = multer({
   })
 });
 
+//todo: move to pkg/graphics
 /**
  * create resized version of an image
  * @method resize
  * @param  img    image path or Buffer
+ * @param sizes    [array of sizes]
  * @return Promise<{size:path}>
  */
-export function resize(img, info) {
-  setTimer("resize");
+/*
+export function resizeAll(img, sizes: Array<any>) {
+  setTimer("resizeAll");
   let originalSize = statSync(img).size; //todo: get size of Buffer img
   //todo: if(parts.type=="dir")size all images inside this dir
   //todo: add meta tag sized=true, original=file
   //todo: create an optimized version (same width as the original image)
+
+  //todo: foreach size resize(img,size)
   return sharp(img)
     .metadata()
     .then(meta => {
       return Promise.all(
-        [400, 600, 800, 1000].map(
+        sizes.map(
           //todo: && !existsSync(img_width.ext)
           width => {
-            if (width < meta.width) return _resize(img, [width, null]);
+            if (width < meta.width) return resize(img, [width, null]);
             //todo: else Promise.reject("larger")
           }
         )
       )
         .then(images => {
-          if (dev) console.log("[server] resize", endTimer("resize"), img);
+          if (dev)
+            console.log("[server] resizeAll", endTimer("resizeAll"), img);
           return (
             images
               .filter(image => image && image.size < originalSize) //ignore images larger than the original one
@@ -456,3 +382,4 @@ export function resize(img, info) {
         .catch(err => console.error(err));
     });
 }
+*/
