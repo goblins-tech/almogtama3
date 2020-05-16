@@ -29,7 +29,7 @@ import { MatCheckbox } from "@angular/material";
 */
 
 export interface Params {
-  type: string; //todo: movr to query i.e: editor/?type=jobs
+  type: string;
   id?: string;
 }
 
@@ -52,7 +52,6 @@ export class ContentEditorComponent implements OnInit {
   private formComp: NgxFormComponent;
   files = []; //Set<File> = new Set();
   progress;
-  submitting = false;
   categories;
   steps;
 
@@ -83,7 +82,7 @@ export class ContentEditorComponent implements OnInit {
 
       concatMap(({ params, data }) => {
         let model = <Article>data;
-        params.type = model.type || params.type || "articles";
+        params.type = model.type || params.type || "article";
 
         this.params = params;
         return this.getCategories(params.type).pipe(
@@ -119,7 +118,7 @@ export class ContentEditorComponent implements OnInit {
           //,syntax: true //->install highlight.js or ngx-highlight
         };
 
-        if (params.type == "jobs") {
+        if (params.type == "job") {
           /*
             //delete cover image since jobs.layout=="list" not grid
             //dont use delete article.fields(...)
@@ -187,9 +186,13 @@ export class ContentEditorComponent implements OnInit {
     //todo: send base64 data from data.content to firebase storage
     //this.formObj = formObj;
 
+    this.response = {
+      status: "loading"
+    };
+
     if (!formObj || !formObj.form || !formObj.form.value) {
       this.response = {
-        ok: false,
+        status: "error",
         message: "technichal error, `formObj` is undefined"
       };
       if (env.dev) console.log({ formObj });
@@ -199,8 +202,6 @@ export class ContentEditorComponent implements OnInit {
     let data = formObj.form.value;
     data._id = this.params.id;
     if (env.dev) console.log("onSubmit()", data);
-    this.submitting = true;
-    this.response = null;
 
     let files = formObj.fields.filter(el => el.type == "file"); //todo: formObj$.form.get('cover').files?
     //todo: app.post("/api/",data)
@@ -210,18 +211,16 @@ export class ContentEditorComponent implements OnInit {
       //todo: send to formObj$.fields[type=file]
       else if (type == "response") {
         let data = event.body;
+
         this.response = data.error
-          ? { ok: false, message: data.error.message || data.error.msg }
+          ? { status: "error", message: data.error.message || data.error.msg }
           : {
-              ok: true,
-              message: data
-                ? `<a href="/id/${data.shortId ||
-                    data._id ||
-                    data.id}">view</a>`
+              status: "ok",
+              message: data._id
+                ? `${data.type} posted successfully, <a href="/id/${data._id}">view</a>`
                 : ""
             };
 
-        this.submitting = false;
         //todo: reset progress value
         //todo: showSnackBar() content: is html
         this.showSnackBar(
