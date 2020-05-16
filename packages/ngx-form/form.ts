@@ -6,7 +6,8 @@ import {
   QueryList,
   Input,
   Output,
-  EventEmitter
+  EventEmitter,
+  SimpleChanges
 } from "@angular/core";
 import { Observable } from "rxjs";
 import { keepHtml } from "../ngx-content/core/functions";
@@ -36,8 +37,9 @@ export interface Step {
 }
 
 export interface Response {
-  ok: boolean;
+  status: "ok" | "error" | "loading";
   message?: string;
+  class?: { [className: string]: boolean };
 }
 
 @Component({
@@ -48,7 +50,6 @@ export class NgxFormComponent implements OnInit {
   @Input() formObj: FormObj | Observable<FormObj>;
   _formObj: FormObj;
   @Input() response: Response;
-  @Input() submitting: boolean;
   @Input() progress; //todo: show progress bar
   @Input() step: number;
   @Output() submit = new EventEmitter<FormObj>();
@@ -118,7 +119,25 @@ export class NgxFormComponent implements OnInit {
   }
 
   onFormChange(formObj: FormObj) {
-    //todo: subscribe to `formly` change event.
+    //todo: subscribe to `formly` (or form.value) change event.
     this.formChange.emit(formObj);
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if ("response" in changes && changes.response.currentValue) {
+      let resp = changes.response.currentValue;
+
+      this.response.class = {
+        [`alert-${resp.status === "loading" ? "warning" : resp.status}`]: true
+      };
+
+      if (!this.response.message)
+        this.response.message =
+          status === "ok"
+            ? "Form submitted successfully"
+            : resp.status === "error"
+            ? "Error"
+            : "Loading....";
+    }
   }
 }
