@@ -142,7 +142,6 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
   if (!req.body._id) req.body._id = shortId.generate();
   req.body.type = req.params.type;
   req.body.file = req.file;
-  if (dev) console.log("[server] post", { body: req.body });
 
   saveData(req.body)
     .then(data => res.send(data))

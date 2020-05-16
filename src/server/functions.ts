@@ -211,6 +211,7 @@ export function getData(params) {
 }
 
 export function saveData(data) {
+  //todo: replace content then return insertData()
   /*
   1- handle base46 data, then: upload images to firebase, then resize
   2- insert data to db
@@ -242,8 +243,8 @@ export function saveData(data) {
           bucket.upload(data, `${bucketFileName}`)
         ) //todo: get fileName
         .then(file => console.log(`[server] ${file} uploaded`));
-
-      return `<img data-src="${imgName}" data-srcset="${srcset}" sizes="${sizes}" alt="${data.title}" />`;
+      //todo: get image dimentions from dataImg
+      return `<img width="" height="" data-src="${imgName}" data-srcset="${srcset}" sizes="${sizes}" alt="${data.title}" />`;
     }
   );
 
@@ -268,17 +269,8 @@ export function saveData(data) {
       });
   }
 
-  //we return the inner promise to catch it's thrown error
-  //ex: promise.then(()=>{ return promise2.then(()=>{throw 'error'})} ).catch(e=>{/*inner error catched*/})
-  //https://stackoverflow.com/a/39212325
   //todo: data.summary=summary(data.content)
-  return insertData(data)
-    .then(data => {
-      if (dev) console.log("data inserted");
-    })
-    .catch(err => {
-      throw new Error(`Error @insertData(), ${err.message}`);
-    });
+  return insertData(data);
 }
 
 export const jsonData = {
