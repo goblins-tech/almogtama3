@@ -27,17 +27,7 @@ a:hover {
   color: #125699;
 }
 
-/* bootstrap-like alerts */
-.alert-error {
-  color: #721c24;
-  background-color: #f8d7da;
-  border-color: #f5c6cb;
-}
-.alert-ok {
-  color: #155724;
-  background-color: #d4edda;
-  border-color: #c3e6cb;
-}
+/* bootstrap-like alerts, todo: add dismess btn */
 
 .alert {
     position: relative;
@@ -48,3 +38,20 @@ a:hover {
     text-align: center;
 }
 .alert a { font-weight: 700; }
+
+.alert-error {
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #721c24;
+}
+.alert-ok {
+  color: #155724;
+  background-color: #d4edda;
+  border-color: #155724;
+}
+
+.alert-warning {
+  color: #8a6d3b;
+  background-color: #fcf8e3 ;
+  border-color: #8a6d3b;
+}
