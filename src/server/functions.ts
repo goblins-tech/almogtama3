@@ -49,7 +49,7 @@ todo: process.env.INIT_CWD || ?? -> check if process.env.INIT_CWD is undefined
 */
 export const BROWSER = join(process.env.INIT_CWD || "", "./dist/browser"); //process.cwd() dosen't include /dist
 export const MEDIA = join(process.env.INIT_CWD || "", "./temp/media"); //don't save media files inside dist, as dist may be deleted at any time
-export const BUCKET = `${dev ? "test" : "almogtama3.com"}/media`; //todo: $config.domain/media
+export const BUCKET = `${dev ? "test" : "almogtama3.com"}`; //todo: $config.domain/media
 
 //todo: use env:GOOGLE_APPLICATION_CREDENTIALS=Path.resolve("./firebase-almogtama3-eg.json")
 initializeApp({
@@ -230,21 +230,24 @@ export function saveData(data) {
   data.content.replace(
     /<img src="data:image\/(.+?);base64,(.+?)={0,2}">/g,
     (match, extention, imgData, matchPosition, fullString) => {
-      let fileName = `${data._id}-${date.getTime()}`,
-        bucketFileName = `${BUCKET}/${data.type}/image/${fileName}.webp`,
-        imgName = `/image/${fileName}/${data.slug}.webp`,
+      let fileName = date.getTime(),
+        bucketPath = `${BUCKET}/${data.type}/${data._id}/${fileName}.webp`,
+        src = `/image/${data.type}-${fileName}-${data._id}/${data.slug}.webp`,
         srcset = "",
-        sizes = ""; //todo: ?size=
+        sizes = "";
+      for (let i = 1; i < 10; i++) {
+        srcset += `${src}?size=${i * 250} ${i * 250}w,`;
+      }
 
       //todo: catch(err=>writeFile('queue/*',{imgData,err})) to retry uploading again
       resize(imgData, "", { format: "webp" })
         .then(data =>
           //todo: upload by data (buffer)
-          bucket.upload(data, `${bucketFileName}`)
+          bucket.upload(data, `${bucketPath}`)
         ) //todo: get fileName
         .then(file => console.log(`[server] ${file} uploaded`));
       //todo: get image dimentions from dataImg
-      return `<img width="" height="" data-src="${imgName}" data-srcset="${srcset}" sizes="${sizes}" alt="${data.title}" />`;
+      return `<img width="" height="" data-src="${src}" data-srcset="${srcset}" sizes="${sizes}" alt="${data.title}" />`;
     }
   );
 
@@ -254,14 +257,10 @@ export function saveData(data) {
     data.cover = true;
 
     //to get original name: data.file.originalname
-    let fileName = `${data._id}`,
-      bucketFileName = `${BUCKET}/${data.type}/cover/${fileName}.webp`,
-      imgName = `/cover/${fileName}/${data.slug}.webp`,
-      srcset = "",
-      sizes = "";
+    let bucketPath = `${BUCKET}/${data.type}/${data._id}/cover.webp`;
 
     resize(data.file.path, "", { format: "webp" })
-      .then(data => bucket.upload(data, `${bucketFileName}`))
+      .then(data => bucket.upload(data, `${bucketPath}`))
       .then(file => {
         delete data.tmp;
         unlink(data.tmp.path, () => {}); //async

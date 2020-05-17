@@ -184,15 +184,16 @@ app.get("/api/:item?", (req, res, next) => {
 });
 
 //todo: /\/(?<type>image|cover)\/(?<id>[^\/]+) https://github.com/expressjs/express/issues/4277
-app.get(/\/(image|cover)\/([^\/]+)/, (req, res) => {
-  //<img src="/images/$id/slug.png?size=250" />
+//ex: <img src="/images/articles-cover-$topicId/slug-text.png?size=250" />
+app.get(/\/image\/([^/-]+)-([^/-]+)-([^/]+)/, (req, res) => {
   setTimer("/image");
 
   //todo: use system.temp folder
   let type = req.params[0],
-    id = req.params[1],
+    name = req.params[1],
+    id = req.params[2],
     size = <string>req.query.size,
-    path = `articles/${type}/${id}`,
+    path = `${type}/${id}/${name}`,
     bucketPath = `${BUCKET}/${path}.webp`,
     localPath = `${MEDIA}/${path}.webp`,
     resizedPath = `${localPath}_${size}.webp`;

@@ -22,8 +22,10 @@
   <img
     mat-card-image
     *ngIf="data.cover"
-    lazyLoad="{{data.cover}}"
-    alt="{{data.title}}"
+    lazyLoad="{{data.cover.src}}"
+    data-src="{{data.cover.src}}"
+    data-srcset="{{data.cover.srcset}}"
+    alt="{{data.cover.alt || data.title}}"
   />
 
   <!-- it is recommended to render the contet that was generated via <quill-editor> inside <quill-view>

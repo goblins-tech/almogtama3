@@ -92,9 +92,17 @@ export class ContentComponent implements OnInit, AfterViewInit {
         //todo: item.cover = {{item.type}}/{{item.id}}/{{item.cover}}
         if (data instanceof Array) {
           data.map((item: Article) => {
-            item.id = item.shortId || item._id;
+            item.id = item._id;
             item.content = item.summary || summary(item.content);
             if (!item.slug || item.slug == "") item.slug = slug(item.title);
+            if (item.cover) {
+              let src = `/image/${item.type}-cover-${item._id}/${item.slug}.webp`,
+                srcset = "";
+              for (let i = 1; i < 10; i++) {
+                srcset += `${src}?size=${i * 250} ${i * 250}w, `;
+              }
+              item.cover = { src, srcset, alt: item.title };
+            }
 
             //todo: this needs to fetch categories, ..
             if (!item.link)
