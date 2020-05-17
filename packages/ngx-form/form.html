@@ -53,7 +53,10 @@
     Submit
   </button>
 </form>
-<ngx-loading show="response?.status=='warning'"></ngx-loading>
+
+<ngx-loading
+  [show]="!_formObj?.form || response?.status==='loading'"
+></ngx-loading>
 
 <!-- material design form-field example:
 <mat-form-field appearance="legacy">

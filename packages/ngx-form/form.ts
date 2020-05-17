@@ -124,6 +124,7 @@ export class NgxFormComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
+    //console.log({ changes });
     if ("response" in changes && changes.response.currentValue) {
       let resp = changes.response.currentValue;
 
