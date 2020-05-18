@@ -94,10 +94,22 @@ class Storage {
    * @return Promise<UploadResponse>;  //UploadResponse=[File, API request]
    */
   //todo: upload / download a folder
-  upload(file: string, options?: uploadOptions) {
+  upload(file: string | Buffer, options?: uploadOptions) {
     if (typeof options === "string") options = { destination: options };
     //console.log({ file, options });
-    return this.bucket.upload(file, options);
+
+    //convert base64 to buffer
+    if (
+      typeof file === "string" &&
+      /data:.+\/.+?;base64,([^=]+)={0,2}/.test(file)
+    )
+      file = Buffer.from(file.replace(/data:.+\/.+?;base64,/, ""), "base64");
+
+    if (typeof file === "string") return this.bucket.upload(file, options);
+    else if (file instanceof Buffer) {
+      let fileObj = this.bucket.file(options.destination);
+      return fileObj.save(file);
+    }
   }
 
   /**
@@ -110,7 +122,7 @@ class Storage {
 
   //todo: file: string | File
   download(file, options?: downloadOptions) {
-    if (typeof file == "string") file = this.bucket.file(file);
+    if (typeof file === "string") file = this.bucket.file(file);
     if (typeof options === "string") options = { destination: options };
     return file.download(options);
   }
