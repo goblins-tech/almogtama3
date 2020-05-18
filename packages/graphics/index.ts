@@ -1,12 +1,12 @@
-import _sharp from "sharp";
+import sharp from "sharp";
 import { parsePath, existsSync } from "../nodejs-tools/fs";
 
-export const sharp = _sharp;
+export { sharp };
 
 export interface ResizeOptions {
   format?: string;
   withMetadata?: boolean;
-  dest?:
+  output?:
     | string
     | boolean
     | ((img: string | Buffer, size: number[], options: any) => string);
@@ -16,62 +16,93 @@ export interface ResizeOptions {
  * [resize description]
  * @method resize
  * @param  {string | Buffer} img     file path or image buffer;
- * @param  {number | number[] | string} size    width or [width, height] or 'width,height'
+ * @param  {number | string | Array[number | string]} size    width or [width, height] or 'width,height'
  * @param  {[type]} options [description]
  * @return Promise<info>
  */
 export function resize(
-  img: string | Buffer,
-  size: number | number[] | string,
+  img: string | Buffer | sharp,
+  size: number | string | Array<number | string>,
   options?: ResizeOptions
 ): Promise<any> {
   options = options || {};
 
-  //this function always override the existing resized file, to prevent this
-  //check if it exists, ore use nodejs-tools/fs.cache()
+  if (
+    typeof img == "string" &&
+    (img.indexOf("data:image/") === 0 || options.input == "base64")
+  )
+    img = Buffer.from(img.replace(/data:image\/.+?;base64,/, ""), "base64");
 
-  if (options.dest == "")
+  if (!(img instanceof sharp)) img = sharp(img, options.sharp);
+
+  if (options.output == "")
     Promise.reject(
-      "options.dest cannot be empty, to get a Buffer, remove this option"
+      "options.output cannot be empty, to get a Buffer, remove this option or use options.output='buffer'."
     );
 
-  //todo: devide options into options[part]={ ... }
-  //to make other operations, such as rotate(), make them outside of this function
-  //ex: resize().rotate()
   //todo: img: Obj{width,height,..} -> sharp({create:{ .. }});
-  if (typeof size == "string") size = size.split(",").map(el => +el);
+  if (!size) size = [null, null];
+  else if (typeof size == "string") size = size.split(",");
   else if (typeof size == "number") size = [size, null];
 
-  //passing (0) to resizedImg.resize() will not generate the image.
-  if (size[0] == 0) size[0] = null;
-  if (size[1] == 0) size[1] = null;
+  //passing (0) to img.resize() will not generate the image.
+  //+el: to convert into number
+  //don't use (size as number[]|string[]).map()  https://stackoverflow.com/a/49511416/12577650
+  size = (size as Array<number | string>).map(el =>
+    !el || el === 0 ? null : +el
+  );
 
-  //it's allowed to dismmess both width and height, in this case the original
-  //  dimemsions will be used to change the format
-  if (!size[0] && !size[1] && !options.format)
-    Promise.reject("no width or height specified");
+  //Include all metadata (EXIF, XMP, IPTC) from the input image in the output image
+  if (options.withMetadata !== false) img = img.withMetadata();
 
-  var resizedImg;
-  if (!(img instanceof _sharp)) resizedImg = _sharp(img, options.sharp);
-  resizedImg = resizedImg.resize(size[0], size[1], options.resize);
+  return img.metadata().then(metadata => {
+    if (
+      !size[0] &&
+      !size[1] &&
+      (!options.format || options.format == metadata.format)
+    )
+      Promise.reject(
+        "width & height can be dismissed only when the image converted into another format, use options.format"
+      );
 
-  if (options.withMetadata !== false) resizedImg = resizedImg.withMetadata();
-  if (options.format) resizedImg.toFormat(options.format);
-
-  if (options.dest) {
-    if (typeof options.dest == "function")
-      options.dest = options.dest(img, size, options);
-    else if (options.dest === true) {
-      //automatically set the destination
-      let parts = parsePath(img);
-      options.dest = `${parts.dir}/${parts.file}_${size[0]}${
-        size[1] ? "X" + size[1] : ""
-      }${parts.extension}`;
+    img = img.resize(size[0], size[1], options.resize);
+    if (options.format) img = img.toFormat(options.format);
+    if (options.output === "buffer" || !options.output) img = img.toBuffer();
+    else if (options.output === "base64")
+      img = img
+        .toBuffer()
+        .then(
+          data =>
+            `data:image/${options.format ||
+              metadata.format};base64,${data.toString("base64")}`
+        );
+    else {
+      if (typeof options.output == "function")
+        options.output = options.output(img, <number[]>size, options);
+      else if (options.output === true) {
+        //automatically set the destination output
+        let parts = parsePath(img);
+        options.output = `${parts.dir}/${parts.file}_${size[0]}${
+          size[1] ? "X" + size[1] : ""
+        }${parts.extension}`;
+      }
+      img = img
+        .toFile(options.output)
+        .then(info => ({ options, metadata, ...info }));
     }
-    resizedImg = resizedImg
-      .toFile(options.dest)
-      .then(info => ({ options, ...info }));
-  } else resizedImg = resizedImg.toBuffer();
 
-  return resizedImg;
+    return img;
+  });
+}
+
+/**
+ * create resized version of an image.
+ * @method resizeAll
+ * @param  img    image path or Buffer
+ * @param sizes    [array of sizes]
+ * @return Promise<any>
+ */
+
+export function resizeAll(img, sizes: Array<any>, options) {
+  return Promise.all(sizes.map(size => size => resize(img, size, options)));
 }
