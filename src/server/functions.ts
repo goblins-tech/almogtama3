@@ -227,8 +227,8 @@ export function saveData(data) {
   if (dev) data.status = "approved";
 
   // handle base64-encoded data (async)
-  data.content.replace(
-    /<img src="data:image\/(.+?);base64,(.+?)={0,2}">/g,
+  data.content = data.content.replace(
+    /<img src="data:image\/(.+?);base64,([^=]+)={0,2}">/g,
     (match, extention, imgData, matchPosition, fullString) => {
       let fileName = date.getTime(),
         bucketPath = `${BUCKET}/${data.type}/${data._id}/${fileName}.webp`,
@@ -240,12 +240,9 @@ export function saveData(data) {
       }
 
       //todo: catch(err=>writeFile('queue/*',{imgData,err})) to retry uploading again
-      resize(imgData, "", { format: "webp" })
-        .then(data =>
-          //todo: upload by data (buffer)
-          bucket.upload(data, `${bucketPath}`)
-        ) //todo: get fileName
-        .then(file => console.log(`[server] ${file} uploaded`));
+      resize(imgData, "", { format: "webp", input: "base64" })
+        .then(data => bucket.upload(data, bucketPath)) //todo: get fileName
+        .then(() => console.log(`[server] uploaded: ${fileName}`));
       //todo: get image dimentions from dataImg
       return `<img width="" height="" data-src="${src}" data-srcset="${srcset}" sizes="${sizes}" alt="${data.title}" />`;
     }
@@ -253,17 +250,19 @@ export function saveData(data) {
 
   //upload cover
   if (data.file) {
+    //delete data.file early, before insertData(data) starts
+    let cover = data.file;
+    delete data.file;
     if (dev) console.log("uploading cover ...");
     data.cover = true;
 
-    //to get original name: data.file.originalname
+    //to get original name: cover.originalname
     let bucketPath = `${BUCKET}/${data.type}/${data._id}/cover.webp`;
 
-    resize(data.file.path, "", { format: "webp" })
-      .then(data => bucket.upload(data, `${bucketPath}`))
+    resize(cover.path, "", { format: "webp" })
+      .then(data => bucket.upload(data, bucketPath))
       .then(file => {
-        delete data.tmp;
-        unlink(data.tmp.path, () => {}); //async
+        unlink(cover.path, () => {}); //async
         console.log(`[server] cover uploaded`);
       });
   }
@@ -322,55 +321,3 @@ export let upload = multer({
     }
   })
 });
-
-//todo: move to pkg/graphics
-/**
- * create resized version of an image
- * @method resize
- * @param  img    image path or Buffer
- * @param sizes    [array of sizes]
- * @return Promise<{size:path}>
- */
-/*
-export function resizeAll(img, sizes: Array<any>) {
-  setTimer("resizeAll");
-  let originalSize = statSync(img).size; //todo: get size of Buffer img
-  //todo: if(parts.type=="dir")size all images inside this dir
-  //todo: add meta tag sized=true, original=file
-  //todo: create an optimized version (same width as the original image)
-
-  //todo: foreach size resize(img,size)
-  return sharp(img)
-    .metadata()
-    .then(meta => {
-      return Promise.all(
-        sizes.map(
-          //todo: && !existsSync(img_width.ext)
-          width => {
-            if (width < meta.width) return resize(img, [width, null]);
-            //todo: else Promise.reject("larger")
-          }
-        )
-      )
-        .then(images => {
-          if (dev)
-            console.log("[server] resizeAll", endTimer("resizeAll"), img);
-          return (
-            images
-              .filter(image => image && image.size < originalSize) //ignore images larger than the original one
-              //.map(el => [el.width, el.file])
-              .reduce((total, current) => {
-                //convert from array[ {width,file, ..} ] into {width:file}
-                let file = current.file.replace(
-                  MEDIA,
-                  `${info.type}/${info.id}`
-                );
-                total[current.width] = file; //todo: remove D:/**,
-                return total; //accumulator
-              }, {})
-          );
-        })
-        .catch(err => console.error(err));
-    });
-}
-*/
