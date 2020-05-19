@@ -14,8 +14,15 @@
   Add Files</button
 ><br />
 
-<!-- show files with progress -->
-<mat-progress-bar mode="determinate" [value]="progress"></mat-progress-bar>
+<!--
+    show files with progress,
+    if every file processed separately put a progress bar to each file in the files list
+-->
+<mat-progress-bar
+  *ngIf="to.progress"
+  mode="determinate"
+  [value]="to.progress"
+></mat-progress-bar>
 
 <mat-list>
   <mat-list-item *ngFor="let file of files">
@@ -29,5 +36,14 @@
         <mat-icon>delete_forever</mat-icon>
       </span>
     </p>
+  </mat-list-item>
+</mat-list>
+
+<mat-list *ngIf="to.existsFiles">
+  <mat-list-item *ngFor="let file of to.existsFiles">
+    <a href="{{file.link}}">
+      <div *ngIf="file.link"><img *ngIf="file.src" src="{{file.src}}" /></div>
+      <p mat-line *ngIf="!file.src">{{file.name}}</p>
+    </a>
   </mat-list-item>
 </mat-list>

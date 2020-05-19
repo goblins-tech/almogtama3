@@ -13,28 +13,11 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor } from "@angular/forms";
   selector: "formly-field-file",
   templateUrl: "./component.html"
 })
-export class FormlyFieldFile extends FieldType implements OnInit {
+export class FormlyFieldFile extends FieldType {
   @ViewChild("fileInput") fileInput;
-  @Input() progress: number = 0; //todo: progress:Observable & subscribe to it
   files: Set<File> = new Set();
-  name = "";
-  multiple = false;
-  accept = ""; //file type : ex: images/*
-  capture = ""; //source ex: accept="user" -> device webcam & mic
 
-  //todo: implement , AfterViewInit?
-  ngAfterViewInit() {
-    console.log({
-      formControl: this.to.formControl,
-      formControl2: this.to.formControl2,
-      formControl3: this.formControl //todo: this.formControl.fields contains only this input, not all form inputs,we need to pass articleForm.form to this.formControl
-    });
-    console.log({
-      templateOptions: this.to, //contains any data that passed to Field.templateOptions{}, same as using nativeElement
-      label: this.to.label, //in template: {{to.label}}
-      label2: this.fileInput.nativeElement.getAttribute("data-test") //Field.templateOptions.attributes are passed to <input file> itself, not to the component
-    }); //any data passed to Field.templateOptions{}
-  }
+  //available: this.formControl, this.to, this.fileInput.nativeElement.getAttribute("data-test")
 
   addFiles() {
     //clicks on <input #file>
@@ -42,12 +25,9 @@ export class FormlyFieldFile extends FieldType implements OnInit {
   }
 
   onFilesAdded() {
-    let files: { [key: string]: File } = this.fileInput.nativeElement.files;
-    for (let key in files) {
-      if (!isNaN(parseInt(key))) {
-        this.files.add(files[key]);
-      }
-    }
+    let files: File[] = this.fileInput.nativeElement.files;
+    if (this.to.multiple) files.forEach(file => this.files.add(file));
+    else this.files = new Set([files[0]]);
   }
 
   remove(file) {

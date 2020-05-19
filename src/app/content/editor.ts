@@ -125,6 +125,18 @@ export class ContentEditorComponent implements OnInit {
           //,syntax: true //->install highlight.js or ngx-highlight
         };
 
+        if (model.cover) {
+          let cover = article[article.findIndex(el => el.key == "cover")],
+            src = `/image/${model.type}-cover-${model._id}/${model.slug}.webp`;
+          cover.templateOptions.existsFiles = [
+            {
+              name: "cover image",
+              src: `${src}?size=100`,
+              link: src
+            }
+          ];
+        }
+
         if (params.type == "job") {
           /*
             //delete cover image since jobs.layout=="list" not grid
@@ -164,7 +176,7 @@ export class ContentEditorComponent implements OnInit {
                   key: "categories",
                   type: "categories",
                   templateOptions: {
-                    categories //todo: categories is observable, not obj{}
+                    categories
                   }
                 }
               ]
