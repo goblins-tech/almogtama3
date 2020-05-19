@@ -141,6 +141,15 @@ export class ContentComponent implements OnInit, AfterViewInit {
             description: data.summary
           };
 
+          if (data.cover) {
+            let src = `/image/${data.type}-cover-${data._id}/${data.slug}.webp`,
+              srcset = "";
+            for (let i = 1; i < 10; i++) {
+              srcset += `${src}?size=${i * 250} ${i * 250}w, `;
+            }
+            data.cover = { src, srcset, alt: data.title };
+          }
+
           if (this.params.type == "jobs")
             data.content += `<div id='contacts'>${data.contacts}</div>`;
         }
