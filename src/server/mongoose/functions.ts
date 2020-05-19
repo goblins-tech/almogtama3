@@ -27,7 +27,7 @@ export function insertData(data) {
 
   //data.type is singular (i.e: article, job),
   //  but collection name is plural (i.e: articles, jobs)
-  let type = ["article", "job", "jobs"].includes(type)
+  let type = ["article", "job", "jobs"].includes(data.type)
     ? "articles"
     : data.type || "articles";
 

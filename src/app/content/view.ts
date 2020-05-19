@@ -8,7 +8,7 @@ todo:
 
 import { Data, Article, MetaService } from "pkg/ngx-content/view";
 import { slug } from "pkg/ngx-content/core";
-import { metaTags } from "../../config/front";
+import { metaTags as _metaTags } from "../../config/front";
 
 import {
   Component,
@@ -83,9 +83,9 @@ export class ContentComponent implements OnInit, AfterViewInit {
         if (typeof data == "string") data = JSON.parse(data); //ex: the url fetched via a ServiceWorker
 
         //todo: import site meta tags from config
-        let metaTags: any = site;
 
         //todo: item.cover = {{item.type}}/{{item.id}}/{{item.cover}}
+        let metaTags;
         if (data instanceof Array) {
           data.map((item: Article) => {
             item.id = item._id;
@@ -115,6 +115,8 @@ export class ContentComponent implements OnInit, AfterViewInit {
             item.date = "1/1/2020";
             return item;
           });
+
+          metaTags = _metaTags;
         } else {
           data = <Article>data;
           (data as Article).id = (data as any).shortId || (data as any)._id;
@@ -134,7 +136,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
 
           data.date = "1/1/2020";
           metaTags = {
-            ...metaTags,
+            ..._metaTags,
             ...data,
             description: data.summary
           };
@@ -142,7 +144,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
           if (this.params.type == "jobs")
             data.content += `<div id='contacts'>${data.contacts}</div>`;
         }
-        this.meta.setTags({ ...metaTags });
+        this.meta.setTags(metaTags);
         return data;
       })
     );
