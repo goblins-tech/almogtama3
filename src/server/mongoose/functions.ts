@@ -27,17 +27,11 @@ export function insertData(data) {
   if (!data) return Promise.reject("no data");
   let type = data.type || "articles";
   if (type == "jobs") type = "articles";
-  return connect().then(
-    () => {
-      let contentModel = model(type);
-      let content = new contentModel(data);
-      return content.save();
-    },
-    err => {
-      console.error("connection failed", { err });
-      throw "connection failed!";
-    }
-  );
+  return connect().then(() => {
+    let contentModel = model(type);
+    let content = new contentModel(data);
+    return content.save();
+  });
 }
 
 export function model(collection) {
