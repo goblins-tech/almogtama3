@@ -8,6 +8,7 @@ todo:
 
 import { Data, Article, MetaService } from "pkg/ngx-content/view";
 import { slug } from "pkg/ngx-content/core";
+import { metaTags } from "../../config/front";
 
 import {
   Component,
@@ -82,12 +83,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
         if (typeof data == "string") data = JSON.parse(data); //ex: the url fetched via a ServiceWorker
 
         //todo: import site meta tags from config
-        let metaTags: any = {
-          name: "almogtama3",
-          hashtag: "@almogtama3", //todo: @hashtag or #hashtag for twitter??
-          baseUrl: "https://www.almogtama3.com/",
-          description: "almogtama3 dot com" //todo:
-        };
+        let metaTags: any = site;
 
         //todo: item.cover = {{item.type}}/{{item.id}}/{{item.cover}}
         if (data instanceof Array) {

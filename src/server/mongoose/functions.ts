@@ -1,7 +1,6 @@
 import { connect as _connect, model as _model, mongoose } from "pkg/mongoose";
-import * as schemas from "./models";
+import { dev, schemas, DB } from "../../config/server";
 
-const dev = process.env.NODE_ENV === "development";
 function encode(str: string) {
   return encodeURIComponent(str).replace(/%/g, "%25");
 }
@@ -15,10 +14,10 @@ export function connect() {
     });
   return mongoose.connection.readyState == 0
     ? _connect({
-        auth: ["xxyyzz2050", "Xx159753@@"],
-        host: "almogtama3-gbdqa.gcp.mongodb.net",
-        srv: true,
-        dbName: dev ? "test" : "almogtama3"
+        auth: DB.auth,
+        host: DB.host,
+        srv: DB.srv,
+        dbName: DB.dbName
       })
     : new Promise(r => mongoose.connection);
 }

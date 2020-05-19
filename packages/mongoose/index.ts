@@ -28,15 +28,18 @@ export namespace types {
     indexes?: []; // or:{indexName: value}
     // todo: add model properties
   }
+  export interface Host {
+    [host: string]: number; // { host1: port1 }
+  }
   export type uri =
     | string
     | {
-        auth: [string, string];
-        host?: string | string[]; // host1:port1,...
+        auth: string[]; //https://github.com/microsoft/TypeScript/issues/38652
+        host?: string | Host[];
         srv?: boolean;
         dbName?: string;
       };
-  //-->deprecated
+  //-->deprecated:
   //| [string, string, string | string[], boolean, string]; // [user,pass,host,srv,dbName]
 }
 

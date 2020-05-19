@@ -11,7 +11,6 @@ import {
   existsSync,
   unlink,
   readdir,
-  join,
   resolve,
   writeFile,
   json,
@@ -20,12 +19,13 @@ import {
 } from "pkg/nodejs-tools/fs";
 import { replaceAsync } from "pkg/nodejs-tools/string";
 import { Firebase } from "pkg/firebase/admin";
-import { initializeApp, credential } from "firebase-admin";
+import { initializeApp } from "firebase-admin";
 import multer from "multer";
 import { slug } from "../app/content/functions";
 import { resize, sharp } from "pkg/graphics";
 import { Categories } from "pkg/ngx-formly/categories-material/functions";
 import { setTimer, getTimer, endTimer } from "pkg/nodejs-tools/timer";
+import { BUCKET, FIREBASE } from "../config/server";
 
 export const dev = process.env.NODE_ENV === "development";
 
@@ -47,15 +47,9 @@ app.set("views", "./browser");
 
 todo: process.env.INIT_CWD || ?? -> check if process.env.INIT_CWD is undefined
 */
-export const BROWSER = join(process.env.INIT_CWD || "", "./dist/browser"); //process.cwd() dosen't include /dist
-export const MEDIA = join(process.env.INIT_CWD || "", "./temp/media"); //don't save media files inside dist, as dist may be deleted at any time
-export const BUCKET = `${dev ? "test" : "almogtama3.com"}`; //todo: $config.domain/media
 
 //todo: use env:GOOGLE_APPLICATION_CREDENTIALS=Path.resolve("./firebase-almogtama3-eg.json")
-initializeApp({
-  credential: credential.cert(require("./firebase-almogtama3-eg.json")),
-  storageBucket: `gs://almogtama3-eg.appspot.com`
-});
+initializeApp(FIREBASE);
 
 export const bucket = new Firebase(/*{
   project: "almogtama3-eg",

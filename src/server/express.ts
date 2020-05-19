@@ -14,19 +14,10 @@ import {
   cache
 } from "pkg/nodejs-tools/fs";
 import shortId from "shortid";
-import {
-  getData,
-  upload,
-  saveData,
-  bucket,
-  BROWSER,
-  MEDIA,
-  BUCKET,
-  dev,
-  getCategories
-} from "./functions";
+import { getData, upload, saveData, bucket, getCategories } from "./functions";
 import { resize } from "pkg/graphics";
 import { setTimer, endTimer, getTimer } from "pkg/nodejs-tools/timer";
+import { dev, BROWSER, MEDIA, BUCKET } from "../config/server";
 
 //todo: import {} from 'fs/promises' dosen't work yet (expremental)
 const { access, readFile, writeFile } = require("fs").promises;

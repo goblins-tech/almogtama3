@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
+import { metaTags } from "../config/front";
 
 @Component({
   selector: "app-root",
@@ -7,7 +8,7 @@ import { Router } from "@angular/router";
   styleUrls: ["./app.component.scss"]
 })
 export class AppComponent implements OnInit {
-  title = "almogtama3";
+  name = metaTags.name;
   constructor(private router: Router) {}
   ngOnInit() {}
   go(path: any[] | string) {
