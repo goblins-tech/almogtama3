@@ -215,7 +215,7 @@ export function getData(params) {
   );
 }
 
-export function saveData(data) {
+export function saveData(data, update: boolean) {
   //todo: replace content then return insertData()
   /*
   1- handle base46 data, then: upload images to firebase, then resize
@@ -273,7 +273,7 @@ export function saveData(data) {
   }
 
   //todo: data.summary=summary(data.content)
-  return insertData(data);
+  return insertData(data, update);
 }
 
 export const jsonData = {

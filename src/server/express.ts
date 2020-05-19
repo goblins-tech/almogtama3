@@ -135,11 +135,15 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
   if (!req.body || !req.body.content)
     return res.send({ error: { message: "no data posted" } });
 
-  if (!req.body._id) req.body._id = shortId.generate();
+  let update;
+  if (!req.body._id) {
+    req.body._id = shortId.generate();
+    update = false;
+  } else update = true;
   req.body.type = req.params.type;
   req.body.file = req.file;
 
-  saveData(req.body)
+  saveData(req.body, update)
     .then(data => res.send(data))
     .catch(error => {
       if (dev) console.error("[server] post", { error });
