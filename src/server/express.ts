@@ -18,6 +18,7 @@ import { getData, upload, saveData, bucket, getCategories } from "./functions";
 import { resize } from "pkg/graphics";
 import { setTimer, endTimer, getTimer } from "pkg/nodejs-tools/timer";
 import { dev, BROWSER, MEDIA, BUCKET } from "../config/server";
+import { connect } from "./mongoose/functions";
 
 //todo: import {} from 'fs/promises' dosen't work yet (expremental)
 const { access, readFile, writeFile } = require("fs").promises;
@@ -33,6 +34,10 @@ export interface Request extends Obj {}
 
 // Express server
 const app = express();
+
+//todo: no need to use connect().then(...), as the connection now is already open
+//connect dosen't create a new connection if readystate=1
+connect();
 
 // * NOTE :: leave this as require() since this file is built Dynamically from webpack
 const {
@@ -136,7 +141,10 @@ app.post("/api/:type", upload.single("cover"), (req: any, res) => {
 
   saveData(req.body)
     .then(data => res.send(data))
-    .catch(error => res.send({ error }));
+    .catch(error => {
+      if (dev) console.error("[server] post", { error });
+      res.send({ error });
+    });
 
   //the content will be available after the process completed (uploading files, inserting to db, ..)
 });

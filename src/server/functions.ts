@@ -81,7 +81,14 @@ export function getCategories() {
               "[server] getCategories: fetched from server",
               getTimer("getCategories")
             );
-          mongoose.connection.close();
+          /*
+          //don't close the connection after every query
+          //todo: close the connection when the server restarts or shutdown
+          //https://hashnode.com/post/do-we-need-to-close-mongoose-connection-cjetx0dxh003hcws2l1fs81nl
+          mongoose.connection.close(() => {
+            if (dev) console.log("connection closed");
+          });
+          */
           let ctg = new Categories(categories);
           ctg.adjust();
           if (dev)
@@ -196,7 +203,11 @@ export function getData(params) {
           return content;
         })
         .then(content => {
-          mongoose.connection.close();
+          /*
+        mongoose.connection.close(() => {
+          if (dev) console.log("connection closed");
+        });
+         */
           //  if (dev) console.log("[server] getData", endTimer("getData"));
           return content;
         }),

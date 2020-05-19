@@ -59,7 +59,8 @@ export function connect(uri: types.uri, options?: types.ConnectionOptions) {
     autoIndex: false,
     useUnifiedTopology: true,
     retryWrites: true,
-    w: "majority"
+    w: "majority",
+    keepAlive: true
   };
 
   let srv = false;

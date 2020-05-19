@@ -19,7 +19,7 @@ export function connect() {
         srv: DB.srv,
         dbName: DB.dbName
       })
-    : new Promise(r => mongoose.connection);
+    : Promise.resolve(mongoose.connection);
 }
 
 export function insertData(data) {
