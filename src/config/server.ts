@@ -3,9 +3,9 @@ import * as schemas from "./models";
 import { join } from "pkg/nodejs-tools/fs";
 
 export const dev = process.env.NODE_ENV === "development";
-export const BROWSER = join(process.env.INIT_CWD || "", "./dist/browser"); //process.cwd() dosen't include /dist
-export const MEDIA = join(process.env.INIT_CWD || "", "./temp/media"); //don't save media files inside dist, as dist may be deleted at any time
-export const BUCKET = `${dev ? "test" : "almogtama3.com"}`; //todo: $config.domain/media
+export const TEMP = join(process.env.INIT_CWD || "", "./temp"); //todo: use system.temp
+export const DIST = join(process.env.INIT_CWD || "", "./dist"); //process.cwd() dosen't include /dist
+export const BUCKET = `${dev ? "test" : "almogtama3.com"}`;
 export { schemas };
 
 export const FIREBASE = {

@@ -25,7 +25,7 @@ import { slug } from "../app/content/functions";
 import { resize, sharp } from "pkg/graphics";
 import { Categories } from "pkg/ngx-formly/categories-material/functions";
 import { setTimer, getTimer, endTimer } from "pkg/nodejs-tools/timer";
-import { BUCKET, FIREBASE } from "../config/server";
+import { BUCKET, FIREBASE, TEMP } from "../config/server";
 
 export const dev = process.env.NODE_ENV === "development";
 
@@ -109,7 +109,7 @@ export function getCategories() {
 //todo: id (ObjectId | shortId) | limit (number)
 export function getData(params) {
   //setTimer("getData"); //timer('getData') = timer('cache')
-  var cacheFile = "./temp/articles/"; //todo: ./temp/$type
+  var cacheFile = `${TEMP}/articles`; //todo: ./temp/$type
   if (params.id) cacheFile += `/${params.id}`;
   else if (params.category) cacheFile += `/${params.category}`;
   else cacheFile += "index";
@@ -278,7 +278,7 @@ export function saveData(data, update: boolean) {
 
 export const jsonData = {
   get(type: string, id?: string | Number) {
-    let file = `./temp/${type}/${id || "index"}.json`;
+    let file = `${TEMP}/${type}/${id ? id + "/data" : "index"}.json`;
     try {
       return json.read(file);
     } catch (e) {
@@ -287,10 +287,10 @@ export const jsonData = {
   },
   save(type: string, data) {
     if (data) {
-      let dir = `./temp/${type}`;
+      let dir = `${TEMP}/${type}`;
       mdir(dir);
       if (data instanceof Array) json.write(`${dir}/index.json`, data);
-      else json.write(`${dir}/${data.shortId || data._id}.json`, data);
+      else json.write(`${dir}/${data._id}/data.json`, data);
     }
   }
 };
@@ -317,7 +317,7 @@ export let upload = multer({
   //https://stackoverflow.com/a/43206506/12577650
   storage: multer.diskStorage({
     destination: function(req, file, cb) {
-      let dir = "./temp/uploads";
+      let dir = `${TEMP}/uploads`;
       mdir(dir);
       cb(null, dir);
     },

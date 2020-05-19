@@ -1,6 +1,6 @@
 import { connect as _connect, model as _model, mongoose } from "pkg/mongoose";
-import { dev, schemas, DB } from "../../config/server";
-import { unlink } from "pkg/nodejs-tools/fs";
+import { dev, schemas, DB, TEMP } from "../../config/server";
+import { unlink, readdir } from "pkg/nodejs-tools/fs";
 
 function encode(str: string) {
   return encodeURIComponent(str).replace(/%/g, "%25");
@@ -43,7 +43,18 @@ export function insertData(data, update: boolean) {
           })
           //return data to the front-End
           .then(doc => {
-            unlink(`./temp/articles/${data._id}.json`, () => {});
+            let temp = `${TEMP}/${data.type}/${data._id}`;
+            readdir(temp, (err, files) => {
+              if (!err)
+                files.forEach(file =>
+                  unlink(`${temp}/${file}`, error => {
+                    if (error && dev)
+                      console.warn(`[server] cannot delete ${temp}/${file}`, {
+                        error
+                      });
+                  })
+                );
+            });
             return data;
           })
       );

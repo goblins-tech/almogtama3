@@ -17,7 +17,7 @@ import shortId from "shortid";
 import { getData, upload, saveData, bucket, getCategories } from "./functions";
 import { resize } from "pkg/graphics";
 import { setTimer, endTimer, getTimer } from "pkg/nodejs-tools/timer";
-import { dev, BROWSER, MEDIA, BUCKET } from "../config/server";
+import { dev, DIST, TEMP, BUCKET } from "../config/server";
 import { connect } from "./mongoose/functions";
 
 //todo: import {} from 'fs/promises' dosen't work yet (expremental)
@@ -57,7 +57,7 @@ app.engine(
 );
 
 app.set("view engine", "html");
-app.set("views", BROWSER);
+app.set("views", `${DIST}/browser`);
 
 //to use req.protocol in case of using a proxy in between (ex: cloudflare, heroku, ..), without it express may always returns req.protocole="https" even if GET/ https://***
 //https://stackoverflow.com/a/46475726
@@ -198,7 +198,7 @@ app.get(/\/image\/([^/-]+)-([^/-]+)-([^/]+)/, (req, res) => {
     size = <string>req.query.size,
     path = `${type}/${id}/${name}`,
     bucketPath = `${BUCKET}/${path}.webp`,
-    localPath = `${MEDIA}/${path}.webp`,
+    localPath = `${TEMP}/${path}.webp`,
     resizedPath = `${localPath}_${size}.webp`;
 
   if (!id || !type)
@@ -242,8 +242,8 @@ app.get(/\/image\/([^/-]+)-([^/-]+)-([^/]+)/, (req, res) => {
 });
 
 // Serve static files; /file.ext will be served from /dist/browser/file.ext then /data/media/file.ext
-app.get("*.*", express.static(BROWSER, { maxAge: "1y" })); //static assets i.e: created at build time; may be deleted at any time and recreated at build time
-app.get("*.*", express.static(MEDIA, { maxAge: "1y" })); //data files i.e: created at runtime via API calls
+app.get("*.*", express.static(`${DIST}/browser`, { maxAge: "1y" })); //static assets i.e: created at build time; may be deleted at any time and recreated at build time
+app.get("*.*", express.static(TEMP, { maxAge: "1y" })); //data files i.e: created at runtime via API calls
 
 // All regular routes use the Universal engine
 app.get("*", (req, res) => {
