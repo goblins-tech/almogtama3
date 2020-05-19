@@ -42,6 +42,11 @@ export interface Response {
   class?: { [className: string]: boolean };
 }
 
+export interface Progress {
+  loaded: number;
+  total?: number;
+}
+
 @Component({
   selector: "ngx-form",
   templateUrl: "./form.html"
@@ -50,7 +55,7 @@ export class NgxFormComponent implements OnInit {
   @Input() formObj: FormObj | Observable<FormObj>;
   _formObj: FormObj;
   @Input() response: Response;
-  @Input() progress; //todo: show progress bar
+  @Input() progress: Progress; //todo: show progress bar
   @Input() step: number;
   @Output() submit = new EventEmitter<FormObj>();
 

@@ -3,6 +3,15 @@
   <div [innerHTML]="response.message"></div>
 </div>
 
+<!-- or: <mat-progress-bar [value]="loaded/total..."> => MatProgressBarModule -->
+<progress
+  *ngIf="progress && response?.status==='loading'"
+  [value]="progress?.loaded"
+  [max]="progress?.total"
+  style="width:100%;display:block"
+>
+</progress>
+
 <form
   *ngIf="_formObj?.form;"
   #formElement

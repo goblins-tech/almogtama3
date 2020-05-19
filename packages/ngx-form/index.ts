@@ -1,6 +1,6 @@
-export { NgxFormComponent, FormObj, Response, Step } from "./form";
-export { NgxFormModule } from "./module";
-export { article, register } from "./samples";
+export * from "./form";
+export * from "./module";
+export * from "./samples";
 
 /*
 the following properties are available from node_modules/@ngx-formly/core/lib/templates/fileType.d.ts
