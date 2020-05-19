@@ -24,8 +24,13 @@ export function connect() {
 
 export function insertData(data) {
   if (!data) return Promise.reject("no data");
-  let type = data.type || "articles";
-  if (type == "jobs") type = "articles";
+
+  //data.type is singular (i.e: article, job),
+  //  but collection name is plural (i.e: articles, jobs)
+  let type = ["article", "job", "jobs"].includes(type)
+    ? "articles"
+    : data.type || "articles";
+
   return connect().then(() => {
     let contentModel = model(type);
     let content = new contentModel(data);

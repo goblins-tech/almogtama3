@@ -4,6 +4,8 @@ export const basic = {};
 
 //times (createdAt, updatedAt) are added automatically, by the option {typestamps: true}
 
+//todo: separate collections jobs & articles
+//use articles_categories & jobs_categories, or add {type:'articles'|'jobs'} to categories
 export const articles = {
   _id: { type: String, default: shortId.generate },
   title: String,
