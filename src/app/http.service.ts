@@ -2,10 +2,11 @@ import { Injectable } from "@angular/core";
 import {
   HttpClient,
   HttpRequest,
-  HttpEventType,
-  HttpResponse
+  HttpResponse,
+  HttpEvent
 } from "@angular/common/http";
 import { Observable, Subject } from "rxjs";
+import { map } from "rxjs/operators";
 import env from "../env";
 
 export interface Obj {
@@ -17,28 +18,77 @@ export interface Obj {
 })
 export class HttpService {
   constructor(private http: HttpClient) {}
-  get<T>(params) {
-    var url = "/api/";
 
+  /**
+   *
+   * @method assign
+   * @param  options||{} [description]
+   * @param  {observe    [description]
+   * @return Observable<T>
+   */
+  get<T>(params, options?: Obj): Observable<T> {
+    options = Object.assign(options || {}, {
+      observe: "body"
+    });
+    var url = "/api/";
     if (typeof params == "string") url += params;
     else if (params.id) url += `id-${params.id}`;
     else if (params.category) url += encodeURIComponent(params.category);
     else url += "articles";
-
-    if (env.dev) console.log("[http.get]", { params, url });
-    return this.http.get<T>(url);
+    if (env.dev) console.log("[httpService] get", { params, url });
+    return this.http.get<T>(url, options);
   }
 
-  post(type: string, data: Obj, options: Obj = {}) {
-    if (env.dev) console.log("httpService post", { type, data });
-    options = options || {};
+  post<T>(type: string, data: Obj, options: Obj = {}): Observable<T> {
+    if (env.dev) console.log("[httpService] post", { type, data });
+
     //todo: sending data as FormData instead of Object causes that req.body=undefined
     if (options.formData !== false) data = this.toFormData(data); //typescript 3.2 dosen't support null safe operator i.e: options?.formData
     delete options.formData;
-    return this.http.post<any>(`/api/${type}`, data, options);
+    return this.http.post<T>(`/api/${type}`, data, options);
+  }
+
+  //same as get() & post(), but reports the progress
+  progress<T>(
+    method: "get" | "post",
+    params,
+    data?,
+    options?
+  ): Observable<HttpEvent<T>> {
+    options = Object.assign(options || {}, {
+      reportProgress: true,
+      observe: "events"
+    });
+    return method === "post"
+      ? this.post<HttpEvent<T>>(
+          typeof params === "string" ? params : params.type,
+          data,
+          options
+        )
+      : this.get<HttpEvent<T>>(
+          params,
+          options
+        ); /*.pipe(
+      //todo: support other `event.type`s
+      map((event: HttpEvent<any>) => {
+        if (
+          [
+            HttpEventType.UploadProgress,
+            HttpEventType.DownloadProgress
+          ].include(event.type)
+        ) {
+          event.type = "progress";
+          event.value = Math.round((event.loaded * 100) / event.total);
+        } else if (event.type === HttpEventType.Response)
+          event.type = "response";
+
+        return event;
+      })
+    );*/
   }
 
   //this method dosent return an Observable
+  //todo: http.request('post') VS http.post()
   request(method: string, type: string, data: Obj, options?: Obj) {
     return new HttpRequest(method, `/api/${type}`, data, options);
   }
@@ -57,7 +107,6 @@ export class HttpService {
     if (data instanceof FormData) return data;
 
     let formData = new FormData();
-
     for (let key in data) {
       if (data.hasOwnProperty(key)) {
         let el = data[key];
@@ -78,21 +127,5 @@ export class HttpService {
     }
     if (env.dev) console.log("toFormData()", { data, formData });
     return formData;
-  }
-
-  //same as post, but reports the progress
-  upload(type, data, cb) {
-    //to show the progress for each file separately, each one must be uploaded separately; use upload() for each file alone
-
-    return this.post(type, data, {
-      reportProgress: true,
-      observe: "events"
-    }).subscribe(event => {
-      if (cb && typeof cb == "function") {
-        if (event.type === HttpEventType.UploadProgress)
-          cb("progress", event, Math.round((event.loaded * 100) / event.total));
-        else if (event.type === HttpEventType.Response) cb("response", event);
-      }
-    });
   }
 }

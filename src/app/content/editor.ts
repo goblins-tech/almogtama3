@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, Input } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { HttpService } from "../http.service";
+import { HttpEvent, HttpEventType } from "@angular/common/http";
 import { Observable, of } from "rxjs";
 import { map, concatMap } from "rxjs/operators";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -16,7 +17,13 @@ import {
 } from "@angular/fire/storage"; //todo: move to server.ts (how to inject AngularFireStorage?)
 import { DomSanitizer } from "@angular/platform-browser";
 import { FieldType } from "@ngx-formly/material";
-import { FormObj, Response, NgxFormComponent, article } from "pkg/ngx-form";
+import {
+  FormObj,
+  Response,
+  Progress,
+  NgxFormComponent,
+  article
+} from "pkg/ngx-form";
 
 /*
 //for FormlyFieldCategories; https://stackoverflow.com/a/60267178/12577650
@@ -51,7 +58,7 @@ export class ContentEditorComponent implements OnInit {
   @ViewChild(NgxFormComponent, { static: true })
   private formComp: NgxFormComponent;
   files = []; //Set<File> = new Set();
-  progress;
+  progress: Progress;
   categories;
   steps;
 
@@ -205,39 +212,51 @@ export class ContentEditorComponent implements OnInit {
 
     let files = formObj.fields.filter(el => el.type == "file"); //todo: formObj$.form.get('cover').files?
     //todo: app.post("/api/",data)
-    this.httpService.upload(this.params.type, data, (type, event, value) => {
-      if (env.dev) console.log("[upload]", { type, event, value });
-      if (type == "progress") this.progress = value;
-      //todo: send to formObj$.fields[type=file]
-      else if (type == "response") {
-        let data = event.body;
+    this.httpService
+      .progress<any>("post", this.params.type, data)
+      .subscribe((event: HttpEvent<any>) => {
+        if (env.dev) console.log("[upload]", event);
+        if (event.type == HttpEventType.UploadProgress)
+          this.progress = { loaded: event.loaded, total: event.total };
+        //todo: send to formObj$.fields[type=file]
+        else if (event.type === HttpEventType.Response) {
+          let data = event.body;
 
-        this.response = data.error
-          ? { status: "error", message: data.error.message || data.error.msg }
-          : {
-              status: "ok",
-              message: data._id
-                ? `${data.type} posted successfully, <a href="/id/${data._id}">view</a>`
-                : ""
+          if (!data)
+            this.response = {
+              status: "error",
+              message: "no data"
             };
+          else
+            this.response = data.error
+              ? {
+                  status: "error",
+                  message: data.error.message || data.error.msg
+                }
+              : {
+                  status: "ok",
+                  message: data._id
+                    ? `${data.type} posted successfully, <a href="/id/${data._id}">view</a>`
+                    : ""
+                };
 
-        //todo: reset progress value
-        //todo: showSnackBar() content: is html
-        this.showSnackBar(
-          (!event.body.error ? "form submitted" : "Error ") +
-            this.response.message || "",
-          "close",
-          7000
-        );
-        //this.uploadedFiles=event.body;
-        formObj.form.reset();
+          //todo: reset progress value
+          //todo: showSnackBar() content: is html
+          this.showSnackBar(
+            (this.response.status === "ok" ? "form submitted" : "error") +
+              this.response.message || "",
+            "close",
+            7000
+          );
+          //this.uploadedFiles=event.body;
+          formObj.form.reset();
 
-        //todo: fix: this.formComp.formElement.reset is not a function
-        //  this.formComp.formElement.reset(); //https://stackoverflow.com/a/49789012/12577650; also see create.html
-        //  this.files.clear();
-        this.files = [];
-      }
-    });
+          //todo: fix: this.formComp.formElement.reset is not a function
+          //  this.formComp.formElement.reset(); //https://stackoverflow.com/a/49789012/12577650; also see create.html
+          //  this.files.clear();
+          this.files = [];
+        }
+      });
   }
 
   //update this.formObj value every time the formObj has been changed.
