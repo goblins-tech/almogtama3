@@ -48,8 +48,8 @@ export function insertData(data, update: boolean) {
               if (!err)
                 files.forEach(file =>
                   unlink(`${temp}/${file}`, error => {
-                    if (error && dev)
-                      console.warn(`[server] cannot delete ${temp}/${file}`, {
+                    if (error)
+                      console.error(`[server] cannot delete ${temp}/${file}`, {
                         error
                       });
                   })

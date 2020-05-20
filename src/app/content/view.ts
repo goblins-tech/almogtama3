@@ -35,6 +35,7 @@ export interface Obj {
 export interface Params extends Obj {
   category: string;
   id?: string;
+  refresh?: boolean;
 }
 
 @Component({
@@ -68,7 +69,8 @@ export class ContentComponent implements OnInit, AfterViewInit {
 
         this.params = {
           category,
-          id: id || item.substring(0, item.indexOf("-")) || item
+          id: id || item.substring(0, item.indexOf("-")) || item,
+          refresh: !!query.get("refresh")
         };
 
         if (env.dev)

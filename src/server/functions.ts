@@ -110,7 +110,7 @@ export function getCategories() {
 export function getData(params) {
   //setTimer("getData"); //timer('getData') = timer('cache')
   var cacheFile = `${TEMP}/articles`; //todo: ./temp/$type
-  if (params.id) cacheFile += `/${params.id}`;
+  if (params.id) cacheFile += `/${params.id}/data`;
   else if (params.category) cacheFile += `/${params.category}`;
   else cacheFile += "index";
 
@@ -211,7 +211,8 @@ export function getData(params) {
           //  if (dev) console.log("[server] getData", endTimer("getData"));
           return content;
         }),
-    params.id ? 3 : 24
+    //todo: ?refresh=AUTH_TOKEN
+    params.refresh ? 0 : params.id ? 3 : 24
   );
 }
 
