@@ -273,6 +273,9 @@ export function saveData(data, update: boolean) {
       });
   }
 
+  writeFile(`${TEMP}/articles/${params.id}/data.json`, error =>
+    console.error(`cannot write the temp file for: ${params._id}`, error)
+  );
   //todo: data.summary=summary(data.content)
   return insertData(data, update);
 }

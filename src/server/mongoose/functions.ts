@@ -46,14 +46,19 @@ export function insertData(data, update: boolean) {
             let temp = `${TEMP}/${data.type}/${data._id}`;
             readdir(temp, (err, files) => {
               if (!err)
-                files.forEach(file =>
-                  unlink(`${temp}/${file}`, error => {
-                    if (error)
-                      console.error(`[server] cannot delete ${temp}/${file}`, {
-                        error
-                      });
-                  })
-                );
+                files.forEach(file => {
+                  //a new temp file (.json) may be already created before inserting the data (async)
+                  if (file.indexOf(".json") == -1)
+                    unlink(`${temp}/${file}`, error => {
+                      if (error)
+                        console.error(
+                          `[server] cannot delete ${temp}/${file}`,
+                          {
+                            error
+                          }
+                        );
+                    });
+                });
             });
             return data;
           })
