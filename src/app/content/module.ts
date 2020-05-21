@@ -66,9 +66,8 @@ const routes: Routes = [
   { path: ":type/editor/:item", component: ContentEditorComponent },
   { path: ":type/manage", component: ContentManageComponent }, //same as index page but lists only user's posts with notes and status
   { path: ":type/item/:item", component: ContentComponent },
-  { path: ":type/:category", component: ContentComponent },
   { path: ":type/:category/:item", component: ContentComponent },
-
+  { path: ":type/:category", component: ContentComponent },
   { path: "", component: ContentComponent, pathMatch: "full" } //or: redirectTo: "articles",
 ];
 

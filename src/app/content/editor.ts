@@ -38,6 +38,7 @@ import { MatCheckbox } from "@angular/material";
 export interface Params {
   type: string;
   id?: string;
+  postType?: string;
 }
 
 @Component({
@@ -82,7 +83,13 @@ export class ContentEditorComponent implements OnInit {
     */
     this.formObj$ = urlParams(this.route).pipe(
       map(([params, query]) => {
-        this.params = { id: params.get("item"), type: params.get("type") };
+        let type = params.get("type");
+        this.params = {
+          id: params.get("item"),
+          type,
+          //convert articles, jobs to article, job
+          postType: type.slice(-1) == "s" ? type.slice(0, -1) : type
+        };
       }),
       concatMap(() =>
         forkJoin(
@@ -90,7 +97,7 @@ export class ContentEditorComponent implements OnInit {
             map((model: Article) => {
               if (model.cover) {
                 let cover = article[article.findIndex(el => el.key == "cover")],
-                  src = `/image/${model.type}-cover-${model._id}/${model.slug}.webp`;
+                  src = `/api/v1/image/${this.params.type}-cover-${model._id}/${model.slug}.webp`;
                 cover.templateOptions.existsFiles = [
                   {
                     name: "cover image",
@@ -128,7 +135,7 @@ export class ContentEditorComponent implements OnInit {
           //,syntax: true //->install highlight.js or ngx-highlight
         };
 
-        if (this.params.type == "job") {
+        if (this.params.type == "jobs") {
           /*
             //delete cover image since jobs.layout=="list" not grid
             //dont use delete article.fields(...)
@@ -138,15 +145,27 @@ export class ContentEditorComponent implements OnInit {
             );*/
 
           //add field:contacts after content
-          article.splice(article.findIndex(el => el.key == "content") + 1, 0, {
-            key: "contacts",
-            type: "textarea",
-            templateOptions: {
-              label: "contacts",
-              required: false,
-              rows: 2
+          article.splice(
+            article.findIndex(el => el.key == "content") + 1,
+            0,
+            {
+              key: "contacts",
+              type: "textarea",
+              templateOptions: {
+                label: "contacts",
+                required: false,
+                rows: 2
+              }
+            },
+            {
+              key: "location",
+              type: "input",
+              templateOptions: {
+                label: "job location",
+                placeholder: "country or city or full address"
+              }
             }
-          });
+          );
 
           //todo: add fields: required experience, salary,
           // job type (ex: full time), location{}, company{}, required skills,
@@ -239,7 +258,10 @@ export class ContentEditorComponent implements OnInit {
               : {
                   status: "ok",
                   message: data._id
-                    ? `${data.type} posted successfully, <a href="${this.params.type}/item/${data._id}">view</a>`
+                    ? `${this.params.postType} posted successfully,
+                    <a href="${this.params.type}/item/${data._id}">view</a><br />
+                    <a href="${this.params.type}/editor">post another ${this.params.postType}</a>
+                    `
                     : ""
                 };
 

@@ -71,8 +71,8 @@ export class ContentComponent implements OnInit, AfterViewInit {
           type,
           category,
           //get last part of a string https://stackoverflow.com/a/6165387/12577650
-          //note that slug part may include '='
-          id: item && item.indexOf("=") !== -1 ? item.split("=").pop() : item,
+          //using '=' (i.e /slug=id) will redirect to /slug
+          id: item && item.indexOf("@") !== -1 ? item.split("@").pop() : item,
           refresh: !!query.get("refresh")
         };
 
@@ -97,7 +97,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
             item.content = item.summary || summary(item.content);
             if (!item.slug || item.slug == "") item.slug = slug(item.title);
             if (item.cover) {
-              let src = `/api/v1/image/${item.type}-cover-${item._id}/${item.slug}.webp`,
+              let src = `/api/v1/image/${this.params.type}-cover-${item._id}/${item.slug}.webp`,
                 srcset = "";
               for (let i = 1; i < 10; i++) {
                 srcset += `${src}?size=${i * 250} ${i * 250}w, `;
@@ -106,11 +106,12 @@ export class ContentComponent implements OnInit, AfterViewInit {
             }
 
             //todo: this needs to add 'categories' getData()
+            //todo: get category.slug
             if (!item.link)
               item.link =
                 `/${this.params.type}/` +
                 (item.categories && item.categories.length > 0
-                  ? `${item.categories[0]}/${item.slug}=${item.id}`
+                  ? `${item.categories[0]}/${item.slug}@${item.id}`
                   : `item/${item.id}`);
 
             item.author = {
@@ -125,7 +126,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
           metaTags = _metaTags;
         } else {
           data = <Article>data;
-          (data as Article).id = (data as any).shortId || (data as any)._id;
+          data.id = data._id;
 
           data.summary = data.summary || summary(data.content);
           if (!data.link)
@@ -148,7 +149,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
           };
 
           if (data.cover) {
-            let src = `/api/v1/image/${data.type}-cover-${data._id}/${data.slug}.webp`,
+            let src = `/api/v1/image/${this.params.type}-cover-${data._id}/${data.slug}.webp`,
               srcset = "";
             for (let i = 1; i < 10; i++) {
               srcset += `${src}?size=${i * 250} ${i * 250}w, `;

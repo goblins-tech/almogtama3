@@ -3,7 +3,7 @@ import shortId from "shortid";
 import { connect, getModel } from "../mongoose/functions";
 import { dev, TEMP, BUCKET } from "../../config/server";
 import { upload, bucket, getCategories } from "../functions";
-import { cache } from "pkg/nodejs-tools/fs";
+import { cache, mdir } from "pkg/nodejs-tools/fs";
 import { Categories } from "pkg/ngx-formly/categories-material/functions";
 import { setTimer, endTimer, getTimer } from "pkg/nodejs-tools/timer";
 import { resize } from "pkg/graphics";
@@ -67,7 +67,7 @@ export function query(
   todo: use AUTH_TOKEN
   todo: send small data via app.post()
   ex: /api/v1/:find/articles?limit=20
-  ex: /api/v1/articles/$articleId
+  ex: /api/v1/:find/articles/$articleId
  */
 app.get(/\/:([^\/]+)\/([^\/]+)(?:\/(.+))?/, (req, res) => {
   let operation = req.params[0],
@@ -89,6 +89,67 @@ app.get(/\/:([^\/]+)\/([^\/]+)(?:\/(.+))?/, (req, res) => {
     .then(() => {
       if (dev) console.log("[serer] get", req.url, endTimer(`get_${req.url}`));
     });
+});
+
+//todo: /\/(?<type>image|cover)\/(?<id>[^\/]+) https://github.com/expressjs/express/issues/4277
+//ex: <img src="/images/articles-cover-$topicId/slug-text.png?size=250" />
+//todo: change to /api/v1/articles/image/$articleId-$imageName (move to the previous app.get(); execlude from ngsw cache)
+//todo:  /api/v1/$collection/image=$name-$id/slug-text?size
+app.get(/\/image\/([^/-]+)-([^/-]+)-([^/]+)/, (req, res) => {
+  setTimer("/image");
+
+  //todo: use system.temp folder
+  let collection = req.params[0],
+    name = req.params[1],
+    id = req.params[2],
+    size = <string>req.query.size,
+    bucketPath = `${BUCKET}/${collection}/${id}/${name}.webp`,
+    localPath = `${TEMP}/${collection}/item/${id}/${name}.webp`,
+    resizedPath = `${localPath.replace(".webp", "")}_${size}.webp`;
+
+  if (!id || !collection)
+    return res.json({
+      error: { message: "[server/api] undefined id or collection " }
+    });
+
+  cache(
+    resizedPath,
+    () =>
+      cache(
+        localPath,
+        () => bucket.download(bucketPath).then(data => data[0]),
+        24
+      ).then(data =>
+        resize(data, size, {
+          //  dest: resizedPath, //if the resizid img saved to a file, data=readFile(resized)
+          format:
+            req.headers.accept.indexOf("image/webp") !== -1 ? "webp" : "jpg",
+          allowBiggerDim: false, //todo: add this options to resize()
+          allowBiggerSize: false
+        })
+      ),
+    24
+  )
+    .then(data => {
+      //todo: set cache header
+      //todo: resize with sharp, convert to webp
+      //res.write VS res.send https://stackoverflow.com/a/54874227/12577650
+      //res.write VS res.sendFile https://stackoverflow.com/a/44693016/12577650
+      //res.writeHead VS res.setHeader https://stackoverflow.com/a/28094490/12577650
+      res.writeHead(200, {
+        "Content-Type": "image/jpg",
+        "Cache-Control": "max-age=31536000"
+      });
+
+      res.write(data);
+      if (dev)
+        console.log(
+          `[server/api] get /image ${id}/${name}.webp`,
+          endTimer("/image")
+        );
+      res.end();
+    })
+    .catch(error => res.json({ error }));
 });
 
 /*
@@ -210,79 +271,22 @@ app.get(/\/([^\/]+)(?:\/(.+))?/, (req, res, next) => {
   )
     .then(payload => {
       res.json(payload);
-      return payload;
+      if (dev)
+        console.log(
+          "[server/api] getData:",
+          endTimer(`get ${req.url}`),
+          payload
+        );
     })
     .catch(error => {
       res.json({ error });
-      return { error };
-    })
-    .then(result => {
       if (dev)
-        console[result.error ? "error" : "log"](
-          "[server] getData:",
+        console.error(
+          "[server/api] getData:",
           endTimer(`get ${req.url}`),
-          result
+          error
         );
     });
-});
-
-//todo: /\/(?<type>image|cover)\/(?<id>[^\/]+) https://github.com/expressjs/express/issues/4277
-//ex: <img src="/images/articles-cover-$topicId/slug-text.png?size=250" />
-//todo: change to /api/v1/articles/image/$articleId-$imageName (move to the previous app.get(); execlude from ngsw cache)
-//todo:  /api/v1/$collection/image=$name-$id/slug-text?size
-app.get(/\/image\/([^/-]+)-([^/-]+)-([^/]+)/, (req, res) => {
-  setTimer("/image");
-
-  //todo: use system.temp folder
-  let collection = req.params[0],
-    name = req.params[1],
-    id = req.params[2],
-    size = <string>req.query.size,
-    path = `${collection}/${id}/${name}`,
-    bucketPath = `${BUCKET}/${path}.webp`,
-    localPath = `${TEMP}/${path}.webp`,
-    resizedPath = `${localPath}_${size}.webp`;
-
-  if (!id || !collection)
-    return res.json({
-      error: { message: "[server] undefined id or collection " }
-    });
-
-  cache(
-    resizedPath,
-    () =>
-      cache(
-        localPath,
-        () => bucket.download(bucketPath).then(data => data[0]),
-        24
-      ).then(data =>
-        resize(data, size, {
-          //  dest: resizedPath, //if the resizid img saved to a file, data=readFile(resized)
-          format:
-            req.headers.accept.indexOf("image/webp") !== -1 ? "webp" : "jpg",
-          allowBiggerDim: false, //todo: add this options to resize()
-          allowBiggerSize: false
-        })
-      ),
-    24
-  )
-    .then(data => {
-      console.log({ data });
-      //todo: set cache header
-      //todo: resize with sharp, convert to webp
-      //res.write VS res.send https://stackoverflow.com/a/54874227/12577650
-      //res.write VS res.sendFile https://stackoverflow.com/a/44693016/12577650
-      //res.writeHead VS res.setHeader https://stackoverflow.com/a/28094490/12577650
-      res.writeHead(200, {
-        "Content-Type": "image/jpg",
-        "Cache-Control": "max-age=31536000"
-      });
-
-      res.write(data);
-      if (dev) console.log("[server] get /image", endTimer("/image"), path);
-      res.end();
-    })
-    .catch(error => res.json({ error }));
 });
 
 //todo: typescript: add files[] to `req` definition
@@ -290,7 +294,7 @@ app.get(/\/image\/([^/-]+)-([^/-]+)-([^/]+)/, (req, res) => {
 //todo: change to /api/v1/collection/itemType[/id]
 app.post("/:collection", upload.single("cover"), (req: any, res) => {
   if (dev)
-    console.log("[server] post", {
+    console.log("[server/api] post", {
       body: req.body,
       files: req.files,
       file: req.file,
@@ -312,6 +316,9 @@ app.post("/:collection", upload.single("cover"), (req: any, res) => {
   if (collection == "article") collection = "articles";
   else if (collection == "job") collection = "jobs";
   setTimer(`post ${req.url}`);
+
+  let tmp = `${TEMP}/${collection}/item/${data._id}`;
+  mdir(tmp);
 
   //todo: replace content then return insertData()
   /*
@@ -343,8 +350,8 @@ app.post("/:collection", upload.single("cover"), (req: any, res) => {
       resize(imgData, "", { format: "webp", input: "base64" })
         .then(data => bucket.upload(data, bucketPath)) //todo: get fileName
         .then(() => {
-          console.log(`[server] uploaded: ${fileName}`);
-          writeFile(`${TEMP}/${collection}/item/${data._id}/${fileName}.webp`);
+          console.log(`[server/api] uploaded: ${fileName}`);
+          writeFile(`${tmp}/${fileName}.webp`);
         });
       //todo: get image dimentions from dataImg
       return `<img width="" height="" data-src="${src}" data-srcset="${srcset}" sizes="${sizes}" alt="${data.title}" />`;
@@ -353,7 +360,7 @@ app.post("/:collection", upload.single("cover"), (req: any, res) => {
 
   //upload cover
   if (req.file && req.file.buffer) {
-    if (dev) console.log("[server] uploading cover ...");
+    if (dev) console.log("[server/api] uploading cover ...");
     data.cover = true;
 
     //to get original name: cover.originalname
@@ -362,20 +369,16 @@ app.post("/:collection", upload.single("cover"), (req: any, res) => {
     resize(req.file.buffer, "", { format: "webp" })
       .then(data => bucket.upload(data, bucketPath))
       .then(file => {
-        console.log(`[server] cover uploaded`);
-        writeFile(
-          `${TEMP}/${collection}/item/${data.id}/cover.webp`,
-          req.file.buffer
-        );
+        console.log(`[server/api] cover uploaded`);
+        writeFile(`${tmp}/cover.webp`, req.file.buffer);
       });
   }
 
-  writeFile(`${TEMP}/${collection}/item/${data.id}/data.json`, data).catch(
-    error =>
-      console.error(
-        `[server] cannot write the temp file for: ${data._id}`,
-        error
-      )
+  writeFile(`${tmp}/data.json`, JSON.stringify(data)).catch(error =>
+    console.error(
+      `[server/api] cannot write the temp file for: ${data._id}`,
+      error
+    )
   );
 
   //todo: data.summary=summary(data.content)
@@ -398,9 +401,12 @@ app.post("/:collection", upload.single("cover"), (req: any, res) => {
                   //remove images and cover sizes; cover.webp, $images.webp and data.json are already renewed.
                   if (file.indexOf(".webp") && file.indexOf("_") !== -1)
                     unlink(`${temp}/${file}`).catch(error =>
-                      console.error(`[server] cannot delete ${temp}/${file}`, {
-                        error
-                      })
+                      console.error(
+                        `[server/api] cannot delete ${temp}/${file}`,
+                        {
+                          error
+                        }
+                      )
                     );
                 });
               });
@@ -413,19 +419,20 @@ app.post("/:collection", upload.single("cover"), (req: any, res) => {
     })
     .then(data => {
       res.send(data);
-      return data;
+      if (dev)
+        console.log(
+          `[server/api] post: ${collection}`,
+          endTimer(`post ${req.url}`),
+          data
+        );
     })
     .catch(error => {
       res.send({ error });
-      return { error };
-    })
-    .then(result => {
-      if (dev)
-        console[result.error ? "error" : "log"](
-          `[server] post: ${collection}`,
-          endTimer(`post ${req.url}`),
-          result
-        );
+      console.error(
+        `[server/api] post: ${collection}`,
+        endTimer(`post ${req.url}`),
+        error
+      );
     });
 
   //the content will be available after the process completed (uploading files, inserting to db, ..)

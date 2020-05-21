@@ -2,10 +2,11 @@
 - quill css already defined in content/view (in pkg/content/view),
   but they also needed for content/editor, because they didn't defined in
    <ngx-form> we have to import them globally (i.e in style.scss)
-
+- remove text-align from .ql-editor to enable dir="auto"   
 */
 @import '~quill/dist/quill.core.css';
 @import '~quill/dist/quill.snow.css';
+.ql-editor{text-align: inherit !important}
 
 
 html, body { height: 100%; }
