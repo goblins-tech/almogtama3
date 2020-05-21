@@ -239,7 +239,7 @@ export class ContentEditorComponent implements OnInit {
               : {
                   status: "ok",
                   message: data._id
-                    ? `${data.type} posted successfully, <a href="/id/${data._id}">view</a>`
+                    ? `${data.type} posted successfully, <a href="${this.params.type}/item/${data._id}">view</a>`
                     : ""
                 };
 

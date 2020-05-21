@@ -135,6 +135,8 @@ export let upload = multer({
     files: 20
   },
   fileFilter: function(req, file, cb) {
+    //we only upload 'cover image', so only images are available
+    //other files are pasted into quill editor as base64-encoded data.
     let result = file.mimetype.startsWith("image/");
     if (dev) console.log("multer fileFilter", { result, req, file, cb });
     cb(null, result); //to reject this file cb(null,false) or cb(new error(..))
@@ -144,7 +146,7 @@ export let upload = multer({
   //but rename(c:/oldPath, d:/newPath) not allowed,
   //so we upload the file to a temporary dir inside the same partition
   //https://stackoverflow.com/a/43206506/12577650
-  storage: multer.diskStorage({
+  storage: multer.memoryStorage() /*multer.diskStorage({
     destination: function(req, file, cb) {
       let dir = `${TEMP}/uploads`;
       mdir(dir);
@@ -153,5 +155,5 @@ export let upload = multer({
     filename: function(req, file, cb) {
       cb(null, `tmp${new Date().getTime()}.tmp`);
     }
-  })
+  }) */
 });

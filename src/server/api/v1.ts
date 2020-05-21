@@ -288,7 +288,7 @@ app.get(/\/image\/([^/-]+)-([^/-]+)-([^/]+)/, (req, res) => {
 //todo: typescript: add files[] to `req` definition
 //todo: cover= only one img -> upload.single()
 //todo: change to /api/v1/collection/itemType[/id]
-app.post(":collection", upload.single("cover"), (req: any, res) => {
+app.post("/:collection", upload.single("cover"), (req: any, res) => {
   if (dev)
     console.log("[server] post", {
       body: req.body,
@@ -342,31 +342,42 @@ app.post(":collection", upload.single("cover"), (req: any, res) => {
       //todo: catch(err=>writeFile('queue/*',{imgData,err})) to retry uploading again
       resize(imgData, "", { format: "webp", input: "base64" })
         .then(data => bucket.upload(data, bucketPath)) //todo: get fileName
-        .then(() => console.log(`[server] uploaded: ${fileName}`));
+        .then(() => {
+          console.log(`[server] uploaded: ${fileName}`);
+          writeFile(`${TEMP}/${collection}/item/${data._id}/${fileName}.webp`);
+        });
       //todo: get image dimentions from dataImg
       return `<img width="" height="" data-src="${src}" data-srcset="${srcset}" sizes="${sizes}" alt="${data.title}" />`;
     }
   );
 
   //upload cover
-  if (req.file) {
+  if (req.file && req.file.buffer) {
     if (dev) console.log("[server] uploading cover ...");
     data.cover = true;
 
     //to get original name: cover.originalname
     let bucketPath = `${BUCKET}/${collection}/${data._id}/cover.webp`;
 
-    resize(req.file.path, "", { format: "webp" })
+    resize(req.file.buffer, "", { format: "webp" })
       .then(data => bucket.upload(data, bucketPath))
       .then(file => {
-        unlink(req.file.path); //async
         console.log(`[server] cover uploaded`);
+        writeFile(
+          `${TEMP}/${collection}/item/${data.id}/cover.webp`,
+          req.file.buffer
+        );
       });
   }
 
-  writeFile(`${TEMP}/${collection}/${data.id}/data.json`, data).catch(error =>
-    console.error(`[server] cannot write the temp file for: ${data._id}`, error)
+  writeFile(`${TEMP}/${collection}/item/${data.id}/data.json`, data).catch(
+    error =>
+      console.error(
+        `[server] cannot write the temp file for: ${data._id}`,
+        error
+      )
   );
+
   //todo: data.summary=summary(data.content)
 
   connect()
@@ -381,11 +392,11 @@ app.post(":collection", upload.single("cover"), (req: any, res) => {
             })
             //return data to the front-End
             .then(doc => {
-              let temp = `${TEMP}/${collection}/${data._id}`;
+              let temp = `${TEMP}/${collection}/item/${data._id}`;
               readdir(temp).then(files => {
                 files.forEach(file => {
-                  //a new temp file (.json) may be already created before inserting the data (async)
-                  if (file.indexOf(".json") == -1)
+                  //remove images and cover sizes; cover.webp, $images.webp and data.json are already renewed.
+                  if (file.indexOf(".webp") && file.indexOf("_") !== -1)
                     unlink(`${temp}/${file}`).catch(error =>
                       console.error(`[server] cannot delete ${temp}/${file}`, {
                         error
