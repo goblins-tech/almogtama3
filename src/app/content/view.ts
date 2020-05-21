@@ -36,6 +36,7 @@ export interface Params extends Obj {
   category: string;
   id?: string;
   refresh?: boolean;
+  type?: string;
 }
 
 @Component({
@@ -62,14 +63,16 @@ export class ContentComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     this.data$ = urlParams(this.route).pipe(
       map(([params, query]) => {
-        //ex:  /$ctg/$id-title
-        let category = (params.get("category") || "").trim(),
-          item = (params.get("item") || "").trim(),
-          id = params.get("id");
+        let type = params.get("type") || "articles",
+          category = params.get("category"),
+          item = params.get("item"); //item may be: id or slug-text=id
 
         this.params = {
+          type,
           category,
-          id: id || item.substring(0, item.indexOf("-")) || item,
+          //get last part of a string https://stackoverflow.com/a/6165387/12577650
+          //note that slug part may include '='
+          id: item && item.indexOf("=") !== -1 ? item.split("=").pop() : item,
           refresh: !!query.get("refresh")
         };
 
@@ -82,19 +85,19 @@ export class ContentComponent implements OnInit, AfterViewInit {
       //also we use concatMap and not mergeMap, to wait until the previous Obs. to be completed.
       concatMap(params => this.getData()),
       map(data => {
-        if (typeof data == "string") data = JSON.parse(data); //ex: the url fetched via a ServiceWorker
+        if (typeof data === "string") data = JSON.parse(data); //ex: the url fetched via a ServiceWorker
 
         //todo: import site meta tags from config
 
         //todo: item.cover = {{item.type}}/{{item.id}}/{{item.cover}}
         let metaTags;
         if (data instanceof Array) {
-          data.map((item: Article) => {
+          <Article[]>data.map(item => {
             item.id = item._id;
             item.content = item.summary || summary(item.content);
             if (!item.slug || item.slug == "") item.slug = slug(item.title);
             if (item.cover) {
-              let src = `/image/${item.type}-cover-${item._id}/${item.slug}.webp`,
+              let src = `/api/v1/image/${item.type}-cover-${item._id}/${item.slug}.webp`,
                 srcset = "";
               for (let i = 1; i < 10; i++) {
                 srcset += `${src}?size=${i * 250} ${i * 250}w, `;
@@ -102,12 +105,13 @@ export class ContentComponent implements OnInit, AfterViewInit {
               item.cover = { src, srcset, alt: item.title };
             }
 
-            //todo: this needs to fetch categories, ..
+            //todo: this needs to add 'categories' getData()
             if (!item.link)
               item.link =
-                item.categories && item.categories.length > 0
-                  ? `/${item.categories[0]}/${item.id}-${item.slug}`
-                  : `/id/${item.id}`;
+                `/${this.params.type}/` +
+                (item.categories && item.categories.length > 0
+                  ? `${item.categories[0]}/${item.slug}=${item.id}`
+                  : `item/${item.id}`);
 
             item.author = {
               name: "author name",
@@ -144,7 +148,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
           };
 
           if (data.cover) {
-            let src = `/image/${data.type}-cover-${data._id}/${data.slug}.webp`,
+            let src = `/api/v1/image/${data.type}-cover-${data._id}/${data.slug}.webp`,
               srcset = "";
             for (let i = 1; i < 10; i++) {
               srcset += `${src}?size=${i * 250} ${i * 250}w, `;
@@ -195,6 +199,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
       });
   }
   getData(): Observable<Data> {
+    //todo: ?docs="_id title subtitle slug summary author cover categories updatedAt"
     return this.httpService.get<Data>(this.params);
   }
 }

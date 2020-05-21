@@ -1,5 +1,5 @@
-import { connect, insertData, model } from "./mongoose/functions";
-import mongoose from "mongoose";
+import { connect, getModel } from "./mongoose/functions";
+
 import {
   cache,
   mdir,
@@ -17,15 +17,14 @@ import {
   statSync
   //promises //todo: promises.writeFile as writeFilePromise
 } from "pkg/nodejs-tools/fs";
-import { replaceAsync } from "pkg/nodejs-tools/string";
+
 import { Firebase } from "pkg/firebase/admin";
 import { initializeApp } from "firebase-admin";
 import multer from "multer";
-import { slug } from "../app/content/functions";
-import { resize, sharp } from "pkg/graphics";
+
 import { Categories } from "pkg/ngx-formly/categories-material/functions";
 import { setTimer, getTimer, endTimer } from "pkg/nodejs-tools/timer";
-import { BUCKET, FIREBASE, TEMP } from "../config/server";
+import { FIREBASE, TEMP } from "../config/server";
 
 export const dev = process.env.NODE_ENV === "development";
 
@@ -63,19 +62,19 @@ export const bucket = new Firebase(/*{
  * @method categories
  * @return {categories, main, article_categories, category_articles, inputs}
  */
-export function getCategories() {
-  return cache("temp/articles/categories.json", () =>
+export function getCategories(collection: string = "articles") {
+  return cache(`./temp/${collection}/categories.json`, () =>
     connect().then(() => {
       setTimer("getCategories");
       return Promise.all([
-        model("categories")
+        getModel(`${collection}_categories`)
           .find({})
           .lean(),
-        model("articles")
+        getModel(collection)
           .find({}, "categories")
           .lean()
       ])
-        .then(([categories, articles_categories]) => {
+        .then(([categories, items]) => {
           if (dev)
             console.log(
               "[server] getCategories: fetched from server",
@@ -96,7 +95,7 @@ export function getCategories() {
               "[server] getCategories: adjusted",
               endTimer("getCategories")
             );
-          return ctg.articleCategories(articles_categories);
+          return ctg.itemCategories(items);
         })
         .catch(err => {
           console.error("Error @categories", err);
@@ -104,180 +103,6 @@ export function getCategories() {
         });
     }, 1)
   );
-}
-
-//todo: id (ObjectId | shortId) | limit (number)
-export function getData(params) {
-  //setTimer("getData"); //timer('getData') = timer('cache')
-  var cacheFile = `${TEMP}/articles`; //todo: ./temp/$type
-  if (params.id) cacheFile += `/${params.id}/data`;
-  else if (params.category) cacheFile += `/${params.category}`;
-  else cacheFile += "index";
-
-  cacheFile += ".json";
-
-  //docs to be fetched in list mode
-  let docs = "_id title subtitle slug summary author cover updatedAt";
-
-  return cache(
-    cacheFile,
-    () =>
-      connect()
-        .then(() => {
-          let contentModel = model("articles"),
-            content;
-
-          /*
-              deprecated! now _id is type of ShortId
-            if (params.id.length == 24)
-              content = contentModel.findById(params.id);
-            else
-              content = contentModel.find({ shortId: params.id }, null, {
-                limit: 1
-              }); //note that the returned result is an array, not object
-              */
-          if (params.id) content = contentModel.findById(params.id);
-          else if (
-            !params.category ||
-            ["articles", "jobs"].includes(params.category)
-          )
-            content = contentModel.find(
-              { type: params.category || "articles", status: "approved" },
-              docs,
-              {
-                limit: 50
-              }
-            );
-          else {
-            content = Promise.all([
-              cache(
-                `temp/articles/categories.json`,
-                () => model("categories").find({}),
-                3
-              ),
-              cache(
-                `temp/articles/article_categories.json`,
-                () => model("article_categories").find({}),
-                1
-              )
-            ]).then(([categories, article_categories]) => {
-              if (dev)
-                console.log("categories", { categories, article_categories });
-              //get category._id from category.slug
-              let category,
-                selectedArticles = [];
-
-              if (category == "jobs" || category == "articles") {
-                selectedArticles = [];
-                //todo: select articles where article.type==article
-              } else {
-                category = categories.find(el => el.slug == params.category);
-                if (dev) console.log("category", category);
-
-                if (category) {
-                  //get articles from article_categories where category=category._id
-                  article_categories.forEach(el => {
-                    if (el.category == category._id)
-                      selectedArticles.push(el.article);
-                  });
-                }
-              }
-
-              if (dev) console.log({ selectedArticles });
-
-              //get articles from 'articles' where _id in selectedArticles[]
-              let articles = model("articles").find(
-                { _id: { $in: selectedArticles } },
-                docs, //todo: {shortid,title,slug,summary|content}
-                {
-                  limit: params.limit || 50,
-                  sort: { _id: -1 }
-                }
-              );
-
-              //  if (env.dev)  articles.then(result => console.log("articles", result));
-              return articles;
-            });
-          }
-
-          return content;
-        })
-        .then(content => {
-          /*
-        mongoose.connection.close(() => {
-          if (dev) console.log("connection closed");
-        });
-         */
-          //  if (dev) console.log("[server] getData", endTimer("getData"));
-          return content;
-        }),
-    //todo: ?refresh=AUTH_TOKEN
-    params.refresh ? 0 : params.id ? 3 : 24
-  );
-}
-
-export function saveData(data, update: boolean) {
-  //todo: replace content then return insertData()
-  /*
-  1- handle base46 data, then: upload images to firebase, then resize
-  2- insert data to db
-  3- upload cover image then resize it
-   */
-  setTimer("saveData");
-  if (dev) console.log("[server] saveData", data);
-
-  let date = new Date();
-
-  if (!data.slug || data.slug == "")
-    data.slug = slug(data.title, 200, ":ar", false); //if slug changed, cover fileName must be changed
-  if (dev) data.status = "approved";
-
-  // handle base64-encoded data (async)
-  data.content = data.content.replace(
-    /<img src="data:image\/(.+?);base64,([^=]+)={0,2}">/g,
-    (match, extention, imgData, matchPosition, fullString) => {
-      let fileName = date.getTime(),
-        bucketPath = `${BUCKET}/${data.type}/${data._id}/${fileName}.webp`,
-        src = `/image/${data.type}-${fileName}-${data._id}/${data.slug}.webp`,
-        srcset = "",
-        sizes = "";
-      for (let i = 1; i < 10; i++) {
-        srcset += `${src}?size=${i * 250} ${i * 250}w,`;
-      }
-
-      //todo: catch(err=>writeFile('queue/*',{imgData,err})) to retry uploading again
-      resize(imgData, "", { format: "webp", input: "base64" })
-        .then(data => bucket.upload(data, bucketPath)) //todo: get fileName
-        .then(() => console.log(`[server] uploaded: ${fileName}`));
-      //todo: get image dimentions from dataImg
-      return `<img width="" height="" data-src="${src}" data-srcset="${srcset}" sizes="${sizes}" alt="${data.title}" />`;
-    }
-  );
-
-  //upload cover
-  if (data.file) {
-    //delete data.file early, before insertData(data) starts
-    let cover = data.file;
-    delete data.file;
-    if (dev) console.log("uploading cover ...");
-    data.cover = true;
-
-    //to get original name: cover.originalname
-    let bucketPath = `${BUCKET}/${data.type}/${data._id}/cover.webp`;
-
-    resize(cover.path, "", { format: "webp" })
-      .then(data => bucket.upload(data, bucketPath))
-      .then(file => {
-        unlink(cover.path, () => {}); //async
-        console.log(`[server] cover uploaded`);
-      });
-  }
-
-  writeFile(`${TEMP}/articles/${params.id}/data.json`, error =>
-    console.error(`cannot write the temp file for: ${params._id}`, error)
-  );
-  //todo: data.summary=summary(data.content)
-  return insertData(data, update);
 }
 
 export const jsonData = {

@@ -1,5 +1,7 @@
 <!--todo: create or edit -->
-<h1 *ngIf="params?.type">create a new {{params.type}}</h1>
+<h1 *ngIf="params?.type">
+  create a new {{params.type=="jobs"?'job':'article'}}
+</h1>
 
 <ngx-form
   [formObj]="formObj$"

@@ -1,78 +1,29 @@
-import { connect as _connect, model as _model, mongoose } from "pkg/mongoose";
-import { dev, schemas, DB, TEMP } from "../../config/server";
-import { unlink, readdir } from "pkg/nodejs-tools/fs";
-
-function encode(str: string) {
-  return encodeURIComponent(str).replace(/%/g, "%25");
-}
+import { connect as _connect, model, mongoose } from "pkg/mongoose";
+import { schemas, DB } from "../../config/server";
 
 export function connect() {
-  //todo: get db config from /config.ts
-  if (dev)
-    console.log({
-      connection: mongoose.connection,
-      readyState: mongoose.connection.readyState
-    });
-  return mongoose.connection.readyState == 0
-    ? _connect({
-        auth: DB.auth,
-        host: DB.host,
-        srv: DB.srv,
-        dbName: DB.dbName
-      })
-    : Promise.resolve(mongoose.connection);
+  return _connect(
+    {
+      auth: DB.auth,
+      host: DB.host,
+      srv: DB.srv,
+      dbName: DB.dbName
+    },
+    { multiple: false }
+  );
 }
 
-export function insertData(data, update: boolean) {
-  if (!data) return Promise.reject({ error: { message: "no data" } });
-
-  //data.type is singular (i.e: article, job),
-  //  but collection name is plural (i.e: articles, jobs)
-  let type = ["article", "job", "jobs"].includes(data.type)
-    ? "articles"
-    : data.type || "articles";
-
-  return connect().then(() => {
-    let contentModel = model(type);
-    if (update)
-      return (
-        contentModel
-          .replaceOne({ _id: data._id }, data, {
-            upsert: true,
-            timestamps: true
-          })
-          //return data to the front-End
-          .then(doc => {
-            let temp = `${TEMP}/${data.type}/${data._id}`;
-            readdir(temp, (err, files) => {
-              if (!err)
-                files.forEach(file => {
-                  //a new temp file (.json) may be already created before inserting the data (async)
-                  if (file.indexOf(".json") == -1)
-                    unlink(`${temp}/${file}`, error => {
-                      if (error)
-                        console.error(
-                          `[server] cannot delete ${temp}/${file}`,
-                          {
-                            error
-                          }
-                        );
-                    });
-                });
-            });
-            return data;
-          })
-      );
-    let content = new contentModel(data);
-    return content.save();
-  });
+export function disconnect() {
+  //close all connections;  OR: mongoose.connection.close()
+  return mongoose.disconnect();
 }
 
-export function model(collection) {
+export function getModel(collection, schemaObj = {}) {
   //console.log("model: " +{ type, models: mongoose.models, modelNames: mongoose.modelNames() });
   //todo: schemas/mongoose.ts
 
-  let schemaObj =
-    collection in schemas ? schemas[collection] : schemas["basic"];
-  return _model(collection, schemaObj, { strict: false });
+  if (collection instanceof mongoose.model) return collection;
+  if (!schemaObj)
+    schemaObj = collection in schemas ? schemas[collection] : schemas["basic"];
+  return model(collection, schemaObj, { strict: false });
 }

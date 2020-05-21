@@ -13,15 +13,10 @@ import {
   parsePath,
   cache
 } from "pkg/nodejs-tools/fs";
-import shortId from "shortid";
-import { getData, upload, saveData, bucket, getCategories } from "./functions";
-import { resize } from "pkg/graphics";
-import { setTimer, endTimer, getTimer } from "pkg/nodejs-tools/timer";
-import { dev, DIST, TEMP, BUCKET } from "../config/server";
-import { connect } from "./mongoose/functions";
 
-//todo: import {} from 'fs/promises' dosen't work yet (expremental)
-const { access, readFile, writeFile } = require("fs").promises;
+import { dev, DIST, TEMP } from "../config/server";
+import { connect, disconnect } from "./mongoose/functions";
+import v1 from "./api/v1";
 
 //console.clear();
 
@@ -100,6 +95,8 @@ app.use(jsonParser());
 app.use(urlParser({ extended: true }));
 app.use(cors());
 
+app.use("/api/v1", v1);
+
 /*
  cors default options:
  {
@@ -120,126 +117,6 @@ app.use(cors());
     maxFieldsSize: 5 * 1024 * 1024 //the amount of memory all fields together (except files)
   })
 );*/
-
-//todo: typescript: add files[] to `req` definition
-//todo: cover= only one img -> upload.single()
-app.post("/api/:type", upload.single("cover"), (req: any, res) => {
-  if (dev)
-    console.log("[server] post", {
-      body: req.body,
-      files: req.files,
-      file: req.file,
-      cover: req.body.cover //should be moved to files[] via multer
-    });
-
-  if (!req.body || !req.body.content)
-    return res.send({ error: { message: "no data posted" } });
-
-  let update;
-  if (!req.body._id) {
-    req.body._id = shortId.generate();
-    update = false;
-  } else update = true;
-  req.body.type = req.params.type;
-  req.body.file = req.file;
-
-  saveData(req.body, update)
-    .then(data => res.send(data))
-    .catch(error => {
-      if (dev) console.error("[server] post", { error });
-      res.send({ error });
-    });
-
-  //the content will be available after the process completed (uploading files, inserting to db, ..)
-});
-
-app.get("/api/:item?", (req, res, next) => {
-  var item = req.params.item;
-
-  //home page (/api/)
-  if (!item) category = "articles";
-  else if (item.startsWith("~")) {
-    if (item == "~categories")
-      getCategories()
-        .then(data => res.json({ data }))
-        .catch(error => res.json({ error }));
-    else res.json({ error: { message: `unknown param ${item}` } });
-  } else {
-    var id, category;
-    if (item.startsWith("id-")) id = item.slice(3);
-    else category = item;
-
-    if (dev) console.log("[server] get:", { id, category });
-
-    getData({ id, category })
-      .then(payload => {
-        if (dev) console.log("[server] getData:", payload);
-        res.json(payload);
-      })
-      .catch(error => {
-        if (dev) console.log("[server] getData error:", error);
-        res.json({ error });
-      });
-    //or .catch(next)
-    //https://expressjs.com/en/advanced/best-practice-performance.html#use-promises
-    //https://expressjs.com/en/guide/error-handling.html
-  }
-});
-
-//todo: /\/(?<type>image|cover)\/(?<id>[^\/]+) https://github.com/expressjs/express/issues/4277
-//ex: <img src="/images/articles-cover-$topicId/slug-text.png?size=250" />
-app.get(/\/image\/([^/-]+)-([^/-]+)-([^/]+)/, (req, res) => {
-  setTimer("/image");
-
-  //todo: use system.temp folder
-  let type = req.params[0],
-    name = req.params[1],
-    id = req.params[2],
-    size = <string>req.query.size,
-    path = `${type}/${id}/${name}`,
-    bucketPath = `${BUCKET}/${path}.webp`,
-    localPath = `${TEMP}/${path}.webp`,
-    resizedPath = `${localPath}_${size}.webp`;
-
-  if (!id || !type)
-    return res.json({ error: { message: "[server] undefined id or type " } });
-
-  cache(
-    resizedPath,
-    () =>
-      cache(
-        localPath,
-        () => bucket.download(bucketPath).then(data => data[0]),
-        24
-      ).then(data =>
-        resize(data, size, {
-          //  dest: resizedPath, //if the resizid img saved to a file, data=readFile(resized)
-          format:
-            req.headers.accept.indexOf("image/webp") !== -1 ? "webp" : "jpg",
-          allowBiggerDim: false, //todo: add this options to resize()
-          allowBiggerSize: false
-        })
-      ),
-    24
-  )
-    .then(data => {
-      console.log({ data });
-      //todo: set cache header
-      //todo: resize with sharp, convert to webp
-      //res.write VS res.send https://stackoverflow.com/a/54874227/12577650
-      //res.write VS res.sendFile https://stackoverflow.com/a/44693016/12577650
-      //res.writeHead VS res.setHeader https://stackoverflow.com/a/28094490/12577650
-      res.writeHead(200, {
-        "Content-Type": "image/jpg",
-        "Cache-Control": "max-age=31536000"
-      });
-
-      res.write(data);
-      if (dev) console.log("[server] get /image", endTimer("/image"), path);
-      res.end();
-    })
-    .catch(error => res.json({ error }));
-});
 
 // Serve static files; /file.ext will be served from /dist/browser/file.ext then /data/media/file.ext
 app.get("*.*", express.static(`${DIST}/browser`, { maxAge: "1y" })); //static assets i.e: created at build time; may be deleted at any time and recreated at build time
@@ -264,5 +141,17 @@ if (process.argv[2] == "--start") {
     .listen(PORT, () => {
       console.log(`Node Express server listening on port:${PORT}`); //,{server}
     })
-    .on("error", error => console.error("express server error:", { error }));
+    .on("error", error => console.error("[server] express error:", { error }))
+    .on("close", () => {
+      disconnect()
+        .then(() =>
+          console.log("[server] all database connections disconnected.")
+        )
+        .catch(error =>
+          console.error("[server] faild to disconnect the connections", {
+            error
+          })
+        );
+      console.log("[server] server closed.");
+    });
 }

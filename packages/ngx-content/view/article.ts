@@ -13,6 +13,7 @@ export interface Article extends Obj {
   cover?: { src: string; srcset: string; alt: string };
   author?: { name?: string; img?: string; link?: string };
   link?: string;
+  categories?: string[];
   [key: string]: any; //ex: _id,...
 }
 

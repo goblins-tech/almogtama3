@@ -11,6 +11,8 @@ import { ActivatedRoute, ParamMap } from "@angular/router";
 export function urlParams(
   route: ActivatedRoute
 ): Observable<[ParamMap, ParamMap]> {
-  //todo: combineLatest VS forkJoin
+  //use combineLatest (not forkJoin), because route.paramMap and route.queryParamMap
+  //may be changed at any time again and again, every time any of them changes it will emit the current (latest)
+  //value from each one.
   return combineLatest(route.paramMap, route.queryParamMap);
 }

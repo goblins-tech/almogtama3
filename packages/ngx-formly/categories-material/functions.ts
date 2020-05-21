@@ -31,19 +31,20 @@ export class Categories {
   }
 
   /**
-   * add articles of each category to this.ctg.categories[category]
-   * @method articleCategories
-   * @param  data        [{_id, categories[]}]
+   * add items (ex: articles) of each category to this.ctg.categories[category].items[]
+   * @method itemCategories
+   * @param  data      [{_id, categories[]}]
    * @return [description]
    */
-  articleCategories(data) {
+  itemCategories(data) {
     data = data || [];
 
     //remove old articles from all categories
     this.ctg.categories.map(el => {
-      el.articles = [];
+      el.items = [];
       return el;
     });
+
     data.forEach(el => {
       if (
         el.categories &&
@@ -51,8 +52,7 @@ export class Categories {
         el.categories.length > 0
       ) {
         el.categories.forEach(c => {
-          if (this.ctg.categories[c])
-            this.ctg.categories[c].articles.push(el._id);
+          if (this.ctg.categories[c]) this.ctg.categories[c].items.push(el._id);
         });
       }
     });
@@ -82,7 +82,7 @@ export class Categories {
   }
 
   /**
-   * get main categories i.e: have no parent
+   * get main categories, i.e: have no parent
    * @method getMain
    * @param  ids  if true: return id[] instead of categories[]
    * @return categories[] | ids[]

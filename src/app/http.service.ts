@@ -30,11 +30,17 @@ export class HttpService {
     options = Object.assign(options || {}, {
       observe: "body"
     });
-    var url = "/api/";
-    if (typeof params == "string") url += params;
-    else if (params.id) url += `id-${params.id}`;
-    else if (params.category) url += encodeURIComponent(params.category);
-    else url += "articles";
+    //todo: rename params.type to params.collection
+    var url = `/api/v1`; //todo: /api/$type(articles)/$item(id,ctg,...)
+    if (typeof params === "string") url += `/${params}`;
+    else {
+      url += `/${params.type}`;
+      if (params.id) url += `/${params.id}`;
+      else if (params.category)
+        url += `category=${encodeURIComponent(params.category)}`;
+    }
+
+    if (params.refresh) url += `?refresh=${params.refresh}`;
     if (env.dev) console.log("[httpService] get", { params, url });
     return this.http.get<T>(url, options);
   }
@@ -45,7 +51,7 @@ export class HttpService {
     //todo: sending data as FormData instead of Object causes that req.body=undefined
     if (options.formData !== false) data = this.toFormData(data); //typescript 3.2 dosen't support null safe operator i.e: options?.formData
     delete options.formData;
-    return this.http.post<T>(`/api/${type}`, data, options);
+    return this.http.post<T>(`/api/v1/${type}`, data, options);
   }
 
   //same as get() & post(), but reports the progress
@@ -90,7 +96,7 @@ export class HttpService {
   //this method dosent return an Observable
   //todo: http.request('post') VS http.post()
   request(method: string, type: string, data: Obj, options?: Obj) {
-    return new HttpRequest(method, `/api/${type}`, data, options);
+    return new HttpRequest(method, `/api/v1/${type}`, data, options);
   }
 
   /**

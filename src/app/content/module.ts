@@ -60,13 +60,16 @@ import { LazyLoadImageModule } from "ng-lazyload-image";
 import { DynamicLoadService } from "pkg/ngx-tools/dynamic-load.service";
 
 const routes: Routes = [
-  { path: "editor", component: ContentEditorComponent }, // ex: /editor?type=jobs
-  { path: "editor/:id", component: ContentEditorComponent },
-  { path: "id/:id", component: ContentComponent },
-  { path: ":category", component: ContentComponent },
-  { path: ":category/manage", component: ContentManageComponent },
-  { path: ":category/:item", component: ContentComponent },
-  { path: "", component: ContentComponent, pathMatch: "full" }
+  //ex: /articles/category-slug/item-slug=123
+  { path: ":type", component: ContentComponent },
+  { path: ":type/editor", component: ContentEditorComponent }, // ex: /editor?type=jobs
+  { path: ":type/editor/:item", component: ContentEditorComponent },
+  { path: ":type/manage", component: ContentManageComponent }, //same as index page but lists only user's posts with notes and status
+  { path: ":type/item/:item", component: ContentComponent },
+  { path: ":type/:category", component: ContentComponent },
+  { path: ":type/:category/:item", component: ContentComponent },
+
+  { path: "", component: ContentComponent, pathMatch: "full" } //or: redirectTo: "articles",
 ];
 
 export const APP_LOCALE_ID = "en-US";

@@ -2,10 +2,10 @@ import { Component, OnInit, ViewChild, Input } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { HttpService } from "../http.service";
 import { HttpEvent, HttpEventType } from "@angular/common/http";
-import { Observable, of } from "rxjs";
+import { Observable, of, forkJoin } from "rxjs";
 import { map, concatMap } from "rxjs/operators";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { Data, Article } from "pkg/ngx-content/view"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
+import { Article } from "pkg/ngx-content/view"; //todo: use tripple directive i.e: ///<reference types="./index.ts" />
 import { HighlightJS } from "ngx-highlightjs";
 import { keepHtml, Categories } from "./functions";
 import { urlParams } from "pkg/ngx-tools/routes";
@@ -62,6 +62,8 @@ export class ContentEditorComponent implements OnInit {
   categories;
   steps;
 
+  //todo: hide this route from search engines
+
   constructor(
     private route: ActivatedRoute,
     private httpService: HttpService,
@@ -72,37 +74,38 @@ export class ContentEditorComponent implements OnInit {
 
   ngOnInit() {
     //queryParams --concatMap-->combineLatest(getData(), getCategories()) --map--> formObj
-    /* updating this.formObj$, this.params value after waiting getData() to finish
+    /* updating this.formObj$ & this.params value after waiting getData() to finish
        will caue error: ExpressionChangedAfterItHasBeenCheckedError
        solutions:
          - move this.params={...} to constractor (will need to call getData() in constructor)
          - force change detection call
     */
     this.formObj$ = urlParams(this.route).pipe(
-      map(([params, query]) => ({
-        id: params.get("id"),
-        type: query.get("type")
-      })),
-      concatMap(params =>
-        this.getData(params).pipe(map(data => ({ params, data })))
-      ),
-
-      concatMap(({ params, data }) => {
-        let model = <Article>data;
-        params.type = model.type || params.type || "article";
-
-        this.params = params;
-        return this.getCategories(params.type).pipe(
-          map(result => ({
-            params,
-            model,
-            categories: result.data || {}
-          }))
-        );
+      map(([params, query]) => {
+        this.params = { id: params.get("item"), type: params.get("type") };
       }),
-      map(({ params, model, categories }) => {
-        //create formObj:
-
+      concatMap(() =>
+        forkJoin(
+          this.getData().pipe(
+            map((model: Article) => {
+              if (model.cover) {
+                let cover = article[article.findIndex(el => el.key == "cover")],
+                  src = `/image/${model.type}-cover-${model._id}/${model.slug}.webp`;
+                cover.templateOptions.existsFiles = [
+                  {
+                    name: "cover image",
+                    src: `${src}?size=100`,
+                    link: src
+                  }
+                ];
+              }
+              return model;
+            })
+          ),
+          this.getCategories(this.params.type)
+        )
+      ),
+      map(([model, categories]) => {
         //change content.type from textarea to quill
         let content = article[article.findIndex(el => el.key == "content")];
         content.type = "quill";
@@ -125,19 +128,7 @@ export class ContentEditorComponent implements OnInit {
           //,syntax: true //->install highlight.js or ngx-highlight
         };
 
-        if (model.cover) {
-          let cover = article[article.findIndex(el => el.key == "cover")],
-            src = `/image/${model.type}-cover-${model._id}/${model.slug}.webp`;
-          cover.templateOptions.existsFiles = [
-            {
-              name: "cover image",
-              src: `${src}?size=100`,
-              link: src
-            }
-          ];
-        }
-
-        if (params.type == "job") {
+        if (this.params.type == "job") {
           /*
             //delete cover image since jobs.layout=="list" not grid
             //dont use delete article.fields(...)
@@ -182,21 +173,21 @@ export class ContentEditorComponent implements OnInit {
               ]
             }
           ],
-          model //this.getData(this.params.id).map(v => v.payload)
+          model
         };
       })
     );
   }
 
-  getData(params) {
-    return params.id
-      ? this.httpService.get<Data>(params)
-      : of(<Data>{ type: params.type });
+  getData() {
+    return this.params.id
+      ? this.httpService.get<Article>(this.params)
+      : of(<Article>{});
   }
 
   getCategories(type: string) {
     //todo: getCategories(~categories/:type)
-    return this.httpService.get<any>("~categories");
+    return this.httpService.get<any>(`${type}_categories`);
   }
 
   onSubmit(formObj: FormObj) {

@@ -2,6 +2,15 @@ import shortId from "shortid";
 import mongoose from "mongoose";
 export const basic = {};
 
+/*
+//replace '-' with '@', because it will be used as a separator between the id and the slug,
+//or use '='
+//ex: /id-slug-text   OR /id=slug-text
+shortid.characters(
+  "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_@"
+);
+*/
+
 //times (createdAt, updatedAt) are added automatically, by the option {typestamps: true}
 
 //todo: separate collections jobs & articles

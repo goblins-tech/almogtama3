@@ -81,6 +81,7 @@ export class NgxFormComponent implements OnInit {
     obs(this.formObj, v => {
       this._formObj = v;
       this.adjust();
+      console.log({ _formObj: this._formObj });
     });
   }
 
@@ -129,7 +130,7 @@ export class NgxFormComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    //console.log({ changes });
+    console.log({ changes });
     if ("response" in changes && changes.response.currentValue) {
       let resp = changes.response.currentValue;
 

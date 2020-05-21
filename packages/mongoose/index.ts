@@ -20,6 +20,7 @@ export namespace types {
 
   export interface ConnectionOptions extends mongoose.ConnectionOptions {
     dbName?: string;
+    multiple?: boolean; //don't create a new connection if there are connections already open
   }
   export interface Model extends types.Object {
     fields?: types.Object;
@@ -48,7 +49,14 @@ Object.keys(mongoose).forEach(key => {
   exports[key] = mongoose[key]; //todo: ES export i.e export key = mongoose[key]
 });*/
 
-export function connect(uri: types.uri, options?: types.ConnectionOptions) {
+export function connect(uri: types.uri, options: types.ConnectionOptions = {}) {
+  if (!options.multiple && mongoose.connection.readyState > 0) {
+    console.log("[mongoose] already connected");
+    return Promise.resolve(mongoose.connection);
+  }
+
+  delete options.multiple;
+
   setTimer("connect");
   const defaultOptions = {
     // todo: export static defaultConnectionOptions={..}
@@ -104,7 +112,7 @@ export function connect(uri: types.uri, options?: types.ConnectionOptions) {
 
 export function model(
   collection: string,
-  obj: types.Model,
+  obj: types.Model = {},
   options?: mongoose.SchemaOptions
 ) {
   // todo: merge schema's defaultOptions
