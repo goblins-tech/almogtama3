@@ -87,9 +87,6 @@ export class ContentComponent implements OnInit, AfterViewInit {
       map(data => {
         if (typeof data === "string") data = JSON.parse(data); //ex: the url fetched via a ServiceWorker
 
-        //todo: import site meta tags from config
-
-        //todo: item.cover = {{item.type}}/{{item.id}}/{{item.cover}}
         let metaTags;
         if (data instanceof Array) {
           <Article[]>data.map(item => {
@@ -97,12 +94,24 @@ export class ContentComponent implements OnInit, AfterViewInit {
             item.content = item.summary || summary(item.content);
             if (!item.slug || item.slug == "") item.slug = slug(item.title);
             if (item.cover) {
+              //if the layout changed, change the attribute sizes, for example if a side menue added.
               let src = `/api/v1/image/${this.params.type}-cover-${item._id}/${item.slug}.webp`,
-                srcset = "";
+                srcset = "",
+                sizes = "";
               for (let i = 1; i < 10; i++) {
                 srcset += `${src}?size=${i * 250} ${i * 250}w, `;
               }
-              item.cover = { src, srcset, alt: item.title };
+              item.cover = {
+                src,
+                srcset,
+                sizes,
+                alt: item.title,
+                lazy: true,
+                //use same colors as website theme (i.e: toolbar backgroundColor & textColor)
+                //don't use dinamic size i.e: placeholder.com/OriginalWidthXOriginalHeight, because this image will be cashed via ngsw
+                placeholder:
+                  "http://via.placeholder.com/500x250.webp/1976d2/FFFFFF?text=loading..."
+              };
             }
 
             //todo: this needs to add 'categories' getData()
@@ -149,12 +158,23 @@ export class ContentComponent implements OnInit, AfterViewInit {
           };
 
           if (data.cover) {
+            //todo: i<originalSize/250
             let src = `/api/v1/image/${this.params.type}-cover-${data._id}/${data.slug}.webp`,
-              srcset = "";
+              srcset = "",
+              sizes =
+                "(max-width: 1000px) 334px, (max-width: 800px) 400px,(max-width: 550px) 550px";
             for (let i = 1; i < 10; i++) {
               srcset += `${src}?size=${i * 250} ${i * 250}w, `;
             }
-            data.cover = { src, srcset, alt: data.title };
+            data.cover = {
+              src,
+              srcset,
+              sizes,
+              alt: data.title,
+              lazy: true,
+              placeholder:
+                "http://via.placeholder.com/500x250.webp/1976d2/FFFFFF?text=loading..."
+            };
           }
 
           if (this.params.type == "jobs")

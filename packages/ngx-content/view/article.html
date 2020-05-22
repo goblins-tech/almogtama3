@@ -19,23 +19,29 @@
     </mat-card-subtitle>
   </mat-card-header>
 
-  <img
-    mat-card-image
-    *ngIf="data.cover"
-    lazyLoad="{{data.cover.src}}"
-    data-src="{{data.cover.src}}"
-    data-srcset="{{data.cover.srcset}}"
-    alt="{{data.cover.alt || data.title}}"
-  />
-
   <!-- it is recommended to render the contet that was generated via <quill-editor> inside <quill-view>
   https://www.npmjs.com/package/ngx-quill#quillviewcomponent---using-quilljs-to-render-content
   <mat-card-content
     dir="auto"
     innerHtml="{{data.content | content}}"
   ></mat-card-content> -->
-  <mat-card-content dir="auto"
-    ><quill-view
+  <mat-card-content dir="auto">
+    <img
+      *ngIf="data.cover"
+      mat-card-image
+      width="{{data.cover.width}}"
+      height="{{data.cover.height}}"
+      lazyLoad="{{data.cover.lazy?data.cover.src:''}}"
+      [useSrcset]="true"
+      defaultImage="{{data.cover.lazy? data.cover.placeholder || 'http://via.placeholder.com/'+(data.cover.width||'500')+'x'+(data.cover.height||'250')+'.webp?text=loading...':''}}"
+      data-src="{{data.cover.src}}"
+      data-srcset="{{data.cover.srcset}}"
+      src="{{data.cover.lazy?data.cover.src:''}}"
+      srcset="{{data.cover.lazy?data.cover.srcset:''}}"
+      sizes="{{data.cover.sizes}}"
+      alt="{{data.cover.alt || data.title}}"/>
+
+    <quill-view
       #quillView
       [content]="data.content"
       format="text"

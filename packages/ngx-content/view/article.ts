@@ -10,7 +10,16 @@ export interface Article extends Obj {
   subtitle?: string;
   content?: string;
   keywords?: string | string[]; //todo: if(string)..
-  cover?: { src: string; srcset: string; alt: string };
+  cover?: {
+    src?: string;
+    srcset?: string;
+    sizes?: string;
+    alt?: string;
+    lazy?: boolean;
+    placeholder?: string;
+    width?: number | string;
+    height?: number | string;
+  };
   author?: { name?: string; img?: string; link?: string };
   link?: string;
   categories?: string[];

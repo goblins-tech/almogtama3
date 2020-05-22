@@ -267,7 +267,7 @@ app.get(/\/([^\/]+)(?:\/(.+))?/, (req, res, next) => {
         return content;
       }),
     //todo: ?refresh=AUTH_TOKEN
-    req.query.refresh ? 0 : 3
+    req.query.refresh ? -1 : 3
   )
     .then(payload => {
       res.json(payload);
@@ -419,6 +419,7 @@ app.post("/:collection", upload.single("cover"), (req: any, res) => {
     })
     .then(data => {
       res.send(data);
+      unlink(`${TEMP}/${collection}/index.json`);
       if (dev)
         console.log(
           `[server/api] post: ${collection}`,
