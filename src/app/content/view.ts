@@ -8,7 +8,7 @@ todo:
 
 import { Data, Article, MetaService } from "pkg/ngx-content/view";
 import { slug } from "pkg/ngx-content/core";
-import { metaTags as _metaTags } from "../../config/front";
+import { metaTags as _metaTags, ADSENSE } from "../../config/front";
 
 import {
   Component,
@@ -52,7 +52,8 @@ export class ContentComponent implements OnInit, AfterViewInit {
   dev = env.dev; //to disable adsense in dev mode
 
   //todo: share adsense by changeing this value based on the article's author
-  adsense = "ca-pub-8421502147716920";
+  //to totally remove the adsense code in dev mode, use: <ngx-adsense *ngIf="!dev">
+  adsense = ADSENSE;
   constructor(
     private route: ActivatedRoute,
     private httpService: HttpService,

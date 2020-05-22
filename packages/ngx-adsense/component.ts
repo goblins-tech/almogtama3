@@ -1,15 +1,12 @@
 import {
   Component,
-  OnInit,
-  ViewChild,
-  ViewChildren,
-  QueryList,
   Input,
   Output,
   EventEmitter,
   ElementRef,
   AfterViewInit,
-  Inject
+  Inject,
+  SimpleChanges
 } from "@angular/core";
 import { DOCUMENT } from "@angular/common";
 
@@ -18,26 +15,37 @@ angular dosen't allow to use <script> inside the template, so we dynamically loa
  */
 @Component({
   selector: "ngx-adsense",
-  template: ``
+  template: `
+    <ngx-script
+      [src]="src || '//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js'"
+      (loaded)="onLoaded()"
+      (ready)="onReady()"
+      [attributes]="attributes"
+    ></ngx-script>
+  `
 })
-export class NgxAdsenseComponent implements AfterViewInit {
+export class NgxAdsenseComponent {
   @Input() id: string; //ca-pub-**
   @Input() src: string;
-  constructor(
-    @Inject(DOCUMENT) private document,
-    private elementRef: ElementRef
-  ) {}
+  @Input() attributes: { [key: string]: any } = {};
+  @Output() loaded = new EventEmitter<void>();
+  @Output() ready = new EventEmitter<void>();
 
-  ngAfterViewInit() {
-    var s = this.document.createElement("script");
-    s.type = "text/javascript";
-    s["data-ad-client"] = this.id;
-    s.src =
-      this.src || "//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js";
-    //no need to use s.async=true; because dynamically loaded scripts are async by default
-    // s.onload = function () { __this.afterScriptAdded(); }; //__this=this
+  ngOnInit() {
+    this.attributes["data-ad-client"] = this.id;
+  }
 
-    //todo: or add to document.head
-    this.elementRef.nativeElement.appendChild(s);
+  ngOnChanges(changes: SimpleChanges) {
+    if ("attributes" in changes && changes.attributes.currentValue) {
+      this.attributes["data-ad-client"] = this.id;
+    }
+  }
+
+  onLoaded() {
+    this.loaded.emit();
+  }
+
+  onReady() {
+    this.ready.emit();
   }
 }
