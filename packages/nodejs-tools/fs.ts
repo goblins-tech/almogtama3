@@ -229,6 +229,14 @@ export function remove(
   }
 }
 
+export function write(file, data, cb: (error: Error) => void) {
+  file = resolve(file);
+  mdir(file as string, true);
+  if (["array", "object"].includes(objectType(data)))
+    data = JSON.stringify(data);
+  return cb ? fs.writeFile(file, data, cb) : fs.writeFileSync(file, data);
+}
+
 /**
  * cache data into a file, or read the cache file if the data is fresh
  * @method cache
@@ -315,9 +323,12 @@ export async function cache(
 
 //todo: use async functions
 function cache_save(file, data, allowEmpty) {
-  if (["array", "object"].includes(objectType(data)))
-    data = JSON.stringify(data);
-  if (allowEmpty || !isEmpty(data)) fs.writeFileSync(file, data);
+  if (allowEmpty || !isEmpty(data))
+    write(file, data, error => {
+      if (dev) console.error(`cannot write to ${file}`, { error, data });
+    });
+
+  //todo: return write(..)
   return data;
 }
 
@@ -333,20 +344,15 @@ export function mdir(path: string | string[], file = false) {
   fs.existsSync(path) || fs.mkdirSync(path, { recursive: true });
 }
 
+//todo: replace with read() & write()
 export let json = {
   read(file: string) {
     if (!file) return null;
     var data = fs.readFileSync(file).toString();
     return JSON.parse(data || null);
   },
-  write(file: string, data: any) {
-    if (data) {
-      mdir(file, true);
-
-      if (["array", "object"].includes(objectType(data)))
-        data = JSON.stringify(data);
-      fs.writeFileSync(file, data);
-    }
+  write(file: string, data: any, cb?) {
+    return write(file, data, cb);
   },
   convert(data: any) {
     if (typeof data == "string") {
