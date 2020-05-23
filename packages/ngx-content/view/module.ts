@@ -36,6 +36,7 @@ import {
 import { fab } from "@fortawesome/free-brands-svg-icons";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { NgxLoadingModule } from "ngx-loading";
+import { ScrollingModule } from "@angular/cdk/scrolling";
 
 @NgModule({
   declarations: [NgxContentViewComponent, NgxContentArticleComponent],
@@ -60,7 +61,8 @@ import { NgxLoadingModule } from "ngx-loading";
       primaryColour: "red",
       secondaryColour: "blue",
       tertiaryColour: "green"
-    })
+    }),
+    ScrollingModule
   ],
   providers: [],
   bootstrap: [],
