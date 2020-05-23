@@ -22,7 +22,7 @@ const supportedCollections = [
   "articles",
   "jobs",
   "articles_categories",
-  "jobs_collections",
+  "jobs_categories",
   "countries",
   "keywoards",
   "persons",
@@ -51,7 +51,7 @@ export function query(
   return connect().then(() => {
     let contentModel =
       collection instanceof Array
-        ? getModel(collection[0], collection[1]) //todo: ...collection gives error
+        ? getModel(collection[0], collection[1]) //todo: '...collection' gives error
         : getModel(collection);
 
     if (typeof params[0] === "string") {
@@ -218,7 +218,7 @@ app.get(/\/([^\/]+)(?:\/(.+))?/, (req, res, next) => {
             docs: req.query.docs, //projection
             options: JSON.parse(<string>req.query.options || null) || {}
           };
-          if (req.query.limit) findOptions.options.limit = req.query.limit;
+          if (req.query.limit) findOptions.options.limit = +req.query.limit;
 
           if (
             ["articles", "jobs"].includes(collection) &&
