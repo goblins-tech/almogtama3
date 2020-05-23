@@ -222,6 +222,6 @@ export class ContentComponent implements OnInit, AfterViewInit {
   }
   getData(): Observable<Data> {
     //todo: ?docs="_id title subtitle slug summary author cover categories updatedAt"
-    return this.httpService.get<Data>(this.params);
+    return this.httpService.get<Data>(this.params, { limit: 20 });
   }
 }

@@ -3,7 +3,8 @@ import {
   HttpClient,
   HttpRequest,
   HttpResponse,
-  HttpEvent
+  HttpEvent,
+  HttpParams
 } from "@angular/common/http";
 import { Observable, Subject } from "rxjs";
 import { map } from "rxjs/operators";
@@ -26,31 +27,39 @@ export class HttpService {
    * @param  {observe    [description]
    * @return Observable<T>
    */
-  get<T>(params, options?: Obj): Observable<T> {
+  get<T>(params, query?: Obj, options?: Obj): Observable<T> {
     options = Object.assign(options || {}, {
       observe: "body"
     });
     //todo: rename params.type to params.collection
-    var url = `/api/v1`; //todo: /api/$type(articles)/$item(id,ctg,...)
-    if (typeof params === "string") url += `/${params}`;
+    var url = `/api/v1/`; //todo: /api/$type(articles)/$item(id,ctg,...)
+    if (typeof params === "string") url += params;
     else {
-      url += `/${params.type}`;
-      if (params.id) url += `/${params.id}`;
+      url += params.type;
+      if (params.id) url += params.id;
       else if (params.category)
         url += `category=${encodeURIComponent(params.category)}`;
     }
 
-    if (params.refresh) url += `?refresh=${params.refresh}`;
-    if (env.dev) console.log("[httpService] get", { params, url });
+    if (params.refresh) (query || {})["refresh"] = params.refresh;
+    options.params = this.queryParams(query);
+
+    if (env.dev) console.log("[httpService] get", { params, query, url });
     return this.http.get<T>(url, options);
   }
 
-  post<T>(type: string, data: Obj, options: Obj = {}): Observable<T> {
-    if (env.dev) console.log("[httpService] post", { type, data });
+  post<T>(
+    type: string,
+    data: Obj,
+    query?: Obj,
+    options: Obj = {}
+  ): Observable<T> {
+    if (env.dev) console.log("[httpService] post", { type, query, data });
 
     //todo: sending data as FormData instead of Object causes that req.body=undefined
     if (options.formData !== false) data = this.toFormData(data); //typescript 3.2 dosen't support null safe operator i.e: options?.formData
     delete options.formData;
+    options.params = this.queryParams(query);
     return this.http.post<T>(`/api/v1/${type}`, data, options);
   }
 
@@ -59,6 +68,7 @@ export class HttpService {
     method: "get" | "post",
     params,
     data?,
+    query?: Obj,
     options?
   ): Observable<HttpEvent<T>> {
     options = Object.assign(options || {}, {
@@ -69,10 +79,12 @@ export class HttpService {
       ? this.post<HttpEvent<T>>(
           typeof params === "string" ? params : params.type,
           data,
+          query,
           options
         )
       : this.get<HttpEvent<T>>(
           params,
+          query,
           options
         ); /*.pipe(
       //todo: support other `event.type`s
@@ -133,5 +145,17 @@ export class HttpService {
     }
     if (env.dev) console.log("toFormData()", { data, formData });
     return formData;
+  }
+
+  queryParams(query) {
+    if (!query) return;
+    let queryParams = new HttpParams();
+    for (let key in query) {
+      //HTTPParams is immutable, so queryParams.set() will return a new value
+      //and will not update queryParams
+      // https://www.tektutorialshub.com/angular/angular-pass-url-parameters-query-strings/
+      queryParams = queryParams.set(key, query[key]);
+    }
+    return queryParams;
   }
 }
