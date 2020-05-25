@@ -1,12 +1,14 @@
 // todo: create fileSync
 
 import * as fs from "fs";
+const fsp = require("fs").promises;
 import * as Path from "path";
 import { objectType, isEmpty, now, exportAll } from "./general";
 import { setTimer, getTimer, endTimer } from "./timer";
 
 export * from "fs";
 export * from "path";
+export { fsp };
 
 const dev = process.env.NODE_ENV === "development";
 
@@ -229,12 +231,17 @@ export function remove(
   }
 }
 
-export function write(file, data, cb: (error: Error) => void) {
+export function write(file: types.PathLike, data: any, sync: boolean = false) {
   file = resolve(file);
   mdir(file as string, true);
-  if (["array", "object"].includes(objectType(data)))
-    data = JSON.stringify(data);
-  return cb ? fs.writeFile(file, data, cb) : fs.writeFileSync(file, data);
+  let dataString = ["array", "object"].includes(objectType(data))
+    ? JSON.stringify(data)
+    : data;
+  //todo: if(JSON.stringify error)->throw error
+
+  return sync
+    ? fs.writeFileSync(file, dataString)
+    : fsp.writeFile(file, dataString).then(() => ({ data, file }));
 }
 
 /**
@@ -271,6 +278,12 @@ export async function cache(
       (mtime(file) as number) + expire * 60 * 60 * 1000 < now()) // todo: convert mimetime() to number or convert expire to bigInt??
   ) {
     if (dev) console.log("[cache] refreshing", file);
+
+    let cache_save = function(file, data, allowEmpty) {
+      if (allowEmpty || !isEmpty(data)) write(file, data);
+
+      return data; //todo: return write(..)
+    };
 
     //todo: also support rxjs.Observable
     //no need to support Async functions, because it is nonsense if data() function returns another function. (func.constructor.name === "AsyncFunction")
@@ -319,17 +332,6 @@ export async function cache(
     });
     // todo: elseif(type=="number") elseif ...
   }
-}
-
-//todo: use async functions
-function cache_save(file, data, allowEmpty) {
-  if (allowEmpty || !isEmpty(data))
-    write(file, data, error => {
-      if (dev) console.error(`cannot write to ${file}`, { error, data });
-    });
-
-  //todo: return write(..)
-  return data;
 }
 
 export function mdir(path: string | string[], file = false) {
