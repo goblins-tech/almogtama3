@@ -6,7 +6,6 @@ const webpack = require("webpack");
 module.exports = {
   mode: "none",
   entry: {
-    // This is our Express server for Dynamic universal
     express: "./src/server/express.ts"
   },
   externals: {

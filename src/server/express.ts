@@ -97,27 +97,6 @@ app.use(cors());
 
 app.use("/api/v1", v1);
 
-/*
- cors default options:
- {
-  "origin": "*",
-  "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-  "preflightContinue": false,
-  "optionsSuccessStatus": 204
-}
-
- */
-
-/*app.use(
-  formidableMiddleware({
-    //  uploadDir: './data/uploads/$type',
-    multiples: true,
-    keepExtensions: true,
-    maxFileSize: 5 * 1024 * 1024,
-    maxFieldsSize: 5 * 1024 * 1024 //the amount of memory all fields together (except files)
-  })
-);*/
-
 // Serve static files; /file.ext will be served from /dist/browser/file.ext then /data/media/file.ext
 app.get("*.*", express.static(`${DIST}/browser`, { maxAge: "1y" })); //static assets i.e: created at build time; may be deleted at any time and recreated at build time
 app.get("*.*", express.static(TEMP, { maxAge: "1y" })); //data files i.e: created at runtime via API calls

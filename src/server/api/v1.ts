@@ -7,12 +7,17 @@ import { cache, mdir } from "pkg/nodejs-tools/fs";
 import { Categories } from "pkg/ngx-formly/categories-material/functions";
 import { setTimer, endTimer, getTimer } from "pkg/nodejs-tools/timer";
 import { resize } from "pkg/graphics";
+import { backup, restore } from "pkg/mongoose";
+import { write } from "pkg/nodejs-tools/fs";
+import { replaceAll } from "pkg/nodejs-tools/string";
+
+//todo: add auth token
 
 //todo: don't import from ngx-* packages, because it may contain browser-specific APIs.
 import { slug } from "pkg/ngx-content/core/functions";
 
 //todo: import {} from 'fs/promises' dosen't work yet (expremental)
-const { readdir, writeFile, unlink } = require("fs").promises;
+const { readdir, unlink } = require("fs").promises;
 
 const app = express.Router();
 
@@ -351,7 +356,7 @@ app.post("/:collection", upload.single("cover"), (req: any, res) => {
         .then(data => bucket.upload(data, bucketPath)) //todo: get fileName
         .then(() => {
           console.log(`[server/api] uploaded: ${fileName}`);
-          writeFile(`${tmp}/${fileName}.webp`);
+          write(`${tmp}/${fileName}.webp`, imgData);
         });
       //todo: get image dimentions from dataImg
       return `<img width="" height="" data-src="${src}" data-srcset="${srcset}" sizes="${sizes}" alt="${data.title}" />`;
@@ -370,11 +375,11 @@ app.post("/:collection", upload.single("cover"), (req: any, res) => {
       .then(data => bucket.upload(data, bucketPath))
       .then(file => {
         console.log(`[server/api] cover uploaded`);
-        writeFile(`${tmp}/cover.webp`, req.file.buffer);
+        write(`${tmp}/cover.webp`, req.file.buffer);
       });
   }
 
-  writeFile(`${tmp}/data.json`, JSON.stringify(data)).catch(error =>
+  write(`${tmp}/data.json`, data).catch(error =>
     console.error(
       `[server/api] cannot write the temp file for: ${data._id}`,
       error
@@ -438,5 +443,72 @@ app.post("/:collection", upload.single("cover"), (req: any, res) => {
 
   //the content will be available after the process completed (uploading files, inserting to db, ..)
 });
+
+//todo: /backup?filter=db1,db2:coll1,coll2,db3:!coll4
+app.get("/backup", (req, res) => {
+  let filter;
+  if (req.query.filter) {
+    let tmp = JSON.parse(<string>req.query.filter);
+    if (tmp instanceof Array) filter = (db, coll) => tmp.includes(db);
+    //todo: else of object; else if string
+  } else
+    filter = (db, coll) => {
+      if (dev) console.log("[backup] filter", db, coll);
+      return true;
+    };
+
+  connect()
+    .then(con => {
+      let host = con.client.s.options.srvHost,
+        now = replaceAll(new Date().toISOString(), ":", "-");
+      console.log(`[backup] host: ${host}`);
+
+      //using !console.log() or console.log() || true is illegal in typescript
+      //don't convert void to boolean this way, use ',' (console.log(),true)
+      //playground: https://www.typescriptlang.org/play?#code/GYVwdgxgLglg9mABFApgZygCgB4H4BcARnHADYoCGYAlAN4C+AsAFAssD07cA1i6hpkwQEaMigB0pOAHNM1ADRQATiBTVqbVs04olSuEr7oswsKPKSZcjc35YAhKfMSps9UYFOxlt4gA+fsgqakA
+      //issue: https://github.com/microsoft/TypeScript/issues/28248#issuecomment-434693307
+      return backup(con, filter).then(data => {
+        let file = `${process.env.INIT_CWD}/tmp/db-backup/${host}/${now}.json`;
+        if (dev) console.log("[backup]", { file, data });
+        let result = { info: con.client.s, backup: data };
+
+        return write(file, result)
+          .then(() => {
+            console.log("[backup] Done");
+            res.json(result);
+          })
+          .catch(error => {
+            console.error({ error });
+            throw Error(`[backup] cannot write to ${file}`);
+          });
+      });
+    })
+
+    .catch(error => res.json({ error }));
+});
+
+//todo: /restore?filter=db1;db2:coll2,coll3;db3:!coll1,coll2 & change=db2:db5
+//i.e: upload db2:coll2 to db5
+app.get("/restore", (req, res) => {});
+/*
+ cors default options:
+ {
+  "origin": "*",
+  "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+  "preflightContinue": false,
+  "optionsSuccessStatus": 204
+}
+
+ */
+
+/*app.use(
+  formidableMiddleware({
+    //  uploadDir: './data/uploads/$type',
+    multiples: true,
+    keepExtensions: true,
+    maxFileSize: 5 * 1024 * 1024,
+    maxFieldsSize: 5 * 1024 * 1024 //the amount of memory all fields together (except files)
+  })
+);*/
 
 export default app;

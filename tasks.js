@@ -1,7 +1,6 @@
 const fs = require("fs");
 const { execSync } = require("child_process");
 const { argv } = require("process");
-const { backup, restore } = require("./backup");
 
 var tasks = {
   terser: function(dir = "./dist") {
@@ -26,9 +25,7 @@ var tasks = {
    */
   "firebase:copy": function(src = "./firebase", dist = "./dist") {
     fs.copyFileSync(`${src}/package.json`, `${dist}/package.json`);
-  },
-  backup,
-  restore
+  }
 };
 
 const task = argv.slice(2)[0];

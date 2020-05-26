@@ -42,6 +42,25 @@ export namespace types {
       };
   //-->deprecated:
   //| [string, string, string | string[], boolean, string]; // [user,pass,host,srv,dbName]
+
+  export type BackupFilter = (db?: string, collection?: string) => boolean;
+  export interface Obj {
+    [key: string]: any;
+  }
+
+  export interface BackupData {
+    info: Obj;
+    backup: {
+      [db: string]: {
+        [collection: string]: {
+          data: Obj[];
+          info?: Obj;
+          schema?: Obj;
+          modelOptions?: Obj;
+        };
+      };
+    };
+  }
 }
 
 /*
@@ -113,10 +132,21 @@ export function connect(uri: types.uri, options: types.ConnectionOptions = {}) {
 export function model(
   collection: string,
   obj: types.Model = {},
-  options?: mongoose.SchemaOptions
+  options?: mongoose.SchemaOptions,
+  con? //example: db = mongoose.connection.useDb('dbName')
 ) {
   // todo: merge schema's defaultOptions
-  if (mongoose.models[collection]) return mongoose.models[collection];
+
+  //note that creating a new connection useing ...useDb() will reset con.models{},
+  //so it is better to pass con as a connection (i.e ..useDn()) instead of dbName (i.e string)
+  //if you want to reuse models instead of creating a new one each time
+  con = con
+    ? typeof con === "string"
+      ? mongoose.connection.useDb(con)
+      : con
+    : mongoose;
+
+  if (con.models[collection]) return con.models[collection];
   let schema: mongoose.Schema;
   options = options || {};
   if (!("fields" in obj)) obj = { fields: obj };
@@ -132,9 +162,119 @@ export function model(
   // todo: add methods,virtuals,...
 
   //to get schema: model.schema
-  return mongoose.model(collection, schema);
+  return con.model(collection, schema);
 }
 
 export function encode(str: string) {
   return encodeURIComponent(str); //.replace(/%/g, "%25");
+}
+
+export function useDb(dbName: string = "") {
+  return mongoose.connection.useDb(dbName).client.db(dbName);
+}
+
+export function admin(dbName: string = "") {
+  //return new (mongoose.mongo.Admin)((connection || mongoose.connection).db);
+  return useDb(dbName).admin();
+}
+
+export function dbs(systemDbs = false) {
+  return admin()
+    .listDatabases()
+    .then(dbs =>
+      systemDbs
+        ? dbs.databases
+        : dbs.databases.filter(db => !["admin", "local"].includes(db.name))
+    );
+}
+
+export function collections(dbName?: string) {
+  //mongoose.connection.db.listCollections().toArray()
+  return useDb(dbName)
+    .listCollections()
+    .toArray();
+}
+
+/**
+ * [backup description]
+ * usage: connect(..).then(con=>backup(con,...))
+ * @method backup
+ * @param  connection the connection returned from mongoose.connect()
+ * @param  filter:Filter     a filter strategy for databases/collections/fields to be fetched
+ * @return {promise<Data>}   { dbName: { collectionName:{data} }}
+ */
+export function backup(
+  connection, //todo: mongoose.connection || MongoClient
+  filter: types.BackupFilter = () => true
+): Promise<types.BackupData> {
+  //convert [{k:v}] to {k:v}
+  let extract = arr =>
+    arr.reduce(
+      (obj, item) => ({
+        ...obj,
+        [Object.keys(item)[0]]: item[Object.keys(item)[0]]
+      }),
+      {}
+    );
+
+  return dbs().then(dbs =>
+    Promise.all(
+      dbs
+        .filter(db => filter(db.name))
+        .map(async db => ({
+          [db.name]: await collections(db.name).then(collections =>
+            Promise.all(
+              collections
+                .filter(coll => filter(db.name, coll.name))
+                .map(async coll => ({
+                  [coll.name]: {
+                    coll,
+                    data: await useDb(db.name)
+                      .collection(coll.name)
+                      .find({})
+                      .toArray()
+                  }
+                }))
+            ).then(result => extract(result))
+          )
+
+          //.catch(error => ({}))
+        }))
+    ).then(result => extract(result))
+  );
+}
+
+/**
+ * [restore description]
+ * @method restore
+ * @param  backupData [description]
+ * @return [description]
+ *
+ * notes:
+ * - to insert the data into another database just rename dbName.
+ *   ex:
+ *       data.backup.newDbName = data.backup.oldDbName
+ *       delete data.backup.oldDbName
+ *
+ */
+export function restore(backupData: types.BackupData) {
+  for (let dbName in backupData.backup) {
+    let con = mongoose.connection.useDb(dbName);
+    let db = backupData.backup[dbName];
+    for (let collName in db) {
+      let coll = db[collName],
+        data = coll.data,
+        modelOptions = Object.assign(coll.modelOptions || {}, {
+          timestamps: true,
+          strict: false,
+          validateBeforeSave: false
+        });
+
+      let dataModel = model(collName, coll.schema || {}, modelOptions, con);
+      dataModel
+        .insertMany(data)
+        .then(() => console.log(`${collName}: inserted`))
+        .catch(err => console.error(`error in ${collName}:`, err));
+    }
+  }
 }

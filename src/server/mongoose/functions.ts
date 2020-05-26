@@ -1,14 +1,14 @@
 import { connect as _connect, model, mongoose } from "pkg/mongoose";
 import { schemas, DB } from "../../config/server";
 
-export function connect() {
+export function connect(uri?) {
   return _connect(
-    {
+    Object.assign(uri || {}, {
       auth: DB.auth,
       host: DB.host,
       srv: DB.srv,
       dbName: DB.dbName
-    },
+    }),
     { multiple: false }
   );
 }

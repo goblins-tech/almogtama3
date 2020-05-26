@@ -52,3 +52,31 @@ export function replaceAsync(str, regex, replacer) {
     return result.join("");
   });
 }
+
+/**
+ * str.replace() only replaces the first occurence, this function replaces all occurances.
+ * @method replaceAll
+ * @param  str        [description]
+ * @param  replace    [description]
+ * @param  with       [description]
+ * @return [description]
+ */
+export function replaceAll(
+  str: string,
+  replace: string | RegExp,
+  replaceWith: string
+): string {
+  replace = new RegExp(replace, "g");
+  return str.replace(<RegExp>replace, replaceWith); //faster than str.split().join() https://jsperf.com/replace-all-vs-split-join
+  //return str.split(replace).join(with)
+}
+
+/* todo:
+export interface String {
+  replaceAll(
+    str: string,
+    replace: string | RegExp,
+    replaceWith: string
+  ): string;
+}
+String.prototype.replaceAll = replaceAll;*/
