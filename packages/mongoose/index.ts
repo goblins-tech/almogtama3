@@ -2,6 +2,7 @@
 import mongoose from "mongoose";
 import shortId from "shortid";
 import { setTimer, endTimer } from "pkg/nodejs-tools/timer";
+import { chunk } from "pkg/nodejs-tools/array";
 export { mongoose };
 
 /*
@@ -255,9 +256,9 @@ export function backup(
  *   ex:
  *       data.backup.newDbName = data.backup.oldDbName
  *       delete data.backup.oldDbName
- *
+ *   todo: return promise<{dbName:report}>
  */
-export function restore(backupData: types.BackupData) {
+export function restore(backupData: types.BackupData, chunkSize: number = 50) {
   for (let dbName in backupData.backup) {
     let con = mongoose.connection.useDb(dbName);
     let db = backupData.backup[dbName];
@@ -271,10 +272,22 @@ export function restore(backupData: types.BackupData) {
         });
 
       let dataModel = model(collName, coll.schema || {}, modelOptions, con);
-      dataModel
-        .insertMany(data)
-        .then(() => console.log(`${collName}: inserted`))
-        .catch(err => console.error(`error in ${collName}:`, err));
+      if (chunkSize && data.length > chunkSize) {
+        data = chunk(data, chunkSize);
+        let chunks = data.length;
+        data.map((part, index) =>
+          dataModel
+            .insertMany(part)
+            .then(() =>
+              console.log(`${collName}: part ${index + 1}/${chunks} inserted`)
+            )
+            .catch(err => console.error(`error in ${collName}:`, err))
+        );
+      } else
+        dataModel
+          .insertMany(data)
+          .then(() => console.log(`${collName}: inserted`))
+          .catch(err => console.error(`error in ${collName}:`, err));
     }
   }
 }
