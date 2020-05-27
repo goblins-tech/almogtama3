@@ -25,20 +25,24 @@
     dir="auto"
     innerHtml="{{data.content | content}}"
   ></mat-card-content> -->
+
+  <!--
+    notes:
+      - use attr.width instead of width to remove this attribute if data.cover.width
+        has no value (i.e: null)
+        https://stackoverflow.com/a/62048326/12577650
+  -->
   <mat-card-content dir="auto">
     <img
       *ngIf="data.cover"
       mat-card-image
-      width="{{data.cover.width}}"
-      height="{{data.cover.height}}"
-      lazyLoad="{{data.cover.lazy?data.cover.src:''}}"
-      [useSrcset]="true"
-      defaultImage="{{data.cover.lazy? data.cover.placeholder || 'http://via.placeholder.com/'+(data.cover.width||'500')+'x'+(data.cover.height||'250')+'.webp?text=loading...':''}}"
-      data-src="{{data.cover.src}}"
-      data-srcset="{{data.cover.srcset}}"
-      src="{{data.cover.lazy?data.cover.src:''}}"
-      srcset="{{data.cover.lazy?data.cover.srcset:''}}"
+      [attr.width]="data.cover.width"
+      [attr.height]="data.cover.height"
+      lazyLoad="{{data.cover.lazy? data.cover.srcset || data.cover.src : ''}}"
       sizes="{{data.cover.sizes}}"
+      defaultImage="{{data.cover.lazy? data.cover.placeholder || 'http://via.placeholder.com/'+(data.cover.width||'500')+'x'+(data.cover.height||'250')+'.webp?text=loading...':''}}"
+      [useSrcset]="data.cover.lazy && data.cover.srcset"
+      src="data.cover.lazy?'':data.cover.src"
       alt="{{data.cover.alt || data.title}}"/>
 
     <quill-view

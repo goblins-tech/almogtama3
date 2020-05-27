@@ -17,8 +17,8 @@ export interface Article extends Obj {
     alt?: string;
     lazy?: boolean;
     placeholder?: string;
-    width?: number | string;
-    height?: number | string;
+    width?: number; //html img.width is number ex: <img width="50" />
+    height?: number;
   };
   author?: { name?: string; img?: string; link?: string };
   link?: string;
