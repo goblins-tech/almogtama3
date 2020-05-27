@@ -78,14 +78,15 @@ app.use((req, res, next) => {
     let url = `https://${parts.subdomain || "www"}.${parts.domain}.${
       parts.tld
     }${req.url}`;
-    /*console.log(`redirecting to: ${url}`, {
-      host: req.hostname,
-      secure: req.secure,
-      protocol: req.protocol,
-      subdomain: parts.subdomain,
-      url: req.url
-    });
-    */
+    if (dev)
+      console.log(`redirecting to: ${url}`, {
+        host: req.hostname,
+        secure: req.secure,
+        protocol: req.protocol,
+        subdomain: parts.subdomain,
+        url: req.url
+      });
+
     return res.redirect(301, url);
   }
   next();

@@ -112,7 +112,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
                 //don't use dinamic size i.e: placeholder.com/OriginalWidthXOriginalHeight, because this image will be cashed via ngsw
                 //todo: width:originalSize.width, height:..
                 placeholder:
-                  "http://via.placeholder.com/500x250.webp/1976d2/FFFFFF?text=loading..."
+                  "//via.placeholder.com/500x250.webp/1976d2/FFFFFF?text=loading..."
               };
             }
 
@@ -175,7 +175,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
               alt: data.title,
               lazy: true,
               placeholder:
-                "http://via.placeholder.com/500x250.webp/1976d2/FFFFFF?text=loading..."
+                "//via.placeholder.com/500x250.webp/1976d2/FFFFFF?text=loading..."
             };
           }
 

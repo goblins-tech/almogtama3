@@ -6,43 +6,77 @@
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
-    <!-- Google Tag Manager sh@gm part1 (id: GTM-K8J7FKM)-->
-    <script>
-      (function(w, d, s, l, i) {
-        w[l] = w[l] || [];
-        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
-        var f = d.getElementsByTagName(s)[0],
-          j = d.createElement(s),
-          dl = l != "dataLayer" ? "&l=" + l : "";
-        j.async = true;
-        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
-        f.parentNode.insertBefore(j, f);
-      })(window, document, "script", "dataLayer", "GTM-K8J7FKM");
-    </script>
-    <!-- End Google Tag Manager -->
-    <link
-      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&amp;display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet"
-    />
-
     <link rel="manifest" href="manifest.webmanifest" />
     <meta name="theme-color" content="#1976d2" />
+    <link rel="apple-touch-icon" href="assets/icons/icon-192x192.png" />
   </head>
   <body>
-    <!-- Google Tag Manager (noscript) part2-->
+    <app-root></app-root>
+
+    <script>
+      //todo: adblock detector
+      //todo: copy load() to ngx-tools/load-scripts.ts
+      function load(src, type = "script", attributes = {}, cb) {
+        if (type == "css") {
+          type = "link";
+          attributes.rel = "stylesheet";
+          attributes.type = "text/css";
+        }
+
+        if (type === "link") {
+          attributes.href = src;
+          attributes.crossorigin = true; //https://developer.mozilla.org/en-US/docs/Web/HTML/Preloading_content#Cross-origin_fetches
+        } else if (type == "script") {
+          attributes.src = src;
+          attributes.type = "text/javascript";
+        }
+
+        if (!("async" in attributes)) attributes.async = true;
+
+        let el = document.createElement(type === "css" ? "link" : type);
+        for (let key in attributes) {
+          el.setAttribute(key, attributes[key]);
+        }
+
+        if (cb) {
+          el.onload = () => cb("loaded");
+          el.onreadystatechange = () => cb("ready");
+        }
+        document.getElementsByTagName("head")[0].appendChild(el);
+      }
+
+      //Google Tag Manager sh@gm (id: GTM-K8J7FKM)
+      window["dataLayer"] = window["dataLayer"] || [];
+      window["dataLayer"].push({
+        "gtm.start": new Date().getTime(),
+        event: "gtm.js"
+      });
+      load("//www.googletagmanager.com/gtm.js?id=GTM-K8J7FKM");
+
+      load(
+        "//fonts.googleapis.com/css?family=Roboto:300,400,500&amp;display=swap",
+        "css"
+      );
+      load("//fonts.googleapis.com/icon?family=Material+Icons", "css");
+    </script>
+
+    <!-- load css & tag manager if <script> tag not supported -->
+    <!-- todo: display instructions to enable javascript -->
     <noscript
       ><iframe
         src="https://www.googletagmanager.com/ns.html?id=GTM-K8J7FKM"
         height="0"
         width="0"
         style="display:none;visibility:hidden"
-      ></iframe
-    ></noscript>
-    <!-- End Google Tag Manager (noscript) -->
-    <app-root></app-root>
+      ></iframe>
+      <link rel="stylesheet" type="text/css"
+      href="//fonts.googleapis.com/css?family=Roboto:300,400,500&amp;display=swap",
+      "css"/>
+      <link
+        rel="stylesheet"
+        type="text/css"
+        href="//fonts.googleapis.com/icon?family=Material+Icons"
+      />
+    </noscript>
   </body>
 </html>

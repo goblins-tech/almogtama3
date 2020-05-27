@@ -12,7 +12,9 @@
           "/manifest.webmanifest",
           "/*.css",
           "/*.js",
-          "http://via.placeholder.com/*"
+          "//via.placeholder.com/*",
+          "//fonts.googleapis.com/*",
+          "//www.googletagmanager.com/*"
         ]
       }
     },

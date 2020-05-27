@@ -57,8 +57,8 @@ mat-card-title a h1{
 /* todo: css direction dosen't have the value 'auto' */
 mat-card-title, mat-card-subtitle, mat-card-content, dir-auto{direction: auto}
 
-mat-card .info{
-  text-align:center
+mat-card-subtitle{
+  padding: 15px 0
 }
 
 mat-card-subtitle span{

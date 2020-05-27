@@ -24,7 +24,7 @@ export class MetaService {
 
   setTags(tags: types.Meta = {}) {
     let defaultTags = {
-      viewport: "width=device-width, initial-scale=1,maximum-scale=1.0",
+      viewport: "width=device-width, initial-scale=1",
       type: "website",
       "twitter:card": "summary_large_image",
       charset: "UTF-8",
@@ -40,9 +40,16 @@ export class MetaService {
     }
     tags.description = tags.description || tags.desc; //todo: || summary(content) from ./functions
     tags.image_src = tags.image_src || tags.image || tags.img;
-    tags.url =
-      (tags.baseUrl + tags.baseUrl.substr(-1) !== "/" ? "/" : "" || "") + // todo: check this line if baseUrl is empty or null
-      (tags.url || tags.link || "");
+    if (!tags.baseUrl) tags.baseUrl = "/";
+    else if (tags.baseUrl.substr(-1) !== "/") tags.baseUrl += "/";
+
+    tags.url = tags.url || tags.link;
+    if (tags.url) {
+      if (tags.url.substr(-1) === "/") tags.url = tags.url.slice(0, -1);
+      tags.url = tags.baseUrl + tags.url;
+      tags["og:url"] = tags.url;
+    }
+
     if (tags.image_src instanceof Array) {
       // [src,width,height] for og:image
       [
@@ -56,7 +63,7 @@ export class MetaService {
     tags["og:site_name"] = tags.name;
     tags["og:title"] = tags.title;
     tags["og:description"] = tags.description;
-    tags["og:url"] = tags.url;
+
     tags["fb:app_id"] = tags["fb:app_id"] || tags.fb_app;
     tags["twitter:site"] =
       tags.hashtag!.substr(0, 1) !== "@" ? "@" : "" + tags.hashtag;
@@ -118,6 +125,9 @@ export class MetaService {
       if (value instanceof Array) {
         value = `${value[0]}; URL='${value[1]}'`;
       }
+    } else if (key == "url" || key == "link") {
+      prop = "rel";
+      key = "canonical";
     } else {
       prop = "name";
     }
