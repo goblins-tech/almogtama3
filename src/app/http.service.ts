@@ -35,7 +35,7 @@ export class HttpService {
     var url = `/api/v1/`; //todo: /api/$type(articles)/$item(id,ctg,...)
     if (typeof params === "string") url += params;
     else {
-      url += params.type;
+      url += `${params.type}/`;
       if (params.id) url += params.id;
       else if (params.category)
         url += `category=${encodeURIComponent(params.category)}`;

@@ -6,7 +6,7 @@
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
-    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#1976d2" />
     <link rel="apple-touch-icon" href="assets/icons/icon-192x192.png" />
   </head>
@@ -15,7 +15,7 @@
 
     <script>
       //todo: adblock detector
-      //todo: copy load() to ngx-tools/load-scripts.ts
+      //todo: import from ngx-tools/load-scripts.service.ts
       function load(src, type = "script", attributes = {}, cb) {
         if (type == "css") {
           type = "link";
@@ -60,23 +60,7 @@
       load("//fonts.googleapis.com/icon?family=Material+Icons", "css");
     </script>
 
-    <!-- load css & tag manager if <script> tag not supported -->
     <!-- todo: display instructions to enable javascript -->
-    <noscript
-      ><iframe
-        src="https://www.googletagmanager.com/ns.html?id=GTM-K8J7FKM"
-        height="0"
-        width="0"
-        style="display:none;visibility:hidden"
-      ></iframe>
-      <link rel="stylesheet" type="text/css"
-      href="//fonts.googleapis.com/css?family=Roboto:300,400,500&amp;display=swap",
-      "css"/>
-      <link
-        rel="stylesheet"
-        type="text/css"
-        href="//fonts.googleapis.com/icon?family=Material+Icons"
-      />
-    </noscript>
+    <noscript> </noscript>
   </body>
 </html>

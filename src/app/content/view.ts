@@ -25,6 +25,7 @@ import { HighlightJS } from "ngx-highlightjs";
 import env from "../../env";
 import { summary } from "./functions";
 import { urlParams } from "pkg/ngx-tools/routes";
+import { NgxToolsLoadService } from "pkg/ngx-tools";
 
 //todo: import module & interfaces from packages/content/ngx-content-view/index.ts
 
@@ -59,7 +60,8 @@ export class ContentComponent implements OnInit, AfterViewInit {
     private httpService: HttpService,
     private meta: MetaService,
     private hljs: HighlightJS,
-    private comp: ElementRef
+    private elementRef: ElementRef, //a reference to this component
+    private loadService: NgxToolsLoadService
   ) {}
   ngOnInit() {
     this.data$ = urlParams(this.route).pipe(
@@ -120,7 +122,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
             //todo: get category.slug
             if (!item.link)
               item.link =
-                `/${this.params.type}/` +
+                `${_metaTags.baseUrl}${this.params.type}/` +
                 (item.categories && item.categories.length > 0
                   ? `${item.categories[0]}/${item.slug}@${item.id}`
                   : `item/${item.id}`);
@@ -142,10 +144,10 @@ export class ContentComponent implements OnInit, AfterViewInit {
           data.summary = data.summary || summary(data.content);
           if (!data.link)
             data.link =
-              data.categories && data.categories.length > 0
-                ? `/${data.categories[0]}/${data.id}-${data.slug}`
-                : `/id/${data.id}`;
-
+              `${_metaTags.baseUrl}${this.params.type}/` +
+              (data.categories && data.categories.length > 0
+                ? `${data.categories[0]}/${data.slug}@${data.id}`
+                : `id/${data.id}`);
           data.author = {
             name: "author name",
             img: "assets/avatar-female.png",
@@ -183,6 +185,13 @@ export class ContentComponent implements OnInit, AfterViewInit {
             data.content += `<div id='contacts'>${data.contacts}</div>`;
         }
         this.meta.setTags(metaTags);
+        this.loadService.load(
+          metaTags.link,
+          "link",
+          { rel: "canonical" },
+          null
+          //this.elementRef.nativeElement
+        );
         return data;
       })
     );
@@ -192,8 +201,8 @@ export class ContentComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     //or this.hljs.initHighlighting().subscribe(); Applies highlighting to all <pre><code>..</code></pre> blocks on a page.
     //don't use document.querySelectorAll(..), it will search over all elements even those outside this component
-    if (this.comp)
-      this.comp.nativeElement
+    if (this.elementRef)
+      this.elementRef.nativeElement
         .querySelectorAll("pre.ql-syntax")
         .forEach((item: any) => {
           this.hljs.highlightBlock(item).subscribe();
@@ -210,7 +219,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
           this.hljs.highlightBlock(item).subscribe();
         });
 
-    let comp = this.comp.nativeElement;
+    let comp = this.elementRef.nativeElement;
     if (env.dev)
       console.log("selector", {
         "pre.ql-syntax": comp.querySelectorAll("pre.ql-syntax"),

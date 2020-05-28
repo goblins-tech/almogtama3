@@ -13,6 +13,7 @@ import { ContentModule } from "./content/module";
 import { FormModule } from "./forms/forms.module";
 import { UniversalInterceptor } from "../../universal-interceptor";
 import { MetaService } from "pkg/ngx-content/view/meta.service";
+import { NgxToolsLoadService } from "pkg/ngx-tools/load-scripts.service";
 import { SocialComponent } from "./social";
 import { ServiceWorkerModule } from "@angular/service-worker";
 import env from "../env";
@@ -74,6 +75,7 @@ export class AppRoutingModule {}
   providers: [
     HttpService,
     MetaService,
+    NgxToolsLoadService,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: UniversalInterceptor,

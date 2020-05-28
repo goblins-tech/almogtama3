@@ -125,9 +125,6 @@ export class MetaService {
       if (value instanceof Array) {
         value = `${value[0]}; URL='${value[1]}'`;
       }
-    } else if (key == "url" || key == "link") {
-      prop = "rel";
-      key = "canonical";
     } else {
       prop = "name";
     }
