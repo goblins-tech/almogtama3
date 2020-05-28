@@ -1,11 +1,28 @@
 {
   "name": "almogtama3",
   "short_name": "almogtama3",
+  "description": "المجتمع دوت كوم",
   "theme_color": "#1976d2",
   "background_color": "#fafafa",
-  "display": "standalone",
+  "display": "fullscreen",
+  "orientation": "any",
   "scope": "/",
   "start_url": "/",
+  "categories": [
+    "jobs",
+    "education",
+    "entertainment",
+    "fitness",
+    "health",
+    "lifestyle",
+    "news",
+    "productivity",
+    "social",
+    "sports",
+    "travel"
+  ],
+  "related_applications": [],
+  "orientation": "any",
   "icons": [
     {
       "src": "assets/icons/icon-72x72.png",
@@ -47,5 +64,6 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "screenshots": []
 }
