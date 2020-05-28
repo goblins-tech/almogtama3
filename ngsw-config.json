@@ -6,26 +6,18 @@
       "name": "app",
       "installMode": "prefetch",
       "resources": {
-        "files": [
-          "/favicon.ico",
-          "/index.html",
-          "/manifest.webmanifest",
-          "/*.css",
-          "/*.js",
-          "//via.placeholder.com/*",
-          "//fonts.googleapis.com/*",
-          "//www.googletagmanager.com/*"
-        ]
+        "files": ["/manifest.webmanifest", "/favicon.ico", "/index.html"]
       }
     },
     {
       "name": "assets",
       "installMode": "lazy",
-      "updateMode": "lazy",
+      "updateMode": "prefetch",
       "resources": {
         "files": [
           "/assets/**",
-          "/*.(eot|svg|cur|jpg|png|webp|gif|otf|ttf|woff|woff2|ani)"
+          "/*.(eot|svg|cur|jpg|png|webp|gif|otf|ttf|woff|woff2|ani|json|js|css|scss)",
+          "//via.placeholder.com/*"
         ]
       }
     }
@@ -33,12 +25,23 @@
   "dataGroups": [
     {
       "name": "api",
-      "urls": ["/api/**", "/**", "!/**/*.*"],
+      "urls": ["/api/**", "/*", "!/**/*.*"],
       "version": 1,
       "cacheConfig": {
         "maxSize": 100,
         "maxAge": "30d",
-        "strategy": "freshness"
+        "strategy": "freshness",
+        "timeout": "20s"
+      }
+    },
+    {
+      "name": "static",
+      "urls": ["//fonts.googleapis.com/*", "//www.googletagmanager.com/*"],
+      "version": 1,
+      "cacheConfig": {
+        "maxSize": 100,
+        "maxAge": "1d",
+        "strategy": "performance"
       }
     }
   ]
