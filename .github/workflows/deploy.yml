@@ -1,12 +1,12 @@
-name: firebase Build and Deploy
+name: Build and Deploy to firebase, cloudflare-workers, ..
 on:
   push:
     branches:
       - master
 
 jobs:
-  firebase:
-    name: firebase
+  deploy:
+    name: build & deploy
     runs-on: ubuntu-latest
     steps:
       #we use checkout because we want to use the repo (to install dependencies)
@@ -30,7 +30,15 @@ jobs:
           npm install --no-audit
           npm install -g @angular/cli
       - name: Build
-        run: npm run build && npm run firebase:build
+        run: npm run build
+      - name: Deploy to CloudFlare workers
+        uses: cloudflare/wrangler-action@1.1.0
+        with:
+          apiKey: ${{ secrets.CLOUDFLARE_API_KEY }}
+          email: ${{ secrets.CLOUDFLARE_EMAIL }}
+        env:
+          # https://github.com/cloudflare/wrangler-action/issues/12#issuecomment-588226602
+          USER: root
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@v1.3.0
         with:

@@ -4,6 +4,7 @@ const path = require("path");
 const webpack = require("webpack");
 
 module.exports = {
+  target: "node",
   mode: "none",
   entry: {
     express: "./src/server/express.ts"
@@ -12,7 +13,6 @@ module.exports = {
     "./dist/server/main": 'require("./main")',
     sharp: "commonjs sharp" //https://github.com/lovell/sharp/issues/794#issuecomment-306555683
   },
-  target: "node",
   //https://github.com/googleapis/gax-nodejs/issues/719#issuecomment-605250814
   resolve: {
     extensions: [".ts", ".js", ".json"],

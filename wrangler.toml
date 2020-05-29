@@ -1,0 +1,11 @@
+#todo: use config
+name = "almogtama3"
+type = "webpack"
+account_id = "86c2e234071b66b22c790f282bc19fad"
+route = "www.almogtama3.com/api/v1/cloudflare"
+zone_id = "0d46db4336edce11c3891714cbfcf7c3"
+webpack_config="./webpack.server.config.js"
+
+[site]
+entry-point="./dist/server/cloudflare-workers.js"
+bucket="./dist/browser"
