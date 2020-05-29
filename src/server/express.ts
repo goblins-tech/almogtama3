@@ -1,5 +1,6 @@
-import "zone.js/dist/zone-node";
+import "zone.js/dist/zone-node"; //todo: why??
 import express from "express";
+import { express as firebaseExpress } from "pkg/firebase/express";
 import { json as jsonParser, urlencoded as urlParser } from "body-parser";
 import cors from "cors"; //To be able to access our API from an angular application
 //import formidable from "formidable"; //to handle the uploaded files https://flaviocopes.com/express-forms-files/
@@ -16,7 +17,10 @@ import {
 
 import { dev, DIST, TEMP } from "../config/server";
 import { connect, disconnect } from "./mongoose/functions";
+import { enableProdMode } from "@angular/core";
 import v1 from "./api/v1";
+
+if (dev) enableProdMode();
 
 //console.clear();
 
@@ -110,6 +114,9 @@ app.get("*", (req, res) => {
 //app.listen() moved to a separate file `server-start.ts`, because firebase will handle it automatically
 //when using this server without firebase, use `node dist/server-start`
 export { app, express }; //for firebase
+
+//convert express app into firebase functions
+export const ssr = firebaseExpress(app);
 
 // Start up the Node server
 //firebase starts the server automatically, so we don't need to start it again (error)

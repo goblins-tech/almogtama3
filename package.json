@@ -6,8 +6,8 @@
     "build:browser:dev": "ng build",
     "build:server": "ng run almogtama3:server:production --bundleDependencies all",
     "build:server:dev": "ng run almogtama3:server --bundleDependencies all",
-    "build:server:webpack": "webpack --config webpack.server.config.js --progress --colors --mode=production",
-    "build:server:webpack:dev": "webpack --config webpack.server.config.js --progress --colors --mode=development",
+    "build:server:webpack": "webpack --config webpack.server.config.js --progress --colors --mode=production && node tasks firebase:copy",
+    "build:server:webpack:dev": "webpack --config webpack.server.config.js --progress --colors --mode=development && node tasks firebase:copy",
     "build:all": "npm run build:browser && npm run build:server && npm run build:server:webpack && node tasks terser && npx ngsw-config dist/browser ngsw-config.json",
     "build:all:dev": "npm run build:browser:dev && npm run build:server:dev && npm run build:server:webpack:dev",
     "build": "npx cross-env NODE_ENV=production npm run build:all",
@@ -20,7 +20,7 @@
     "start:dev": "npm run build:dev && npm run serve:inspect",
     "start:nodemon": "nodemon  src/ -e ts,html,scss --exec \"npm run start:dev\"",
     "firebase": "npm run firebase:build && npm run firebase:deploy",
-    "firebase:build": "tsc -p firebase/tsconfig.json && node tasks firebase:copy",
+    "firebase:build": "npm run build:server:webpack",
     "firebase:deploy": "firebase deploy --token 1//03o0ymiALXnyPCgYIARAAGAMSNwF-L9IrNSe7csFXkbFuGz1zgPc1SJzuohIvdneYBi-tlNJ6mARjWNLtwK9wpAzsCAx6r9hyYLY",
     "firebase:functions": "npm run firebase:build && npm run firebase:deploy -- --only functions",
     "firebase:serve": "firebase serve --port=4200 --token 1//03o0ymiALXnyPCgYIARAAGAMSNwF-L9IrNSe7csFXkbFuGz1zgPc1SJzuohIvdneYBi-tlNJ6mARjWNLtwK9wpAzsCAx6r9hyYLY",
@@ -29,10 +29,10 @@
     "firebase:start:dev": "npm run build:dev && npm run firebase:build && npm run firebase:serve"
   },
   "engines": {
-    "node": "12",
+    "node": "10",
     "npm": "6.9.0"
   },
-  "main": "",
+  "main": "dist/server/express.js",
   "private": false,
   "dependencies": {
     "@angular/animations": "~9.1.3",

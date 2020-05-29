@@ -23,8 +23,13 @@ var tasks = {
     - linux cp firebase/package.json dist/package.json
     - windows copy firebase\package.json dist\package.json
    */
-  "firebase:copy": function(src = "./firebase", dist = "./dist") {
-    fs.copyFileSync(`${src}/package.json`, `${dist}/package.json`);
+  "firebase:copy": function(src = ".", dist = "./dist") {
+    //fs.copyFileSync(`${src}/package.json`, `${dist}/package.json`);
+    let package = JSON.parse(
+      fs.readFileSync(`${src}/package.json`, "utf8").toString()
+    );
+    package.main = package.main.replace("dist/", "");
+    fs.writeFileSync(`${dist}/package.json`, JSON.stringify(package));
   }
 };
 
