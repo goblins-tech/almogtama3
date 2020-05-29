@@ -7,7 +7,7 @@ import { cache, mdir } from "pkg/nodejs-tools/fs";
 import { Categories } from "pkg/ngx-formly/categories-material/functions";
 import { setTimer, endTimer, getTimer } from "pkg/nodejs-tools/timer";
 import { resize } from "pkg/graphics";
-import { backup, restore } from "pkg/mongoose";
+import { backup, restore, query as _query } from "pkg/mongoose";
 import { write } from "pkg/nodejs-tools/fs";
 import { replaceAll } from "pkg/nodejs-tools/string";
 
@@ -35,64 +35,33 @@ const supportedCollections = [
 ];
 app.get("/collections", (req, res) => res.json(supportedCollections));
 
-/**
- * quickly perform db operations via an API call
- * @example: GET /api/v1/find/articles
- * @example: GET /api/v1/find/articles?limit=50
- * @example: GET /api/v1/find/articles/$articleId
- * @example: GET /api/v1/find/articles?filter={status:'pending'}
- * @method query
- * @param  operation  operation name, ex: find
- * @param  modelObj   model object (as accepted in pkg/mongoose model()) or collection name as string
- * @param  params  every operation has it's own params, for example find accepts filter, docs, options
- * @return Query
- */
-//todo: import modelObj types from pkg/mongoose
 export function query(
   operation: string,
   collection: string | Array<any>,
-  ...params
+  params: Array<any>
 ) {
-  return connect().then(() => {
-    let contentModel =
-      collection instanceof Array
-        ? getModel(collection[0], collection[1]) //todo: '...collection' gives error
-        : getModel(collection);
-
-    if (typeof params[0] === "string") {
-      //todo: support other operations by id (ex: delete)
-      if (operation == "find") return contentModel.findById(params[0]).lean();
-    }
-    return contentModel[operation](...params).lean();
-  });
+  return _query(operation, getModel(collection), params);
 }
 
 /*
   perform db operations via API.
   todo: use AUTH_TOKEN
   todo: send small data via app.post()
-  ex: /api/v1/:find/articles?limit=20
   ex: /api/v1/:find/articles/$articleId
+  ex: /api/v1/:find/articles?params=[{"status":"approved"},null,{"limit":2}]
  */
 app.get(/\/:([^\/]+)\/([^\/]+)(?:\/(.+))?/, (req, res) => {
   let operation = req.params[0],
     collection = req.params[1],
-    item = req.params[2], //itemId
-    params = req.query.params; //array of function params ex: find(...params)
-
+    params = JSON.parse(<string>req.params[2] || "[]"); //array of function params ex: find(...params)
+  if (!(params instanceof Array)) params = [<any>params];
   setTimer(`get ${req.url}`);
 
-  if (!(params instanceof Array)) params = [<string>params];
-
-  //todo: (...., item || ...params) -> error
-  let result = item
-    ? query(operation, collection, item)
-    : query(operation, collection, ...(<Array<any>>params));
-  result
+  query(operation, collection, params)
     .then(data => res.json(data))
     .catch(error => res.json({ error }))
     .then(() => {
-      if (dev) console.log("[serer] get", req.url, endTimer(`get_${req.url}`));
+      if (dev) console.log("[server] get", req.url, endTimer(`get_${req.url}`));
     });
 });
 
@@ -215,7 +184,7 @@ app.get(/\/([^\/]+)(?:\/(.+))?/, (req, res, next) => {
     () =>
       connect().then(() => {
         let content;
-        if (itemType == "item") content = query("find", collection, item);
+        if (itemType == "item") content = query("find", collection, [item]);
         else {
           let findOptions = {
             filter: JSON.parse(<string>req.query.filter || null) || {},
@@ -234,13 +203,11 @@ app.get(/\/([^\/]+)(?:\/(.+))?/, (req, res, next) => {
             delete findOptions.filter.status;
 
           if (itemType == "index") {
-            content = query(
-              "find",
-              collection,
+            content = query("find", collection, [
               findOptions.filter,
               findOptions.docs,
               findOptions.options
-            );
+            ]);
           } else if (itemType == "category") {
             content = getCategories(collection).then(categories => {
               let ctg = new Categories(categories);
@@ -258,13 +225,11 @@ app.get(/\/([^\/]+)(?:\/(.+))?/, (req, res, next) => {
                 });
 
               findOptions.filter._id = { $in: items };
-              return query(
-                "find",
-                collection,
+              return query("find", collection, [
                 findOptions.filter,
                 findOptions.docs,
                 findOptions.options
-              );
+              ]);
             });
           } else if (itemType == "image") {
           }
@@ -336,7 +301,9 @@ app.post("/:collection", upload.single("cover"), (req: any, res) => {
 
   if (!data.slug || data.slug == "")
     data.slug = slug(data.title, 200, ":ar", false); //if slug changed, cover fileName must be changed
-  if (dev) data.status = "approved";
+
+  //todo: check permissions, for owner, admin -> auto approve
+  data.status = "approved";
 
   // handle base64-encoded data (async)
   data.content = data.content.replace(

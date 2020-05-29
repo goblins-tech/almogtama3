@@ -22,14 +22,13 @@ export function getModel(collection, schemaObj = {}) {
   //console.log("model: " +{ type, models: mongoose.models, modelNames: mongoose.modelNames() });
   //todo: schemas/mongoose.ts
 
-  let schemaName = collection.indexOf("_categories")
-    ? "categories"
-    : collection;
-
-  if (collection instanceof mongoose.model) return collection;
-
-  if (!schemaObj)
-    schemaObj = collection in schemas ? schemas[schemaName] : schemas["basic"];
+  if (!schemaObj) {
+    let schemaName = collection.indexOf("_categories")
+      ? "categories"
+      : collection;
+    schemaObj =
+      schemaName in schemas ? schemas[schemaName] : schemas["basic"] || {};
+  }
 
   return model(collection, schemaObj, { strict: false });
 }

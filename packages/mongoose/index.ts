@@ -131,7 +131,7 @@ export function connect(uri: types.uri, options: types.ConnectionOptions = {}) {
 }
 
 export function model(
-  collection: string,
+  collection: string | typeof mongoose.Model,
   obj: types.Model = {},
   options?: mongoose.SchemaOptions,
   con? //example: db = mongoose.connection.useDb('dbName')
@@ -147,6 +147,9 @@ export function model(
       : con
     : mongoose;
 
+  if (collection.prototype instanceof con.Model) return collection;
+
+  //todo: if opt.override delete the existing one
   if (con.models[collection]) return con.models[collection];
   let schema: mongoose.Schema;
   options = options || {};
@@ -290,4 +293,36 @@ export function restore(backupData: types.BackupData, chunkSize: number = 50) {
           .catch(err => console.error(`error in ${collName}:`, err));
     }
   }
+}
+
+/**
+ * quickly perform database operations via an API call.
+ * this fuction is useful to dynamically perform operations, for example via an API request.
+ * @example: GET /api/v1/find/articles
+ * @example: GET /api/v1/find/articles/$articleId
+ * @example: GET /api/v1/find/articles/[{"status":"approved"},null,{"limit":1}]
+ * @method query
+ * @param  operation  operation name, ex: find
+ * @param  modelObj   model object (as accepted in pkg/mongoose model()) or collection name as string
+ * @param  params  every operation has it's own params, for example find accepts filter, docs, options
+ * @return {}
+ */
+export function query(
+  operation: string,
+  collection: string | Array<any> | typeof mongoose.model,
+  params?: Array<any>
+) {
+  if (dev) console.log("[server] query", { operation, collection, params });
+
+  let contentModel =
+    collection instanceof Array
+      ? model(collection[0], collection[1], collection[2], collection[3]) //todo: model(...collection) gives error
+      : model(collection);
+
+  if (typeof params[0] === "string") {
+    if (operation === "find") operation = "findById";
+    else if (["update", "delete"].includes(operation)) operation += "One";
+    if (operation.indexOf("One")) params[0] = { _id: params[0] };
+  }
+  return contentModel[operation](...params).lean();
 }
