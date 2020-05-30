@@ -23,6 +23,8 @@ export interface Article extends Obj {
   author?: { name?: string; img?: string; link?: string };
   link?: string;
   categories?: string[];
+  createdAt: string;
+  updatedAt: string;
   [key: string]: any; //ex: _id,...
 }
 

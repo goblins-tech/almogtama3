@@ -15,7 +15,7 @@
         ><a href="{{data.author.link}}">{{data.author.name}}</a></span
       >
       <!--todo: a pipe to convert timestamp or Date to string -->
-      <span>{{data.date}}</span>
+      <span>{{data.createdAt || data.updatedAt }}</span>
     </mat-card-subtitle>
   </mat-card-header>
 

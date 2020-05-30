@@ -6,9 +6,10 @@ todo:
  - add copy-all btn to inde (or category) page (*ngIf=data.type=list){show ctg.title; add copy-all btn}
  */
 
-import { Data, Article, MetaService } from "pkg/ngx-content/view";
+import { Data, Article, Payload } from "pkg/ngx-content/view";
+import { MetaService } from "pkg/ngx-tools/meta.service";
 import { slug } from "pkg/ngx-content/core";
-import { metaTags as _metaTags, ADSENSE } from "../../config/front";
+import { metaTags as defaultMetaTags, ADSENSE } from "../../config/front";
 
 import {
   Component,
@@ -25,7 +26,6 @@ import { HighlightJS } from "ngx-highlightjs";
 import env from "../../env";
 import { summary } from "./functions";
 import { urlParams } from "pkg/ngx-tools/routes";
-import { NgxToolsLoadService } from "pkg/ngx-tools";
 
 //todo: import module & interfaces from packages/content/ngx-content-view/index.ts
 
@@ -60,8 +60,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
     private httpService: HttpService,
     private meta: MetaService,
     private hljs: HighlightJS,
-    private elementRef: ElementRef, //a reference to this component
-    private loadService: NgxToolsLoadService
+    private elementRef: ElementRef //a reference to this component
   ) {}
   ngOnInit() {
     this.data$ = urlParams(this.route).pipe(
@@ -122,7 +121,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
             //todo: get category.slug
             if (!item.link)
               item.link =
-                `${_metaTags.baseUrl}${this.params.type}/` +
+                `/${this.params.type}/` +
                 (item.categories && item.categories.length > 0
                   ? `${item.categories[0]}/${item.slug}@${item.id}`
                   : `item/${item.id}`);
@@ -132,19 +131,17 @@ export class ContentComponent implements OnInit, AfterViewInit {
               img: "assets/avatar-female.png",
               link: ""
             };
-            item.date = "1/1/2020";
+
             return item;
           });
-
-          metaTags = _metaTags;
-        } else {
+        } else if (!data.error) {
           data = <Article>data;
           data.id = data._id;
 
           data.summary = data.summary || summary(data.content);
           if (!data.link)
             data.link =
-              `${_metaTags.baseUrl}${this.params.type}/` +
+              `/${this.params.type}/` +
               (data.categories && data.categories.length > 0
                 ? `${data.categories[0]}/${data.slug}@${data.id}`
                 : `id/${data.id}`);
@@ -152,13 +149,6 @@ export class ContentComponent implements OnInit, AfterViewInit {
             name: "author name",
             img: "assets/avatar-female.png",
             link: ""
-          };
-
-          data.date = "1/1/2020";
-          metaTags = {
-            ..._metaTags,
-            ...data,
-            description: data.summary
           };
 
           if (data.cover) {
@@ -183,16 +173,34 @@ export class ContentComponent implements OnInit, AfterViewInit {
 
           if (this.params.type == "jobs")
             data.content += `<div id='contacts'>${data.contacts}</div>`;
+
+          delete data.status;
+          delete data.categories;
+          delete data._id;
+          delete data.type; //todo: remove from database
         }
-        this.meta.setTags(metaTags);
-        this.loadService.load(
-          metaTags.link,
-          "link",
-          { rel: "canonical" },
-          null
-          //this.elementRef.nativeElement
-        );
-        return data;
+
+        if (!(data instanceof Array)) {
+          let defaultTags = defaultMetaTags(this.params.type);
+          metaTags = {
+            ...defaultTags,
+            ...data,
+            author: data.author.name,
+            description: data.content,
+            image: data.cover || defaultTags.image
+            //todo: pass twitter:creator, twitter:creator:id
+            //todo: expires
+          };
+        } else metaTags = defaultMetaTags(this.params.type);
+
+        //todo: if(jobs)description=..
+        if (!("cover" in metaTags) && this.params.type == "jobs")
+          metaTags.image = {
+            src: "/assets/site-image/jobs.webp"
+            //todo: width, height
+          };
+
+        return { payload: data, tags: metaTags };
       })
     );
 
@@ -230,8 +238,10 @@ export class ContentComponent implements OnInit, AfterViewInit {
         html: comp.querySelectorAll("html")
       });
   }
-  getData(): Observable<Data> {
+  getData(): Observable<Payload> {
     //todo: ?docs="_id title subtitle slug summary author cover categories updatedAt"
-    return this.httpService.get<Data>(this.params, { limit: 20 });
+    return this.httpService.get<Payload>(this.params, {
+      limit: 20
+    });
   }
 }
