@@ -124,15 +124,6 @@ export function objectType(obj: any): string {
     .replace("[object ", "")
     .replace("]", "")
     .toLowerCase();
-  /*
-    examples:
-   {} => object
-   [] => array
-   null => null
-   function(){} => function
-   1 => number
-   "x", 'x', `x` => string
-   */
 }
 
 export function isEmpty(obj: any): boolean {

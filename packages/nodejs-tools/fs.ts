@@ -253,61 +253,28 @@ export function write(file: types.PathLike, data: any, sync: boolean = false) {
  * @param  type       [description]
  * @param  allowEmpty allow creating an empty cache file
  * @return Promise<data:any>;  returns a promise (because some operations executed in async mode) , use await or .then()
+  todo:
+   strategy -> in case of no valid cache & faild to get data, return:
+               - the most recent cache file
+               - the nearest valid cache file in files[] array in order
  */
 export async function cache(
-  file: types.PathLike,
+  files: string | string[], //todo: types.PathLike | types.PathLike[]
   data?: any,
   expire = 0,
+  maxAge = 0,
   type?,
   allowEmpty = false
 ): Promise<any> {
   setTimer("cache");
-  file = resolve(file);
+
+  if (!(files instanceof Array)) files = [files];
+  files = files.map(file => resolve(file));
+
   if (data === ":purge:")
-    return fs.unlink(file, () => {
-      if (dev) console.log("[cache] file purged", getTimer("cache"), file);
-    }); //todo: return a promise
+    return Promise.all(files.map(file => ({ [file]: fsp.unlink(file) })));
 
-  mdir(file as string, true);
-
-  if (
-    !fs.existsSync(file) ||
-    expire < 0 ||
-    (!isNaN(expire) && // if not a number consider it as expire=0, i.e: never expires
-    expire != 0 && // if expire=0: never expires
-      (mtime(file) as number) + expire * 60 * 60 * 1000 < now()) // todo: convert mimetime() to number or convert expire to bigInt??
-  ) {
-    if (dev) console.log("[cache] refreshing", file);
-
-    let cache_save = function(file, data, allowEmpty) {
-      if (allowEmpty || !isEmpty(data)) write(file, data);
-
-      return data; //todo: return write(..)
-    };
-
-    //todo: also support rxjs.Observable
-    //no need to support Async functions, because it is nonsense if data() function returns another function. (func.constructor.name === "AsyncFunction")
-    //todo: await dosen't work if the function returned cache()
-    //  ex: cache(file2.txt, ()=>cache(file1.txt, ()=>Promise.resolve('data')).then(data=>'data changed')  )
-    //  we get file1.txt from cache, then changed data, then saved the new data into file2.txt
-    if (typeof data == "function") data = /* await*/ data();
-
-    let p =
-      data && (data instanceof Promise || typeof data.then == "function")
-        ? data.then(data => cache_save(file, data, allowEmpty))
-        : Promise.resolve(cache_save(file, data, allowEmpty));
-
-    return p.then(data => {
-      if (dev) console.log("[cache] refereshed in", endTimer("cache"), file);
-      return data;
-    });
-
-    //else return new Promise(r => r(cache_save(data)));
-
-    // todo: do we need to convert data to string? i.e: writeFileSync(file.toString()), try some different types of data
-  } else {
-    // retrive data from file and return it as the required type
-
+  let readCache = function(file) {
     if (!type) {
       if (ext(file) == ".json") type = "json";
       else if (
@@ -319,19 +286,81 @@ export async function cache(
         type = "buffer";
     }
 
-    if (type == "buffer") data = fs.readFileSync(file);
+    if (type == "buffer") data = fsp.readFile(file);
     else {
       // without encoding (i.e utf-8) will return a stream instead of a string
-      data = fs.readFileSync(file, "utf8").toString();
-      if (type === "json") data = JSON.parse(data);
+      data = fsp.readFile(file, "utf8").then(data => {
+        data = data.toString();
+        if (type === "json") data = JSON.parse(data);
+        return data;
+      });
     }
 
-    return new Promise(r => {
+    return data.then(data => {
       if (dev) console.log("[cache] file exists", endTimer("cache"), file);
-      return r(data);
+      return data;
     });
-    // todo: elseif(type=="number") elseif ...
+  };
+
+  let filesInfo = {}; //contains exists files only with mtime for each file.
+
+  let _now = now();
+
+  for (let i = 0; i < files.length; i++) {
+    if (fs.existsSync(files[i])) {
+      filesInfo[files[i]] = mtime(files[i]) as number;
+
+      if (
+        expire > -1 &&
+        (expire == 0 || filesInfo[files[i]] + expire * 60 * 60 * 1000 > _now)
+      )
+        return readCache(files[i]);
+    }
   }
+
+  //if there is no valid file, run data()
+  if (dev) console.log("[cache] refreshing", files[0]);
+  mdir(files[0] as string, true);
+
+  //todo: also support rxjs.Observable
+  //no need to support Async functions, because it is nonsense if data() function returns another function. (func.constructor.name === "AsyncFunction")
+  //todo: await dosen't work if the function returned cache()
+  //  ex: cache(file2.txt, ()=>cache(file1.txt, ()=>Promise.resolve('data')).then(data=>'data changed')  )
+  //  we get file1.txt from cache, then changed data, then saved the new data into file2.txt
+  if (typeof data === "function") data = /* await*/ data();
+
+  let p =
+    data instanceof Promise || (data && typeof data.then == "function")
+      ? data
+      : Promise.resolve(data);
+
+  return p
+    .then(data => {
+      if (allowEmpty || !isEmpty(data)) write(files[0], data);
+      if (dev)
+        console.log("[cache] refereshed in", endTimer("cache"), files[0]);
+      return data; //todo: return write()
+    })
+    .catch(error => {
+      if (dev)
+        console.warn(
+          "[cache] faild to refresh the cache" +
+            (maxAge > -1
+              ? ", trying to get data from any valid cache file"
+              : ""),
+          getTimer("cache"),
+          error
+        );
+
+      if (maxAge > -1) {
+        for (let k in filesInfo) {
+          if (maxAge == 0 || filesInfo[k] + maxAge * 60 * 60 * 1000 > _now)
+            return readCache(k);
+        }
+      }
+
+      return Promise.reject("[cache] cannot fetch any data");
+    });
 }
 
 export function mdir(path: string | string[], file = false) {
