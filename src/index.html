@@ -16,6 +16,7 @@
     <script id="main-script">
       //todo: adblock detector
       //todo: import from ngx-tools/load-scripts.service.ts
+      //todo: move this function inside 'DOMContentLoaded',it may be not available for tasks:transformIndex
       function load(src, type = "script", attributes = {}, cb, parent) {
         if (!cb) cb = ev => console.log("[load]", ev, src);
 
@@ -52,19 +53,23 @@
         (parent || document.getElementsByTagName("head")[0]).appendChild(el);
       }
 
-      //Google Tag Manager sh@gm (id: GTM-K8J7FKM)
-      window["dataLayer"] = window["dataLayer"] || [];
-      window["dataLayer"].push({
-        "gtm.start": new Date().getTime(),
-        event: "gtm.js"
+      //DOMContentLoaded: document loaded, without resources (images, css, ...)
+      document.addEventListener("load", () => {
+        /*
+        //Google Tag Manager sh@gm (id: GTM-K8J7FKM)
+        window["dataLayer"] = window["dataLayer"] || [];
+        window["dataLayer"].push({
+          "gtm.start": new Date().getTime(),
+          event: "gtm.js"
+        });
+        load("//www.googletagmanager.com/gtm.js?id=GTM-K8J7FKM");
+        */
+        load(
+          "//fonts.googleapis.com/css?family=Roboto:300,400,500&amp;display=swap",
+          "css"
+        );
+        load("//fonts.googleapis.com/icon?family=Material+Icons", "css");
       });
-      load("//www.googletagmanager.com/gtm.js?id=GTM-K8J7FKM");
-
-      load(
-        "//fonts.googleapis.com/css?family=Roboto:300,400,500&amp;display=swap",
-        "css"
-      );
-      load("//fonts.googleapis.com/icon?family=Material+Icons", "css");
     </script>
 
     <!-- todo: display instructions to enable javascript -->

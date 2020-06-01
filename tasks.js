@@ -35,10 +35,11 @@ var tasks = {
   transformIndex(path = "./dist/browser/index.html") {
     //DOMParser() is not available in nodejs, so we use `jsdom`
     let content = fs.readFileSync(path, "utf8").toString();
-    fs.writeFileSync(path + "bkp", content);
+    fs.writeFileSync(path + ".bkp", content);
 
     let dom = new jsDom(content).window.document;
     let mainScript = dom.getElementById("main-script");
+    let txt = "";
 
     dom.querySelectorAll("script").forEach(script => {
       //todo: or class: keep
@@ -55,22 +56,24 @@ var tasks = {
           it instead, will load the "module" version
           https://stackoverflow.com/a/45947601/12577650
        */
-      let txt = dom.createTextNode(
-        `load("${script.src}","${type || "script"}",{${
-          type === "module" ? "" : "nomodule:true,defer:true"
-        }});\n`
-      );
-      mainScript.append(txt);
+
+      txt += `load("${script.src}","${type || "script"}",{${
+        type === "module" ? "" : "nomodule:true,defer:true"
+      }});\n`;
+
       script.remove();
       //
     });
 
     dom.querySelectorAll("link").forEach(el => {
       if (el.rel !== "stylesheet") return;
-      let txt = dom.createTextNode(`load("${el.href}","css")`);
-      mainScript.append(txt);
+      txt += `load("${el.href}","css");`;
       el.remove();
     });
+
+    txt = `document.addEventListener("load", () => {${txt}});`;
+    dom.createTextNode(txt);
+    mainScript.append(txt);
 
     fs.writeFileSync(path, dom.documentElement.outerHTML);
   }
