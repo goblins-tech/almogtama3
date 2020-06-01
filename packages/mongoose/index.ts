@@ -2,12 +2,12 @@
 import mongoose from "mongoose";
 import shortId from "shortid";
 import { setTimer, endTimer } from "pkg/nodejs-tools/timer";
-import { chunk } from "pkg/nodejs-tools/array";
+import { arrayChunk } from "pkg/nodejs-tools/objects";
 export { mongoose };
 
 /*
 todo: export single properties from mongoose
-import { exportAll } from "./general";
+import { exportAll } from "./utils";
 exportAll(mongoose);
 */
 
@@ -276,7 +276,7 @@ export function restore(backupData: types.BackupData, chunkSize: number = 50) {
 
       let dataModel = model(collName, coll.schema || {}, modelOptions, con);
       if (chunkSize && data.length > chunkSize) {
-        data = chunk(data, chunkSize);
+        data = arrayChunk(data, chunkSize);
         let chunks = data.length;
         data.map((part, index) =>
           dataModel

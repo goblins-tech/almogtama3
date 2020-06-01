@@ -9,7 +9,7 @@ import { setTimer, endTimer, getTimer } from "pkg/nodejs-tools/timer";
 import { resize } from "pkg/graphics";
 import { backup, restore, query as _query } from "pkg/mongoose";
 import { write } from "pkg/nodejs-tools/fs";
-import { replaceAll } from "pkg/nodejs-tools/string";
+import { replaceAll } from "pkg/nodejs-tools/objects";
 
 //todo: add auth token
 
