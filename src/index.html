@@ -13,11 +13,13 @@
   <body>
     <app-root></app-root>
 
-    <script>
+    <script id="main-script">
       //todo: adblock detector
       //todo: import from ngx-tools/load-scripts.service.ts
-      function load(src, type = "script", attributes = {}, cb) {
-        if (type == "css") {
+      function load(src, type = "script", attributes = {}, cb, parent) {
+        if (!cb) cb = ev => console.log("[load]", ev, src);
+
+        if (type === "css") {
           type = "link";
           attributes.rel = "stylesheet";
           attributes.type = "text/css";
@@ -26,23 +28,28 @@
         if (type === "link") {
           attributes.href = src;
           attributes.crossorigin = true; //https://developer.mozilla.org/en-US/docs/Web/HTML/Preloading_content#Cross-origin_fetches
-        } else if (type == "script") {
+        } else if (type === "script" || type === "module") {
           attributes.src = src;
-          attributes.type = "text/javascript";
+          attributes.type = type === "script" ? "text/javascript" : type;
         }
 
         if (!("async" in attributes)) attributes.async = true;
 
-        let el = document.createElement(type === "css" ? "link" : type);
+        let el = this.document.createElement(
+          type === "link" ? "link" : "script"
+        );
         for (let key in attributes) {
           el.setAttribute(key, attributes[key]);
         }
 
         if (cb) {
-          el.onload = () => cb("loaded");
-          el.onreadystatechange = () => cb("ready");
+          //or return a promise -> el.onLoad=resolve
+          el.addEventListener("load", () => cb("loaded"));
+          el.addEventListener("readystatechange", () => cb("ready"));
+          el.addEventListener("error", () => cb("error"));
         }
-        document.getElementsByTagName("head")[0].appendChild(el);
+
+        (parent || document.getElementsByTagName("head")[0]).appendChild(el);
       }
 
       //Google Tag Manager sh@gm (id: GTM-K8J7FKM)

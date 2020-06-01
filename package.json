@@ -2,7 +2,7 @@
   "name": "almogtama3",
   "version": "1.0.0",
   "scripts": {
-    "build:browser": "ng build --aot --prod",
+    "build:browser": "ng build --aot --prod && node tasks transformIndex",
     "build:browser:dev": "ng build",
     "build:server": "ng run almogtama3:server:production --bundleDependencies all",
     "build:server:dev": "ng run almogtama3:server --bundleDependencies all",
@@ -97,6 +97,7 @@
     "cross-env": "^7.0.2",
     "jasmine-core": "~3.4.0",
     "jasmine-spec-reporter": "~4.2.1",
+    "jsdom": "^16.2.2",
     "karma": "~4.1.0",
     "karma-chrome-launcher": "~2.2.0",
     "karma-coverage-istanbul-reporter": "~2.0.1",
