@@ -2,6 +2,22 @@
 @import '~quill/dist/quill.core.css';
 @import '~quill/dist/quill.snow.css';
 
+
+mat-card-title h1, h3{
+  margin:0;
+  font-size: unset
+}
+
+
+/*by default image is stretched to be full width, we give it it's original width*/
+.mat-card-image{
+  width: unset;
+  margin: auto;
+  display: block;
+}
+
+
+
 .masonry {
   column-count: 4;
   column-gap: 1em;

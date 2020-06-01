@@ -1,3 +1,12 @@
 @import '~highlight.js/styles/atom-one-dark.css';
 
 h6 .mat-line{color:gray}
+
+
+/*
+use ::ng-deep to apply this style to child components too (i.e child elements of <quill-view>)
+https://ngrefs.com/latest/styling/ng-deep-selector
+https://github.com/angular/angular/issues/25160
+*/
+::ng-deep quill-view .ngx-quill-view {font-size: 18pt;}
+::ng-deep .masonry quill-view .ngx-quill-view {font-size: 14pt;}

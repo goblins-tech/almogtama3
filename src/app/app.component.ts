@@ -8,7 +8,7 @@ import { metaTags } from "../config/front";
   styleUrls: ["./app.component.scss"]
 })
 export class AppComponent implements OnInit {
-  name = metaTags.name;
+  name = metaTags().name;
   constructor(private router: Router) {}
   ngOnInit() {}
   go(path: any[] | string) {

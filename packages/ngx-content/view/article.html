@@ -6,8 +6,9 @@
     </div>
     <mat-card-title dir="auto">
       <a href="{{data.link || '#'}}">
-        <h1 *ngIf="type=='item'; else normal">{{data.title | length:200}}</h1>
-        <ng-template #normal>{{data.title | length:200}}</ng-template>
+        <!--todo: options.length -->
+        <h1 *ngIf="type=='item'">{{data.title | length:200}}</h1>
+        <h3 *ngIf="type!='item'">{{data.title | length:200}}</h3>
       </a></mat-card-title
     >
     <mat-card-subtitle *ngIf="data.author">
@@ -18,13 +19,6 @@
       <span>{{data.createdAt || data.updatedAt }}</span>
     </mat-card-subtitle>
   </mat-card-header>
-
-  <!-- it is recommended to render the contet that was generated via <quill-editor> inside <quill-view>
-  https://www.npmjs.com/package/ngx-quill#quillviewcomponent---using-quilljs-to-render-content
-  <mat-card-content
-    dir="auto"
-    innerHtml="{{data.content | content}}"
-  ></mat-card-content> -->
 
   <!--
     notes:
@@ -43,18 +37,27 @@
       defaultImage="{{data.cover.lazy? data.cover.placeholder || '//via.placeholder.com/'+(data.cover.width||'500')+'x'+(data.cover.height||'250')+'.webp?text=loading...':''}}"
       [useSrcset]="data.cover.lazy && data.cover.srcset"
       src="data.cover.lazy?'':data.cover.src"
-      alt="{{data.cover.alt || data.title}}"/>
+      alt="{{data.cover.alt || data.title}}"
+    />
 
+    <!--
+    in item mode, use <quill-view> to render the contet that was generated via <quill-editor>
+      https://www.npmjs.com/package/ngx-quill#quillviewcomponent---using-quilljs-to-render-content
+
+     todo:
+     if(quillView)use <quill-view>
+     else use <div *ngIf="type=='list'" class="content" [innerHtml]="data.content"></div>
+    -->
     <quill-view
       #quillView
       [content]="data.content"
       format="text"
       theme="snow"
-    ></quill-view
-  ></mat-card-content>
+    ></quill-view>
+  </mat-card-content>
   <!-- todo: use content[] to add content segments, ex: for jobs we need to add: expiration alert -> content -> contacts -->
   <mat-card-actions>
-    <!--
+    <!-- todo:
     <share-buttons show="5"></share-buttons>
   -->
   </mat-card-actions>

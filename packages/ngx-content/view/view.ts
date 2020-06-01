@@ -17,7 +17,7 @@ export type Data = {
 };
 
 export interface DataObj {
-  type?: string;
+  type?: "list" | "item";
   payload: Payload;
 }
 

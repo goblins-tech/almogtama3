@@ -1,48 +1,4 @@
-.toolbar a{
-  text-decoration: none;
-  color:white
-}
-
-
-
-
-
-
-
-
-
-
-:host {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol";
-  font-size: 14px;
-  color: #333;
-  box-sizing: border-box;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  margin: 8px 0;
-}
-
-p {
-  margin: 0;
-}
-
-.spacer {
-  flex: 1;
-}
-
 .toolbar {
-  height: 60px;
-  margin: -8px;
   display: flex;
   align-items: center;
   background-color: #1976d2;
@@ -50,18 +6,53 @@ p {
   font-weight: 600;
 }
 
-.toolbar .logo {
-  margin: 0 16px;
+.toolbar .logo{
+  padding: 0 10px;
+  background-color: black;
+  border-radius: 7px;
 }
 
-toolbar .logo:hover {
-  opacity: 0.5;
+.toolbar .logo:hover {
+  border: solid thin brown;
+  color: red;
+}
+
+.toolbar .logo img:hover{
+  opacity: 0.9;
+}
+
+.toolbar .logo span{
+  /*make the text beside the img, but go beneath it @(max-width: 395px)*/
+  display: inline-block;
 }
 
 
-.content {
-  display: flex;
-  padding: 0 16px;
-  flex-direction: column;
-  align-items: center;
+.toolbar a{
+  text-decoration: none;
+  color:white;
+  margin: 10px
+}
+
+.toolbar .spacer {
+  flex: .95;
+}
+
+
+@media (max-width: 550px) {
+.toolbar{
+  font-weight: normal;
+}
+
+.toolbar .logo{
+  padding:0 5px;
+}
+.toolbar a{
+  margin: 5px
+}
+}
+
+
+@media (max-width: 304px) {
+  .toolbar .logo { background-color: unset}
+  .toolbar .logo span{ display: none}
 }
