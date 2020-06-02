@@ -29,7 +29,7 @@ const supportedCollections = [
   "articles_categories",
   "jobs_categories",
   "countries",
-  "keywoards",
+  "keywords",
   "persons",
   "languages"
 ];

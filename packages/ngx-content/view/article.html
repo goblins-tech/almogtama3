@@ -13,8 +13,11 @@
     >
     <mat-card-subtitle *ngIf="data.author">
       <span dir="auto"
-        ><a href="{{data.author.link}}">{{data.author.name}}</a></span
-      >
+        ><a *ngIf="data.author.link" href="{{data.author.link}}"
+          >{{data.author.name}}</a
+        >
+        <span *ngIf="!data.author.link">{{data.author.name}}</span>
+      </span>
       <!--todo: a pipe to convert timestamp or Date to string -->
       <span>{{data.createdAt || data.updatedAt }}</span>
     </mat-card-subtitle>
@@ -61,6 +64,19 @@
     <share-buttons show="5"></share-buttons>
   -->
   </mat-card-actions>
+
+  <mat-chip-list aria-label="keywords" *ngIf="data.keywords">
+    <mat-chip
+      *ngFor="let item of data.keywords"
+      matBadge="{{item.count}}"
+      matBadgeOverlap="true"
+    >
+      <a *ngIf="item.link" href="{{item.link}}" target="{{item.tagret}}"
+        >{{item.text}}</a
+      >
+      <span *ngIf="!item.link">{{item.text}}</span>
+    </mat-chip>
+  </mat-chip-list>
 </mat-card>
 
 <!-- <mat-card-actions>

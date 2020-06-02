@@ -6,10 +6,11 @@ todo:
  - add copy-all btn to inde (or category) page (*ngIf=data.type=list){show ctg.title; add copy-all btn}
  */
 
-import { Data, Article, Payload } from "pkg/ngx-content/view";
+import { Data, Article, Payload, Keywords } from "pkg/ngx-content/view";
 import { MetaService } from "pkg/ngx-tools/meta.service";
 import { slug } from "pkg/ngx-content/core";
 import { metaTags as defaultMetaTags, ADSENSE } from "../../config/front";
+import { replaceAll } from "pkg/nodejs-tools/objects";
 
 import {
   Component,
@@ -132,6 +133,7 @@ export class ContentComponent implements OnInit, AfterViewInit {
               link: ""
             };
 
+            //  delete item.keywords;
             return item;
           });
         } else if (!data.error) {
@@ -182,6 +184,25 @@ export class ContentComponent implements OnInit, AfterViewInit {
 
         if (!(data instanceof Array)) {
           let defaultTags = defaultMetaTags(this.params.type);
+
+          if (data.keywords && defaultTags.baseUrl) {
+            if (typeof data.keywords === "string")
+              (data.keywords as Keywords[]) = (<string>data.keywords)
+                .split(",")
+                .map(text => ({ text }));
+
+            (data.keywords as Keywords[]) = <Keywords[]>data.keywords
+              .filter(el => el.text)
+              .map(el => {
+                el.link = `https://www.google.com/search?q=site%3A${
+                  defaultTags.baseUrl
+                }+${replaceAll(el.text, "", "+")}`;
+
+                el.target = "_blank";
+                return el;
+              });
+          }
+
           metaTags = {
             ...defaultTags,
             ...data,

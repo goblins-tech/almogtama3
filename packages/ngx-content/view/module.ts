@@ -24,6 +24,8 @@ import {
   MatProgressBarModule,
   MatSnackBarModule
 } from "./material";
+import { MatChipsModule } from "@angular/material/chips";
+import { MatBadgeModule } from "@angular/material/badge";
 
 import { LazyLoadImageModule } from "ng-lazyload-image";
 import { HighlightModule } from "ngx-highlightjs";
@@ -50,6 +52,8 @@ import { ScrollingModule } from "@angular/cdk/scrolling";
     MatListModule,
     MatProgressBarModule,
     MatSnackBarModule,
+    MatChipsModule,
+    MatBadgeModule,
     LazyLoadImageModule,
     HighlightModule,
     QuillModule.forRoot(),

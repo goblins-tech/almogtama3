@@ -9,7 +9,8 @@ export interface Article extends Obj {
   title?: string;
   subtitle?: string;
   content?: string;
-  keywords?: string | string[]; //todo: if(string)..
+  //todo: if(keywods:string)keywords=keywords.split(',').map(text=>({text}))
+  keywords?: Keywords[];
   cover?: {
     src?: string;
     srcset?: string;
@@ -26,6 +27,13 @@ export interface Article extends Obj {
   createdAt: string;
   updatedAt: string;
   [key: string]: any; //ex: _id,...
+}
+
+export interface Keywords extends Obj {
+  text: string;
+  count?: number | string;
+  link?: string;
+  target?: string;
 }
 
 export interface Pref extends Obj {

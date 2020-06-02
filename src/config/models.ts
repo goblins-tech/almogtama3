@@ -21,7 +21,7 @@ export const articles = {
   subtitle: String,
   content: String,
   summary: String,
-  keywords: [String],
+  keywords: [{ type: String, ref: "keywords" }],
   author: { type: String, ref: "persons" },
   status: String, //pending, approved, denied, expired
   notes: String, //ex: denied reason
