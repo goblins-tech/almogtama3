@@ -20,7 +20,7 @@ import { connect, disconnect } from "./mongoose/functions";
 import { enableProdMode } from "@angular/core";
 import v1 from "./api/v1";
 
-if (dev) enableProdMode();
+if (!dev) enableProdMode();
 
 //console.clear();
 
