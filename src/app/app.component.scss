@@ -1,58 +1,54 @@
-.toolbar {
-  display: flex;
-  align-items: center;
-  background-color: #1976d2;
-  color: white;
-  font-weight: 600;
-}
 
-.toolbar .logo{
+mat-toolbar .logo{
   padding: 0 10px;
   background-color: black;
   border-radius: 7px;
 }
 
-.toolbar .logo:hover {
+mat-toolbar .logo:hover {
   border: solid thin brown;
   color: red;
 }
 
-.toolbar .logo img:hover{
+
+
+mat-toolbar .logo img:hover{
   opacity: 0.9;
 }
 
-.toolbar .logo span{
+mat-toolbar .logo span{
   /*make the text beside the img, but go beneath it @(max-width: 395px)*/
   display: inline-block;
+  margin-left: 5px
 }
 
 
-.toolbar a{
+mat-toolbar a{
   text-decoration: none;
   color:white;
   margin: 10px
 }
 
-.toolbar .spacer {
+mat-toolbar .spacer {
   flex: .95;
 }
 
 
 @media (max-width: 550px) {
-.toolbar{
-  font-weight: normal;
+mat-toolbar{
+  font-size: smaller;
 }
 
-.toolbar .logo{
+mat-toolbar.logo{
   padding:0 5px;
 }
-.toolbar a{
+mat-toolbara{
   margin: 5px
 }
 }
 
 
 @media (max-width: 304px) {
-  .toolbar .logo { background-color: unset}
-  .toolbar .logo span{ display: none}
+  mat-toolbar .logo { background-color: unset}
+  mat-toolbar .logo span{ display: none}
 }

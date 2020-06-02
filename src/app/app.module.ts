@@ -18,6 +18,7 @@ import { SocialComponent } from "./social";
 import { ServiceWorkerModule } from "@angular/service-worker";
 import env from "../env";
 import { NgxLoadingModule } from "ngx-loading";
+import { MatToolbarModule } from "@angular/material/toolbar";
 
 /*
 routes are devided into routes (for AppRutingModule) & appRoutes (for AppModule)
@@ -70,7 +71,8 @@ export class AppRoutingModule {}
       primaryColour: "red",
       secondaryColour: "blue",
       tertiaryColour: "green"
-    })
+    }),
+    MatToolbarModule
   ],
   providers: [
     HttpService,
