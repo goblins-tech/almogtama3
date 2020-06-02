@@ -55,20 +55,32 @@
 
       //DOMContentLoaded: document loaded, without resources (images, css, ...)
       document.addEventListener("load", () => {
-        /*
-        //Google Tag Manager sh@gm (id: GTM-K8J7FKM)
-        window["dataLayer"] = window["dataLayer"] || [];
-        window["dataLayer"].push({
-          "gtm.start": new Date().getTime(),
-          event: "gtm.js"
-        });
-        load("//www.googletagmanager.com/gtm.js?id=GTM-K8J7FKM");
-        */
         load(
           "//fonts.googleapis.com/css?family=Roboto:300,400,500&amp;display=swap",
           "css"
         );
         load("//fonts.googleapis.com/icon?family=Material+Icons", "css");
+
+        //Google Analytics sh@gm (gtag.js)
+        //may be moved to google tag manager
+        load("//www.googletagmanager.com/gtag/js?id=G-5PG9CEYYED");
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+          dataLayer.push(arguments);
+        }
+        gtag("js", new Date());
+        gtag("config", "G-5PG9CEYYED");
+        // /Google Analytics
+
+        /*
+          //Google Tag Manager sh@gm (id: GTM-K8J7FKM)
+            window["dataLayer"] = window["dataLayer"] || [];
+            window["dataLayer"].push({
+              "gtm.start": new Date().getTime(),
+              event: "gtm.js"
+            });
+            load("//www.googletagmanager.com/gtm.js?id=GTM-K8J7FKM");
+            */
       });
     </script>
 
