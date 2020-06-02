@@ -1,3 +1,5 @@
+//use load-scripts.service instead, ex: loadService.load(src)
+/*
 import {
   Component,
   Input,
@@ -7,9 +9,7 @@ import {
 } from "@angular/core";
 import { NgxToolsLoadService } from "./load-scripts.service";
 
-/*
-angular dosen't allow to use <script> inside the template, so we dynamically load it.
- */
+//angular dosen't allow to use <script> inside the template, so we dynamically load it.
 @Component({
   selector: "ngx-script",
   template: ``
@@ -21,6 +21,7 @@ export class NgxToolsScriptComponent implements AfterViewInit {
   @Input() parent: any;
   @Output() loaded = new EventEmitter<void>();
   @Output() ready = new EventEmitter<void>();
+  @Output() error = new EventEmitter<void>();
 
   constructor(private loadService: NgxToolsLoadService) {}
 
@@ -29,12 +30,14 @@ export class NgxToolsScriptComponent implements AfterViewInit {
       this.src,
       this.type,
       this.attributes,
-      type => this.emit(type),
+      eventType => this.emit(eventType),
       this.parent
     );
   }
 
   emit(type: string) {
-    this[type].emit();
+    if (["loaded", "ready", "error"].includes(type)) this[type].emit();
   }
 }
+
+*/

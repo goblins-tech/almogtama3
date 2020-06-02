@@ -39,12 +39,27 @@ export class NgxToolsLoadService {
     }
 
     if (cb) {
-      //or return a promise -> el.onLoad=resolve
+      //or return a promise -> new Promise(resolve=>{el.onLoad=resolve})
       el.addEventListener("load", () => cb("loaded"));
       el.addEventListener("readystatechange", () => cb("ready"));
       el.addEventListener("error", () => cb("error"));
     }
 
     (parent || this.document.getElementsByTagName("head")[0]).appendChild(el);
+  }
+
+  adsense(
+    id: string,
+    cb?: (type: string) => void,
+    attributes: { [key: string]: any } = {},
+    src?: string
+  ) {
+    attributes["data-ad-client"] = id;
+    return this.load(
+      src || "//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js",
+      "script",
+      attributes,
+      cb
+    );
   }
 }

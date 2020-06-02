@@ -27,6 +27,7 @@ import { HighlightJS } from "ngx-highlightjs";
 import env from "../../env";
 import { summary } from "./functions";
 import { urlParams } from "pkg/ngx-tools/routes";
+import { NgxToolsLoadService } from "pkg/ngx-tools/load-scripts.service";
 
 //todo: import module & interfaces from packages/content/ngx-content-view/index.ts
 
@@ -61,7 +62,8 @@ export class ContentComponent implements OnInit, AfterViewInit {
     private httpService: HttpService,
     private meta: MetaService,
     private hljs: HighlightJS,
-    private elementRef: ElementRef //a reference to this component
+    private elementRef: ElementRef, //a reference to this component
+    private loadService: NgxToolsLoadService
   ) {}
   ngOnInit() {
     this.data$ = urlParams(this.route).pipe(
@@ -258,6 +260,12 @@ export class ContentComponent implements OnInit, AfterViewInit {
         p: comp.querySelectorAll("p"),
         html: comp.querySelectorAll("html")
       });
+
+    //adsense
+    //todo: adsense profit sharing
+    this.loadService.adsense(this.adsense, type => {
+      /*if (env.dev)*/ console.log(`[adsense] ${type} ${this.adsense}`);
+    });
   }
   getData(): Observable<Payload> {
     //todo: ?docs="_id title subtitle slug summary author cover categories updatedAt"
