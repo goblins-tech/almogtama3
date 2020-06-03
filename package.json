@@ -4,8 +4,8 @@
   "scripts": {
     "build:browser": "ng build --aot --prod",
     "build:browser:dev": "ng build",
-    "build:server": "ng run almogtama3:server:production --bundleDependencies all",
-    "build:server:dev": "ng run almogtama3:server --bundleDependencies all",
+    "build:server": "ng run almogtama3:server:production --bundleDependencies",
+    "build:server:dev": "ng run almogtama3:server --bundleDependencies",
     "build:server:webpack": "webpack --config webpack.server.config.js --progress --colors --mode=production",
     "build:server:webpack:dev": "webpack --config webpack.server.config.js --progress --colors --mode=development",
     "build:all": "npm run build:browser && npm run build:server && npm run build:server:webpack",
@@ -16,6 +16,7 @@
     "serve": "node dist/server/express.js --start",
     "serve:inspect": "node --inspect dist/server/express.js --start",
     "serve:dev": "nodemon --inspect dist/server/express.js --start",
+    "serve:ssr:dev": "ng run almogtama3:serve-ssr",
     "start": "npm run build && node task optimize && npm run serve",
     "start:dev": "npm run build:dev && npm run serve:inspect",
     "start:nodemon": "nodemon  src/ -e ts,html,scss --exec \"npm run start:dev\"",
@@ -27,9 +28,6 @@
     "firebase:token": "firebase login:ci",
     "firebase:start": "npm run build && npm run firebase:build && npm run firebase:serve",
     "firebase:start:dev": "npm run build:dev && npm run firebase:build && npm run firebase:serve",
-    "dev:ssr": "ng run almogtama3:serve-ssr",
-    "serve:ssr": "node dist/server/main.js",
-    "build:ssr": "ng build --prod && ng run almogtama3:server:production",
     "prerender": "ng run almogtama3:prerender"
   },
   "engines": {
@@ -88,6 +86,7 @@
     "zone.js": "~0.10.3"
   },
   "devDependencies": {
+    "@angular-builders/custom-webpack": "^9.1.0",
     "@angular-devkit/build-angular": "^0.901.7",
     "@angular-devkit/build-ng-packagr": "^0.901.7",
     "@angular/cli": "^9.1.7",
@@ -114,7 +113,7 @@
     "ts-node": "~8.10.2",
     "tsickle": "^0.38.1",
     "tslint": "~6.1.2",
-    "typescript": "^3.9.3",
+    "typescript": "^3.8.3",
     "webpack-cli": "^3.3.11"
   }
 }

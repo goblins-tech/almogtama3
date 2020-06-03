@@ -6,7 +6,7 @@ import * from @angular/material will not work any more.
 https://stackoverflow.com/a/60111086/12577650
 https://github.com/angular/components/blob/master/CHANGELOG.md#material-10
 */
-
+/*
 export {
   MAT_LABEL_GLOBAL_OPTIONS,
   MatNativeDateModule,
@@ -46,3 +46,4 @@ export { MatTabsModule } from "@angular/material/tabs";
 export { MatToolbarModule } from "@angular/material/toolbar";
 export { MatTooltipModule } from "@angular/material/tooltip";
 export { MatTreeModule } from "@angular/material/tree";
+*/

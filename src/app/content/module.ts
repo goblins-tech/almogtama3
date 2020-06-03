@@ -131,8 +131,9 @@ export const APP_LOCALE_ID = "en-US";
     { provide: LOCALE_ID, useValue: APP_LOCALE_ID },
     DynamicLoadService
   ],
-  bootstrap: [],
-  entryComponents: [FormlyFieldCategoriesHelper] //https://stackoverflow.com/a/60267178/12577650
+  bootstrap: []
+  //entryComponents not needed with Ivy compiler https://update.angular.io/#8.0:9.0l3
+  //entryComponents: [FormlyFieldCategoriesHelper] //https://stackoverflow.com/a/60267178/12577650
 })
 export class ContentModule {
   constructor(faIconLibrary: FaIconLibrary) {

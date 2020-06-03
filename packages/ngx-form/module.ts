@@ -3,7 +3,7 @@ import { CommonModule } from "@angular/common";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { FormlyModule } from "@ngx-formly/core";
 import { NgxFormComponent } from "./form";
-import { MatButtonModule } from "../ngx-content/view/material"; //todo: add ngx-content-view & material to peerDependencies
+import { MatButtonModule } from "@angular/material/button";
 import { NgxContentCoreModule } from "../ngx-content/core";
 import { NgxLoadingModule } from "ngx-loading";
 /*

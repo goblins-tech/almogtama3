@@ -1,10 +1,13 @@
 import "zone.js/dist/zone-node"; //todo: why??
 import express from "express";
+import { AppServerModule } from "./main.server";
+import { ngExpressEngine } from "@nguniversal/express-engine";
+import { APP_BASE_HREF } from "@angular/common";
 import { express as firebaseExpress } from "pkg/firebase/express";
 import { json as jsonParser, urlencoded as urlParser } from "body-parser";
 import cors from "cors"; //To be able to access our API from an angular application
-//import formidable from "formidable"; //to handle the uploaded files https://flaviocopes.com/express-forms-files/
-import parseDomain from "parse-domain";
+import { parseDomain, ParseResultListed } from "parse-domain";
+
 import {
   renameSync,
   json,
@@ -39,6 +42,17 @@ const app = express();
 connect();
 
 // * NOTE :: leave this as require() since this file is built Dynamically from webpack
+
+// Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
+app.engine(
+  "html",
+  ngExpressEngine({
+    bootstrap: AppServerModule
+  })
+);
+
+/*
+Angular < 9
 const {
   AppServerModuleNgFactory,
   LAZY_MODULE_MAP,
@@ -46,7 +60,6 @@ const {
   provideModuleMap
 } = require("./dist/server/main");
 
-// Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
 app.engine(
   "html",
   ngExpressEngine({
@@ -54,6 +67,7 @@ app.engine(
     providers: [provideModuleMap(LAZY_MODULE_MAP)]
   })
 );
+*/
 
 app.set("view engine", "html");
 app.set("views", `${DIST}/browser`);
@@ -74,21 +88,21 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
   //redirect http -> https & naked -> www
-  let parts = parseDomain(req.hostname);
-  //ex: www.example.com.eg -> {domain:example, subdomain:www, tld:.com.eg}
-  //if the url cannot parsed (ex: http://localhost), parts= null, so we just skip to the next() middliware
+  let parts: ParseResultListed = <ParseResultListed>parseDomain(req.hostname);
+  //ex: www.example.com.eg ->{subDomains:[www], domain:google, topLevelDomains:[com]};  old(v2.3.4):{domain:example, subdomain:www, tld:.com.eg}
+  //if the url cannot parsed (ex: localhost), parts= null, so we just skip to the next() middliware
 
-  if (parts && (!parts.subdomain || !req.secure)) {
-    let url = `https://${parts.subdomain || "www"}.${parts.domain}.${
-      parts.tld
-    }${req.url}`;
+  if (parts && (parts.subDomains == [] || !req.secure)) {
+    let url = `https://${parts.subDomains.join(".") || "www"}.${
+      parts.domain
+    }.${parts.topLevelDomains.join(".")}${req.url}`;
     if (dev)
       console.log(`redirecting to: ${url}`, {
         host: req.hostname,
         secure: req.secure,
         protocol: req.protocol,
-        subdomain: parts.subdomain,
-        url: req.url
+        url: req.url,
+        parts
       });
 
     return res.redirect(301, url);
@@ -108,7 +122,10 @@ app.get("*.*", express.static(TEMP, { maxAge: "1y" })); //data files i.e: create
 
 // All regular routes use the Universal engine
 app.get("*", (req, res) => {
-  res.render("index", { req });
+  res.render("index", {
+    req,
+    providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }]
+  });
 });
 
 //app.listen() moved to a separate file `server-start.ts`, because firebase will handle it automatically
@@ -142,3 +159,18 @@ if (process.argv[2] == "--start") {
       console.log("[server] server closed.");
     });
 }
+
+/*
+todo: from migration to Angular9
+// Webpack will replace 'require' with '__webpack_require__'
+// '__non_webpack_require__' is a proxy to Node 'require'
+// The below code is to ensure that the server is run only when not requiring the bundle.
+declare const __non_webpack_require__: NodeRequire;
+const mainModule = __non_webpack_require__.main;
+const moduleFilename = (mainModule && mainModule.filename) || "";
+if (moduleFilename === __filename || moduleFilename.includes("iisnode")) {
+  run();
+}
+*/
+
+export * from "./main.server";

@@ -47,6 +47,7 @@ const firebaseConfig = {
 
 @NgModule({
   imports: [
+    //todo: add {initialNavigation: 'enabled' } same as AppModule?
     RouterModule.forRoot(routes, { enableTracing }),
     ServiceWorkerModule.register("ngsw-worker.js", { enabled: true })
   ],
@@ -57,7 +58,10 @@ export class AppRoutingModule {}
 @NgModule({
   declarations: [AppComponent, ErrorComponent, SocialComponent],
   imports: [
-    RouterModule.forRoot(appRoutes, { enableTracing, initialNavigation: 'enabled' }), //will be proceed after AppRutingModule and ContentModule
+    RouterModule.forRoot(appRoutes, {
+      enableTracing,
+      initialNavigation: "enabled"
+    }), //will be proceed after AppRutingModule and ContentModule
     BrowserModule.withServerTransition({ appId: "serverApp" }),
     BrowserAnimationsModule,
     AngularFireModule.initializeApp(firebaseConfig),

@@ -4,10 +4,14 @@
 
 /*
 todo: issue#
-  node_modules\google-gax\build\src\operationsClient.js
+https://github.com/firebase/firebase-functions/issues/540#issuecomment-576598589
+https://github.com/googleapis/gax-nodejs/issues/845
+https://github.com/googleapis/gax-nodejs/issues/719#issuecomment-605323285
+
   changed const configData = require('./operations_client_config');
   to const configData = require('./operations_client_config.json');
-  https://github.com/firebase/firebase-functions/issues/540#issuecomment-576598589
+  in node_modules\google-gax\build\src\operationsClient.js
+
  */
 
 import * as admin from "firebase-admin";

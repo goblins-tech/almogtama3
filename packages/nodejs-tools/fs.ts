@@ -30,8 +30,14 @@ import {
 
 //todo: does 'export *' impact the bundle size?
 export * from "fs";
-export * from "path";
 export { fsp };
+
+/*
+todo: export * from 'path'
+//https://stackoverflow.com/a/43801887/12577650
+import Path = require("./m");
+export { Path };
+*/
 
 const dev = process.env.NODE_ENV === "development";
 

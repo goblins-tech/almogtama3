@@ -15,17 +15,16 @@ import { CommonModule } from "@angular/common";
 import { NgxContentViewComponent } from "./view";
 import { NgxContentArticleComponent } from "./article";
 import { NgxContentCoreModule } from "../core"; //to use pipes
-import {
-  MatCardModule,
-  MatGridListModule,
-  MatButtonModule,
-  MatIconModule,
-  MatListModule,
-  MatProgressBarModule,
-  MatSnackBarModule
-} from "./material";
+
+import { MatGridListModule } from "@angular/material/grid-list";
+import { MatIconModule } from "@angular/material/icon";
+import { MatListModule } from "@angular/material/list";
+import { MatProgressBarModule } from "@angular/material/progress-bar";
+import { MatSnackBarModule } from "@angular/material/snack-bar";
+import { MatCardModule } from "@angular/material/card";
 import { MatChipsModule } from "@angular/material/chips";
 import { MatBadgeModule } from "@angular/material/badge";
+import { MatButtonModule } from "@angular/material/button";
 
 import { LazyLoadImageModule } from "ng-lazyload-image";
 import { HighlightModule } from "ngx-highlightjs";
@@ -47,13 +46,13 @@ import { ScrollingModule } from "@angular/cdk/scrolling";
     CommonModule,
     MatCardModule,
     MatGridListModule,
-    MatButtonModule,
     MatIconModule,
     MatListModule,
     MatProgressBarModule,
     MatSnackBarModule,
     MatChipsModule,
     MatBadgeModule,
+    MatButtonModule,
     LazyLoadImageModule,
     HighlightModule,
     QuillModule.forRoot(),
@@ -69,8 +68,7 @@ import { ScrollingModule } from "@angular/cdk/scrolling";
     ScrollingModule
   ],
   providers: [],
-  bootstrap: [],
-  entryComponents: []
+  bootstrap: []
 })
 export class NgxContentViewModule {
   constructor(faIconLibrary: FaIconLibrary) {
