@@ -138,7 +138,7 @@
           "builder": "@angular-devkit/build-angular:server",
           "options": {
             "outputPath": "dist/server",
-            "main": "src/main.server.ts",
+            "main": "server.ts",
             "tsConfig": "tsconfig.server.json"
           },
           "configurations": {
@@ -155,6 +155,32 @@
                 "styles": false
               }
             }
+          }
+        },
+        "serve-ssr": {
+          "builder": "@nguniversal/builders:ssr-dev-server",
+          "options": {
+            "browserTarget": "almogtama3:build",
+            "serverTarget": "almogtama3:server"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "almogtama3:build:production",
+              "serverTarget": "almogtama3:server:production"
+            }
+          }
+        },
+        "prerender": {
+          "builder": "@nguniversal/builders:prerender",
+          "options": {
+            "browserTarget": "almogtama3:build:production",
+            "serverTarget": "almogtama3:server:production",
+            "routes": [
+              "/"
+            ]
+          },
+          "configurations": {
+            "production": {}
           }
         }
       }

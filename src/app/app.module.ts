@@ -57,7 +57,7 @@ export class AppRoutingModule {}
 @NgModule({
   declarations: [AppComponent, ErrorComponent, SocialComponent],
   imports: [
-    RouterModule.forRoot(appRoutes, { enableTracing }), //will be proceed after AppRutingModule and ContentModule
+    RouterModule.forRoot(appRoutes, { enableTracing, initialNavigation: 'enabled' }), //will be proceed after AppRutingModule and ContentModule
     BrowserModule.withServerTransition({ appId: "serverApp" }),
     BrowserAnimationsModule,
     AngularFireModule.initializeApp(firebaseConfig),
