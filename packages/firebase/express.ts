@@ -1,7 +1,7 @@
 import { https } from "firebase-functions";
 
 /**
- * convert expressjs app into firebase cloud function
+ * convert expressjs app (or nodejs http requests) into firebase cloud function
  * @method express
  * @param  app     [description]
  * @return [description]

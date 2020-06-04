@@ -7,17 +7,8 @@ import { express as firebaseExpress } from "pkg/firebase/express";
 import { json as jsonParser, urlencoded as urlParser } from "body-parser";
 import cors from "cors"; //To be able to access our API from an angular application
 import { parseDomain, ParseResultListed } from "parse-domain";
-
-import {
-  renameSync,
-  json,
-  mdir,
-  existsSync,
-  constants,
-  parsePath,
-  cache
-} from "pkg/nodejs-tools/fs";
-
+import { json, mdir, parsePath, cache } from "pkg/nodejs-tools/fs";
+import { renameSync, existsSync, constants } from "fs";
 import { dev, DIST, TEMP } from "../config/server";
 import { connect, disconnect } from "./mongoose/functions";
 import { enableProdMode } from "@angular/core";
@@ -92,10 +83,15 @@ app.use((req, res, next) => {
   //ex: www.example.com.eg ->{subDomains:[www], domain:google, topLevelDomains:[com]};  old(v2.3.4):{domain:example, subdomain:www, tld:.com.eg}
   //if the url cannot parsed (ex: localhost), parts= null, so we just skip to the next() middliware
 
-  if (parts && (parts.subDomains == [] || !req.secure)) {
-    let url = `https://${parts.subDomains.join(".") || "www"}.${
+  if (
+    parts &&
+    parts.hostname !== "localhost" &&
+    (!parts.subDomains || parts.subDomains === [] || !req.secure)
+  ) {
+    if (!parts.subDomains) parts.subDomains = [];
+    let url = `https://${(parts.subDomains || []).join(".") || "www"}.${
       parts.domain
-    }.${parts.topLevelDomains.join(".")}${req.url}`;
+    }.${(parts.topLevelDomains || []).join(".")}${req.url}`;
     if (dev)
       console.log(`redirecting to: ${url}`, {
         host: req.hostname,

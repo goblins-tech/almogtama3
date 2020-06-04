@@ -6,17 +6,13 @@ import {
   ext,
   parsePath,
   rename,
-  renameSync,
-  writeFileSync,
-  existsSync,
   unlink,
   readdir,
   resolve,
   writeFile,
-  json,
-  statSync
-  //promises //todo: promises.writeFile as writeFilePromise
+  json
 } from "pkg/nodejs-tools/fs";
+import { statSync, renameSync, writeFileSync, existsSync } from "fs";
 
 import { Firebase } from "pkg/firebase/admin";
 import { initializeApp } from "firebase-admin";
@@ -24,7 +20,8 @@ import multer from "multer";
 
 import { Categories } from "pkg/ngx-formly/categories-material/functions";
 import { setTimer, getTimer, endTimer } from "pkg/nodejs-tools/timer";
-import { FIREBASE, TEMP } from "../config/server";
+import { TEMP } from "../config/server";
+import { FIREBASE } from "../config/firebase";
 
 export const dev = process.env.NODE_ENV === "development";
 
@@ -48,12 +45,10 @@ todo: process.env.INIT_CWD || ?? -> check if process.env.INIT_CWD is undefined
 */
 
 //todo: use env:GOOGLE_APPLICATION_CREDENTIALS=Path.resolve("./firebase-almogtama3-eg.json")
-initializeApp(FIREBASE);
 
-export const bucket = new Firebase(/*{
-  project: "almogtama3-eg",
-  cert: require("./firebase-almogtama3-eg.json")
-}*/).storage();
+export const bucket = new Firebase(FIREBASE).storage();
+/*
+
 
 /**
  * get adjusted categories (i.e: adding branches, top to each entry & add main categories)

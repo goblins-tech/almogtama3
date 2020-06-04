@@ -136,7 +136,7 @@ export const APP_LOCALE_ID = "en-US";
   //entryComponents: [FormlyFieldCategoriesHelper] //https://stackoverflow.com/a/60267178/12577650
 })
 export class ContentModule {
-  constructor(faIconLibrary: FaIconLibrary) {
-    faIconLibrary.addIconPacks(fab, fas);
+  constructor(private faIconLibrary: FaIconLibrary) {
+    this.faIconLibrary.addIconPacks(fab, fas);
   }
 }

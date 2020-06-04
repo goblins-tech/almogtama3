@@ -35,6 +35,7 @@ export class Firebase {
   public admin;
 
   //todo: init app here causes error, admin.initializeApp() must be called from /server.ts
+  //https://medium.com/google-cloud/firebase-separating-configuration-from-code-in-admin-sdk-d2bcd2e87de6
   constructor(options?) {
     this.admin = admin;
     if (options) this.init(options);
@@ -42,35 +43,33 @@ export class Firebase {
   init(options?: initOptions) {
     if (!("credential" in options)) {
       if (options.cert) {
-        //note: in this case the cert path must be absolute
-        if (typeof options.cert == "string")
+        //note: in this case the cert path must be absolute,
+        //or relative to dist/...
+        if (typeof options.cert === "string")
           options.cert = require(options.cert);
         options.credential = this.admin.credential.cert(options.cert);
+
+        options.projectId = options.projectId || options.cert.project_id;
+
         delete options.cert;
       } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS)
         options.credential = this.admin.credential.applicationDefault();
+    } else if (typeof options.credential === "string")
+      options.credential = this.admin.credential.cert(options.credential);
+
+    if (options.projectId) {
+      if (!("storageBucket" in options))
+        options.storageBucket = `gs://${options.projectId}.appspot.com`;
+
+      if (!("databaseURL" in options))
+        options.databaseURL = `https://${options.projectId}.firebaseio.com`;
+
+      if (!("authDomain" in options))
+        options.authDomain = `${options.projectId}.firebaseapp.com`;
     }
 
-    if (options.project) {
-      if (!("storageBucket" in options))
-        options.storageBucket = `gs://${options.project}.appspot.com`;
-      if (!("databaseURL" in options))
-        //todo:a duplicate key: options.storageBucket
-        options.databaseURL = `https://${options.project}.firebaseio.com`;
-    }
     this.admin.initializeApp(options);
   }
-  /*
-  firebase.initializeApp({
-  apiKey: "AIza....",                             // Auth / General Use
-  applicationId: "1:27992087142:web:ce....",      // General Use
-  projectId: "my-firebase-project",               // General Use
-  authDomain: "YOUR_APP.firebaseapp.com",         // Auth with popup/redirect
-  databaseURL: "https://YOUR_APP.firebaseio.com", // Realtime Database
-  storageBucket: "YOUR_APP.appspot.com",          // Storage
-  messagingSenderId: "123456789"                  // Cloud Messaging
-});
-   */
 
   storage(bucket?: string) {
     return new Storage(this.admin, bucket);
@@ -86,8 +85,8 @@ class Storage {
    */
   //todo: if(bucket instanceof admin.Bucket)this.bucket=bucket
   public bucket;
-  constructor(admin, bucket?: string) {
-    this.bucket = admin.storage().bucket(bucket); //default bucket
+  constructor(admin, bucket?: string, app?: admin.app.App) {
+    this.bucket = admin.storage(app).bucket(bucket); //default bucket
   }
 
   /**

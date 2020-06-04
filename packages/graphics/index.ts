@@ -1,5 +1,6 @@
 import sharp from "sharp";
-import { parsePath, existsSync } from "../nodejs-tools/fs";
+import { parsePath } from "../nodejs-tools/fs";
+import { existsSync } from "fs";
 
 export { sharp };
 

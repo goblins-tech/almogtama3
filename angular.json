@@ -70,13 +70,34 @@
             }
           }
         },
+        "server": {
+          "builder": "@angular-builders/custom-webpack:server",
+          "options": {
+            "outputPath": "dist/server",
+            "main": "src/server/express.ts",
+            "tsConfig": "tsconfig.server.json",
+            "customWebpackConfig": { "path": "./webpack.server.config.js" }
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/env/index.ts",
+                  "with": "src/env/prod.ts"
+                }
+              ],
+              "sourceMap": false,
+              "optimization": {
+                "scripts": false,
+                "styles": false
+              }
+            }
+          }
+        },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "almogtama3:build",
-            "outputPath": "dist/server",
-            "main": "src/main.server.ts",
-            "tsConfig": "src/tsconfig.server.json"
+            "browserTarget": "almogtama3:build"
           },
           "configurations": {
             "production": {
@@ -134,29 +155,7 @@
             }
           }
         },
-        "server": {
-          "builder": "@angular-devkit/build-angular:server",
-          "options": {
-            "outputPath": "dist/server",
-            "main": "src/server/express.ts",
-            "tsConfig": "tsconfig.server.json"
-          },
-          "configurations": {
-            "production": {
-              "fileReplacements": [
-                {
-                  "replace": "src/env/index.ts",
-                  "with": "src/env/prod.ts"
-                }
-              ],
-              "sourceMap": false,
-              "optimization": {
-                "scripts": false,
-                "styles": false
-              }
-            }
-          }
-        },
+
         "serve-ssr:dev": {
           "builder": "@nguniversal/builders:ssr-dev-server",
           "options": {

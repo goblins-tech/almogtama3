@@ -1,6 +1,6 @@
 import { credential } from "firebase-admin";
 import * as schemas from "./models";
-import { existsSync } from "pkg/nodejs-tools/fs";
+import { existsSync } from "fs";
 import { join } from "path";
 
 export const dev = process.env.NODE_ENV === "development";
@@ -12,10 +12,7 @@ export const indexHtml = existsSync(join(DIST, "index.original.html"))
 export const BUCKET = `${dev ? "test" : "almogtama3.com"}`;
 export { schemas };
 
-export const FIREBASE = {
-  credential: credential.cert(require("./firebase-almogtama3-eg.json")),
-  storageBucket: `gs://almogtama3-eg.appspot.com`
-};
+//todo: envrypt all sensetive data, or use ${{env:keyName}}
 
 export const DB = {
   type: "mongodb",

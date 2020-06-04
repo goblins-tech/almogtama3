@@ -55,9 +55,15 @@
 /***************************************************************************************************
  * Zone JS is required by default for Angular itself.
  */
-import 'zone.js/dist/zone';  // Included with Angular CLI.
-
+import "zone.js/dist/zone"; // Included with Angular CLI.
 
 /***************************************************************************************************
  * APPLICATION IMPORTS
  */
+
+/*
+//https://github.com/angular/angular/issues/34526#issuecomment-568391448
+//https://github.com/angular/angular/issues/37438
+import "core-js/es";
+import "core-js/proposals/reflect-metadata";
+*/

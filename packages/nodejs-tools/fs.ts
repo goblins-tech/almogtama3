@@ -1,6 +1,3 @@
-// todo: create fileSync
-
-const fsp = require("fs").promises;
 import {
   resolve as _resolve,
   normalize,
@@ -28,9 +25,41 @@ import {
   PathLike
 } from "fs";
 
+/*
+tmp: https://github.com/webpack/webpack-cli/issues/1612
+import {
+  lstat,
+  rename,
+  readdir,
+  unlink,
+  writeFile,
+  readFile,
+  access,
+  mkdir,
+  rmdir
+} from "fs/promises";
+
 //todo: does 'export *' impact the bundle size?
-export * from "fs";
-export { fsp };
+//todo: separate fs.ts, fs-sync.ts
+export * from "fs/promises";
+//import * as fsSync from "fs";
+//export { fsSync };
+*/
+
+const {
+  lstat,
+  rename,
+  readdir,
+  unlink,
+  writeFile,
+  readFile,
+  access,
+  mkdir,
+  rmdir
+} = require("fs").promises;
+
+export { rename, unlink, readdir, writeFile };
+//-------------- /tmp: webpack issue
 
 /*
 todo: export * from 'path'
@@ -78,10 +107,10 @@ export function resolve(...paths: PathLike[]): string {
 export function parsePath(path) {
   let extension = ext(path);
   return {
+    type: isDirSync(path) ? "dir" : "file",
     dir: dirname(path),
     file: basename(path, extension),
-    extension,
-    type: isDirSync(path) ? "dir" : "file"
+    extension
   };
 }
 
@@ -103,8 +132,7 @@ export function size(
   path?: PathLike,
   unit: "b" | "kb" | "mb" | "gb" = "b"
 ): Promise<number> {
-  return fsp
-    .lstat(path)
+  return lstat(path)
     .then(stats => stats.size)
     .then(size => {
       if (unit === "kb") return size / 1024;
@@ -126,14 +154,14 @@ export function sizeSync(
 }
 
 export function isDir(path: PathLike): Promise<boolean> {
-  return fsp.lstat(path).then(stats => stats.isDirectory());
+  return lstat(path).then(stats => stats.isDirectory());
 }
 export function isDirSync(path: PathLike): boolean {
   return !existsSync(path) ? null : lstatSync(path).isDirectory();
 }
 
 export function mtime(file: PathLike): Promise<number> {
-  return fsp.lstat(file).then(stats => stats.mtimeMs);
+  return lstat(file).then(stats => stats.mtimeMs);
 }
 
 export function mtimeSync(file: PathLike): number {
@@ -151,7 +179,7 @@ todo:
  */
 function move(path: PathLike, newPath: PathLike, options?: MoveOptions) {
   //todo: mdir(path).then->fsp.rename()
-  return fsp.rename(path, newPath);
+  return rename(path, newPath);
 }
 
 function moveSync(path: PathLike, newPath: PathLike, options?: MoveOptions) {
@@ -175,34 +203,51 @@ function moveSync(path: PathLike, newPath: PathLike, options?: MoveOptions) {
      or: remove all files and add dirs to dirs[], then remove all dirs
 
  */
+export function remove(path: string, options?: DeleteOptions): Promise<boolean>;
+export function remove(
+  path: string[],
+  options?: DeleteOptions
+): Promise<{ [path: string]: any }>;
+
 export function remove(
   path: string | string[],
-  options?: DeleteOptions
+  options
 ): Promise<boolean | { [path: string]: any }> {
   if (!path) return Promise.reject("no path");
   if (path instanceof Array)
     return Promise.all(path.map(p => ({ [p]: remove(p as string, options) })));
 
-  return fsp
-    .access(path, constants.R_OK)
-    .then(() => isDir(path as string))
-    .then(_isDir => {
-      if (_isDir)
-        return fsp.readdir(path).then(files => {
-          files.forEach(file => {
-            let curPath = `${path}/${file}`;
-            return isDir(curPath).then(_isDir => {
-              if (_isDir) {
-                if (!options.filesOnly) return remove(curPath, options);
-              } else return fsp.unlink(curPath);
-            });
-          });
-        });
-      else return fsp.unlink(path);
-    })
-    .then(() => {
-      if (!options.keepDir) return fsp.rmdir(path);
-    });
+  return (
+    access(path, constants.R_OK)
+      .then(() => isDir(path as string))
+      .then(_isDir => {
+        if (_isDir)
+          return (
+            readdir(path)
+              .then(files =>
+                Promise.all(
+                  files.map(file => {
+                    let curPath = `${path}/${file}`;
+                    return isDir(curPath).then(_isDir2 => {
+                      if (!_isDir2) return unlink(curPath).then(() => true); //todo: {[file]: unlink()}
+                      if (!options.filesOnly) return remove(curPath, options);
+                    });
+                  })
+                )
+              )
+              //make both values (i.e: return from if(_isDir) & else) of same type, for example 'boolean'
+              .then(() => true)
+          );
+        else return unlink(path).then(() => true);
+      })
+      .then(() => {
+        //.then(results=>{})
+        if (!options.keepDir) return rmdir(path);
+      })
+      //todo: or {file: boolean}
+      .then(() => true)
+      .catch(() => false)
+  );
 }
 
 export function removeSync(
@@ -238,7 +283,7 @@ export function write(file: PathLike, data: any, options?: any): Promise<void> {
         ? JSON.stringify(data)
         : data
     )
-    .then(dataString => fsp.writeFile(file, dataString, options));
+    .then(dataString => writeFile(file, dataString, options));
   //.then-> {file,data}
 }
 
@@ -288,7 +333,7 @@ export async function cache(
   files = files.map(file => resolve(file));
 
   if (data === ":purge:")
-    return Promise.all(files.map(file => ({ [file]: fsp.unlink(file) })));
+    return Promise.all(files.map(file => ({ [file]: unlink(file) })));
 
   let readCache = function(file) {
     if (!type) {
@@ -302,10 +347,10 @@ export async function cache(
         type = "buffer";
     }
 
-    if (type == "buffer") data = fsp.readFile(file);
+    if (type == "buffer") data = readFile(file);
     else {
       // without encoding (i.e utf-8) will return a stream instead of a string
-      data = fsp.readFile(file, "utf8").then(data => {
+      data = readFile(file, "utf8").then(data => {
         data = data.toString();
         if (type === "json") data = JSON.parse(data);
         return data;
@@ -391,7 +436,9 @@ export function mdir(
   if (!("recursive" in <MakeDirectoryOptions>options))
     (<MakeDirectoryOptions>options).recursive = true;
 
-  return fsp.access(path, constants.R_OK).then(() => fsp.mkdir(path, options));
+  return access(path, constants.R_OK).then(() =>
+    mkdir(<string>path, <MakeDirectoryOptions>options)
+  );
 }
 
 //todo: return boolean | {[file:string]: any}
@@ -432,6 +479,8 @@ export let json = {
     }
   }
 };
+
+export function read() {}
 
 /*
 todo:
